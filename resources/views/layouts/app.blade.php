@@ -189,7 +189,7 @@
                             <li>
                                 <ul role="list" class="-mx-2">
                                     <li class="mb-5">
-                                        <a href="{{ route('dashboard') }}" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
+                                        <a href="" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
                                             <div class="flex border-2 border-[#7288FF] rounded-full p-[10px]">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 3H16.2C17.8802 3 18.7202 3 19.362 3.32698C19.9265 3.6146 20.3854 4.07354 20.673 4.63803C21 5.27976 21 6.11984 21 7.8V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V12M8 13V17M16 11V17M12 7V17M2 5L5 2M5 2L8 5M5 2L5 8" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -201,79 +201,12 @@
                                             </span>
                                         </a>
                                     </li>
-
-                                    <li class="mb-5">
-                                        <a href="{{ route('land-charges') }}" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
-                                            <div class="flex border-2 border-[#7288FF] rounded-full p-[10px]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 12L9 12M21 6L9 6M21 18L9 18M5 12C5 12.5523 4.55228 13 4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11C4.55228 11 5 11.4477 5 12ZM5 6C5 6.55228 4.55228 7 4 7C3.44772 7 3 6.55228 3 6C3 5.44772 3.44772 5 4 5C4.55228 5 5 5.44772 5 6ZM5 18C5 18.5523 4.55228 19 4 19C3.44772 19 3 18.5523 3 18C3 17.4477 3.44772 17 4 17C4.55228 17 5 17.4477 5 18Z" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </div>
-
-                                            <span x-show="!isCollapsed">
-                                                Lista de tarifas
-                                            </span>
-                                        </a>
-                                    </li>
-
-                                    <li class="mb-5">
-                                        <a href="{{ route('logs') }}" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
-                                            <div class="flex border-2 border-[#7288FF] rounded-full p-[10px]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 12L9 12M21 6L9 6M21 18L9 18M5 12C5 12.5523 4.55228 13 4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11C4.55228 11 5 11.4477 5 12ZM5 6C5 6.55228 4.55228 7 4 7C3.44772 7 3 6.55228 3 6C3 5.44772 3.44772 5 4 5C4.55228 5 5 5.44772 5 6ZM5 18C5 18.5523 4.55228 19 4 19C3.44772 19 3 18.5523 3 18C3 17.4477 3.44772 17 4 17C4.55228 17 5 17.4477 5 18Z" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </div>
-
-                                            <span x-show="!isCollapsed">
-                                                Cotizaciones
-                                            </span>
-                                        </a>
-                                    </li>
-
-                                    <li class="mb-5">
-                                        <a href="{{ route('emails.index') }}" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
-                                            <div class="flex border-2 border-[#7288FF] rounded-full p-[10px]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 12L9 12M21 6L9 6M21 18L9 18M5 12C5 12.5523 4.55228 13 4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11C4.55228 11 5 11.4477 5 12ZM5 6C5 6.55228 4.55228 7 4 7C3.44772 7 3 6.55228 3 6C3 5.44772 3.44772 5 4 5C4.55228 5 5 5.44772 5 6ZM5 18C5 18.5523 4.55228 19 4 19C3.44772 19 3 18.5523 3 18C3 17.4477 3.44772 17 4 17C4.55228 17 5 17.4477 5 18Z" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </div>
-
-                                            <span x-show="!isCollapsed">
-                                                Editar correo
-                                            </span>
-                                        </a>
-                                    </li>
-
-                                    <li class="mb-5">
-                                        <a href="{{ route('users') }}" class="group flex gap-x-3 rounded-md p-2 text-[16px]  leading-6 text-[#7288FF] hover:bg-gray-50 hover:text-indigo-600 items-center">
-                                            <div class="flex border-2 border-[#7288FF] rounded-full p-[10px]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M9 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5ZM11 21L14.1014 20.1139C14.2499 20.0715 14.3241 20.0502 14.3934 20.0184C14.4549 19.9902 14.5134 19.9558 14.5679 19.9158C14.6293 19.8707 14.6839 19.8161 14.7932 19.7068L21.25 13.25C21.9404 12.5597 21.9404 11.4403 21.25 10.75C20.5597 10.0596 19.4404 10.0596 18.75 10.75L12.2932 17.2068C12.1839 17.3161 12.1293 17.3707 12.0842 17.4321C12.0442 17.4866 12.0098 17.5451 11.9816 17.6066C11.9497 17.6759 11.9285 17.7501 11.8861 17.8987L11 21Z" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </div>
-
-                                            <span x-show="!isCollapsed">
-                                                Configuraciones de usuario
-                                            </span>
-                                        </a>
-                                    </li>
                                 </ul>
                             </li>
+                        </ul>
 
+                        <ul>
                             <div class="flex flex-col items-start justify-start">
-                                <li class="mt-auto">
-                                    <a href="{{ route('configs') }}" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm  leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                    <a href="{{ route('configs') }}" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm  leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
-                                        </svg>
-
-                                        <span x-show="!isCollapsed">
-                                            Prompts
-                                        </span>
-                                    </a>
-                                </li>
-
                                 <li class="mt-auto">
                                     <a href="#" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm  leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
                                     <a href="#" class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm  leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
@@ -282,7 +215,7 @@
                                         </svg>
 
                                         <span x-show="!isCollapsed">
-                                            Cerrar sesión
+                                            Prueba botón
                                         </span>
                                     </a>
                                 </li>
