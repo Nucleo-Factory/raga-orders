@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,19 +18,20 @@
         @stack('styles')
         @livewireStyles
     </head>
-    <body>
+
+    <body class="bg-[#EDEDED] sm:flex">
         <!-- Aqui debe ir el componente sidebar -->
         <livewire:partials.main-sidebar />
         <!-- Aqui debe ir el componente sidebar -->
 
         <!-- Static sidebar for desktop -->
 
-        <div class="lg:pl-72 transition-all duration-500 h-full" :class="{ 'w-6rem': isCollapsed }">
+        <div class="pl-14 lg:pl-20 transition-all duration-500 grow h-full" :class="{ 'w-6rem': isCollapsed }">
             <!-- Aqui debe ir el componente header -->
-            <livewire:layout.navigation />
+            <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
 
-            <main class="pt-10 pb-[150px] flex justify-between w-full relative ">
+            <main class="px-4 sm:px-0 pt-10 pb-[150px] flex justify-between w-full relative">
                 <div class="w-full">
                     {{ $slot }}
                 </div>
@@ -40,4 +42,5 @@
     </body>
 
     @stack('scripts')
+
 </html>
