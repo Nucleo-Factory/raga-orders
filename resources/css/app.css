@@ -167,6 +167,10 @@ th {
 
 /* Main Sidebar */
 @layer base {
+    .main-sidebar {
+        transition: all 0.5s ease-in-out;
+    }
+
     .main-sidebar .link-text {
         @apply hidden;
     }

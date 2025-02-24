@@ -1,22 +1,22 @@
 <header x-data="{ open: false }">
     <div class="flex justify-between items-center py-6 px-2 sm:pt-[2.625rem] sm:pb-5 sm:px-10">
-        <div class="grow text-center">
+        <div class="text-left grow">
             <a href="/" class="text-2xl sm:text-[2.5rem]">
                 Raga-x
             </a>
         </div>
 
         <!-- Settings Dropdown -->
-        <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+        <div class="hidden space-x-4 sm:flex sm:items-center sm:ms-6">
             <x-dropdown align="left" width="48">
                 <x-slot name="trigger">
                     <button
-                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:bg-white focus:out line-none transition ease-in-out duration-150 gap-2">
-                        <div class="rounded-full w-8 h-8 bg-gray-400"></div>
+                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out border border-transparent rounded-md hover:bg-white focus:out line-none">
+                        <div class="w-8 h-8 bg-gray-400 rounded-full"></div>
                         <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
                             x-on:profile-updated.window="name = $event.detail.name"></div>
                         <div class="ms-1">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                     clip-rule="evenodd" />
@@ -36,7 +36,7 @@
 
             <div class="h-10 bg-[#B9B9B9] w-[1px]"></div>
 
-            <div class="flex gap-2 py-2 px-3">
+            <div class="flex gap-2 px-3 py-2">
                 <button
                     class="h-6 w-6 bg-white border border-[#E4E7EC] rounded-[0.25rem] flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"
@@ -61,8 +61,8 @@
         <!-- Hamburger -->
         <div class="flex items-center sm:hidden">
             <button @click="open = ! open"
-                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500">
+                <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round"
                         stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
@@ -83,9 +83,9 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                <div class="text-base font-medium text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
                     x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                <div class="text-sm font-medium text-gray-500">{{ auth()->user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

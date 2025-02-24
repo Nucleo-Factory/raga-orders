@@ -26,13 +26,13 @@
 
         <!-- Static sidebar for desktop -->
 
-        <div class="pl-14 lg:pl-20 transition-all duration-500 grow h-full" :class="{ 'w-6rem': isCollapsed }">
+        <div class="h-full transition-all duration-500 pl-14 lg:pl-20 grow" :class="{ 'w-6rem': isCollapsed }">
             <!-- Aqui debe ir el componente header -->
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
 
             <main class="px-4 sm:px-0 pt-10 pb-[150px] flex justify-between w-full relative">
-                <div class="w-full">
+                <div class="w-full px-10">
                     {{ $slot }}
                 </div>
             </main>
