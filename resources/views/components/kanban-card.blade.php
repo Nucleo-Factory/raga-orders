@@ -8,7 +8,7 @@
     "totalWeight" => "10 Ton",
 ])
 
-<li class="flex justify-between rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs">
+<li class="flex w-[368px] gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs">
     <div class="space-y-2">
         <div class="flex gap-4">
             <input type="checkbox" name="" id="">
