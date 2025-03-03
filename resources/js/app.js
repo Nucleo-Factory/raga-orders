@@ -1,4 +1,7 @@
 import './bootstrap';
+import Sortable from 'sortablejs';
+
+window.Sortable = Sortable;
 
 const sidebarEl = document.querySelector('.main-sidebar')
 
