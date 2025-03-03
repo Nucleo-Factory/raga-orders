@@ -1,18 +1,18 @@
 <sidebar
-    class="main-sidebar fixed top-0 left-0 h-full z-10 sm:static py-6 px-2 sm:py-[2.625rem] sm:px-3 rounded-tr-[1.25rem] rounded-br-[1.25rem] flex flex-col gap-8 bg-white text-[0.875rem] max-h-[1000px] transition-all duration-500 ">
+    class="main-sidebar fixed left-0 top-0 z-10 flex h-full max-h-[1000px] flex-col gap-8 rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white px-2 py-6 text-[0.875rem] transition-all duration-500 sm:static sm:px-3 sm:py-[2.625rem]">
     <div class="mx-auto">
         <a href="/">
             <img src="{{ asset("img/logo-negro.png") }}" alt="Raga Logo">
         </a>
     </div>
 
-    <div class="h-[1px] bg-[#B9B9B9] w-full"></div>
+    <div class="h-[1px] w-full bg-[#B9B9B9]"></div>
 
     <nav>
         <ul class="space-y-2">
             <li>
                 <x-sidebar-link>
-                    <div class="flex items-center justify-center w-6 h-6">
+                    <div class="flex h-6 w-6 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="23" viewBox="0 0 17 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -27,7 +27,7 @@
 
             <li>
                 <x-sidebar-link>
-                    <div class="flex items-center justify-center w-6 h-6">
+                    <div class="flex h-6 w-6 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="23" viewBox="0 0 22 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
