@@ -1,3 +1,4 @@
+{{-- TODO: añadir transición al abrir/cerrar sidebar --}}
 <sidebar
     class="main-sidebar fixed left-0 top-0 z-10 flex h-full max-h-[1000px] flex-col gap-8 rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white px-2 py-6 text-[0.875rem] transition-all duration-500 sm:static sm:px-3 sm:py-[2.625rem]">
     <div class="mx-auto">
