@@ -3,13 +3,7 @@
         Cargar nueva orden de compra
     </a>
 
-    <div class="flex max-h-[587px] max-w-[1184px] gap-x-10 overflow-auto">
-        <x-kanban-list title="Pick Up" />
-        <x-kanban-list title="En transito terrestre" />
-        <x-kanban-list title="Validación operativa" />
-        <x-kanban-list title="Validación operativa" />
-        <x-kanban-list title="Validación operativa" />
-        <x-kanban-list title="Validación operativa" />
-        <x-kanban-list title="Validación operativa" />
+    <div class="flex max-h-[587px] w-full gap-x-10 overflow-auto">
+        <livewire:kanban.kanban-board />
     </div>
 </x-app-layout>
