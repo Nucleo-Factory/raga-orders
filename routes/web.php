@@ -13,4 +13,9 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-require __DIR__.'/auth.php';
+Route::view('new-purchase-order', 'new-purchase-order')
+    ->middleware(['auth'])
+    ->name('new-purchase-order');
+
+
+require __DIR__ . '/auth.php';
