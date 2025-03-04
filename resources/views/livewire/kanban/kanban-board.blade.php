@@ -1,6 +1,6 @@
 <div class="flex w-full p-4 space-x-4 overflow-x-auto">
     @foreach($columns as $column)
-        <div class="flex-shrink-0 p-3 bg-gray-100 rounded-lg w-80">
+        <div class="flex-shrink-0 p-3 bg-gray-100 rounded-lg">
             <h3 class="mb-3 text-lg font-bold">{{ $column['name'] }}</h3>
 
             <div
