@@ -1,6 +1,6 @@
-@props(["action" => "#", "method" => "POST"])
+@props(["action" => "#", "method" => "POST", "class" => ""])
 
-<form action="{{ $action }}" method="{{ $method }}" class="space-y-8">
+<form action="{{ $action }}" method="{{ $method }}" class="{{ $class }} space-y-8">
     @csrf
     {{ $slot }}
 </form>
