@@ -177,10 +177,6 @@ th {
     }
 
     .main-sidebar .link-text {
-        @apply hidden;
-    }
-
-    .main-sidebar.active .link-text {
-        @apply block text-nowrap;
+        @apply text-nowrap overflow-hidden transition-all duration-500;
     }
 }
