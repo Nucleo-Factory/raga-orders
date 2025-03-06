@@ -1,6 +1,5 @@
 {{-- TODO: Modificar con datos dinámicos --}}
 @php
-    $felix = "Hola Félix";
     $modalidadArray = ["op1" => "Modalidad 1", "op2" => "Modalidad 2"];
     $hubArray = ["1" => "Hub 1", "2" => "Hub 2"];
     $paisArray = ["mx" => "México", "us" => "Estados Unidos"];
