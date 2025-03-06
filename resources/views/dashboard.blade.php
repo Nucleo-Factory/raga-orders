@@ -45,7 +45,7 @@
         </ul>
     </div>
 
-    <x-modal name="change-oc-stage" maxWidth="lg" show="true">
+    <x-modal name="change-oc-stage" maxWidth="lg">
         <h3 class="mb-12 text-2xl font-bold">
             ¿Cambiar la Orden de compra de etapa?
         </h3>
