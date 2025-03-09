@@ -10,7 +10,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|inter:400,500,600" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -26,13 +26,13 @@
 
         <!-- Static sidebar for desktop -->
 
-        <div class="pl-14 lg:pl-20 transition-all duration-500 grow h-full" :class="{ 'w-6rem': isCollapsed }">
+        <div class="h-full transition-all duration-500 pl-14 lg:pl-20 grow" :class="{ 'w-6rem': isCollapsed }">
             <!-- Aqui debe ir el componente header -->
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
 
-            <main class="px-4 sm:px-0 pt-10 pb-[150px] flex justify-between w-full relative">
-                <div class="w-full">
+            <main class="relative flex w-full justify-between px-4 pb-[150px] pt-10 sm:px-0">
+                <div class="w-full space-y-5 px-10">
                     {{ $slot }}
                 </div>
             </main>
@@ -41,6 +41,6 @@
         @livewireScripts
     </body>
 
-    @stack('scripts')
+    @stack("scripts")
 
 </html>

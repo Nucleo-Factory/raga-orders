@@ -167,11 +167,16 @@ th {
 
 /* Main Sidebar */
 @layer base {
-    .main-sidebar .link-text {
-        @apply hidden;
+    table th,
+    table td {
+        border: none;
     }
 
-    .main-sidebar.active .link-text {
-        @apply block text-nowrap;
+    .main-sidebar {
+        transition: all 0.5s ease-in-out;
+    }
+
+    .main-sidebar .link-text {
+        @apply text-nowrap overflow-hidden transition-all duration-500;
     }
 }
