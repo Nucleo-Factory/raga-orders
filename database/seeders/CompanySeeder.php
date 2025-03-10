@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CompanySeeder extends Seeder
 {
@@ -13,25 +14,26 @@ class CompanySeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 5 companies with 3 users each
-        Company::factory()
-            ->count(5)
-            ->has(User::factory()->count(3))
-            ->create();
+        try {
+            // Desactivar temporalmente las restricciones de clave foránea
+            Schema::disableForeignKeyConstraints();
 
-        // Create a main company for testing with specific data
-        $mainCompany = Company::factory()->create([
-            'name' => 'Main Test Company',
-            'address' => '123 Main Street, Test City',
-        ]);
+            // Limpiar datos existentes
+            // No eliminamos las compañías aquí para evitar problemas con las relaciones
 
-        // Create an admin user for the main company
-        User::factory()->create([
-            'company_id' => $mainCompany->id,
-            'name' => 'Admin User',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'email_verified_at' => now(),
-        ]);
+            // Create 5 companies
+            Company::factory()
+                ->count(5)
+                ->create();
+
+            // Create a main company for testing with specific data
+            Company::factory()->create([
+                'name' => 'Main Test Company',
+                'address' => '123 Main Street, Test City',
+            ]);
+        } finally {
+            // Asegurarse de que las restricciones de clave foránea se reactiven
+            Schema::enableForeignKeyConstraints();
+        }
     }
 }

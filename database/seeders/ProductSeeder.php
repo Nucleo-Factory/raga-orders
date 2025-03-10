@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class ProductSeeder extends Seeder
@@ -13,9 +15,18 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing products
-        Product::truncate();
+        try {
+            // Desactivar temporalmente las restricciones de clave foránea
+            Schema::disableForeignKeyConstraints();
 
-        Product::factory()->count(10)->create();
+            // Limpiar productos existentes
+            DB::table('products')->delete();
+
+            // Crear nuevos productos
+            Product::factory()->count(10)->create();
+        } finally {
+            // Asegurarse de que las restricciones de clave foránea se reactiven
+            Schema::enableForeignKeyConstraints();
+        }
     }
 }

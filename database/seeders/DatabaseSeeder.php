@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,12 +12,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            CompanySeeder::class,     // Companies must be created first
-            UserSeeder::class,        // Users depend on companies
-            ProductSeeder::class,     // Products are independent
-            PurchaseOrderSeeder::class, // Purchase orders depend on companies and products
-            KanbanSeeder::class,
-        ]);
+        // Desactivar temporalmente las restricciones de clave foránea para toda la operación de seeding
+        Schema::disableForeignKeyConstraints();
+
+        try {
+            $this->call([
+                CompanySeeder::class,     // Companies must be created first
+                UserSeeder::class,        // Users depend on companies
+                ProductSeeder::class,     // Products are independent
+                PurchaseOrderSeeder::class, // Purchase orders depend on companies and products
+                KanbanSeeder::class,      // Kanban depends on purchase orders
+            ]);
+        } finally {
+            // Asegurarse de que las restricciones de clave foránea se reactiven
+            Schema::enableForeignKeyConstraints();
+        }
     }
 }
