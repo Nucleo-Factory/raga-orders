@@ -7,19 +7,22 @@
 
     <x-form>
         <div class="flex gap-[3.5rem]">
-            <div class="w-full max-w-[749px] space-y-6">
+            <div class="w-full max-w-[1254px] space-y-6">
                 <h3 class="text-xl">Datos generales</h3>
 
-                <div class="grid grid-cols-[1fr,1fr] gap-x-5 gap-y-6">
-                    <x-form-input label="Ingresa fecha" type="date" name="fecha" />
-                    <x-form-input label="Número PO" type="text" name="numero_po" placeholder="Ingrese número PO" />
-                    <x-form-select label="Selecciona el HUB" name="hub" :options="$hubArray" />
-                    <x-form-select label="Elija modalidad" name="modalidad" :options="$modalidadArray" />
+                <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                    <x-form-input label="Número PO" type="text" name="order_number" wire:model="order_number" placeholder="Ingrese número PO" />
+                    <x-form-input label="Fecha de orden" type="date" name="order_date" wire:model="order_date" />
+                    <x-form-select label="Moneda" name="currency" wire:model="currency" :options="$currencyArray" />
+                    <x-form-select label="Incoterms" name="incoterms" wire:model="incoterms" :options="$tiposIncotermArray" />
+                    <x-form-select label="Términos de pago" name="payment_terms" wire:model="payment_terms" :options="$paymentTermsArray" />
+                    <x-form-input label="Lugar de orden" type="text" name="order_place" wire:model="order_place" placeholder="Ingrese lugar de orden" />
+                    <x-form-input label="Email del agente" type="email" name="email_agent" wire:model="email_agent" placeholder="Ingrese email del agente" />
                 </div>
             </div>
 
             {{-- TODO: Añadir funcionalidad input type=file --}}
-            <div class="w-full max-w-[449px] space-y-6">
+            <div class="w-full max-w-[449px] space-y-6 hidden">
                 <h3 class="text-xl">Adjunte la Orden para autocompletar</h3>
 
                 <div
@@ -61,20 +64,74 @@
             <h3 class="text-xl">Datos vendor</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Código Vendor" name="codigo_vendor" placeholder="Ingrese código" />
-                <x-form-input label="Dirección" name="direccion" placeholder="Ingrese dirección" />
-                <x-form-input label="Código postal" name="codigo_postal" placeholder="Ingrese código postal" />
-                <x-form-select label="País" name="pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-select label="Estado" name="estado" :options="$estadoArray" />
-                <x-form-input label="Teléfono" name="telefono" placeholder="Ingrese teléfono" />
+                <x-form-input label="Código Vendor" name="vendor_id" wire:model="vendor_id" placeholder="Ingrese código" />
+                <x-form-input label="Dirección" name="vendor_direccion" wire:model="vendor_direccion" placeholder="Ingrese dirección" />
+                <x-form-input label="Código postal" name="vendor_codigo_postal" wire:model="vendor_codigo_postal" placeholder="Ingrese código postal" />
+                <x-form-select label="País" name="vendor_pais" wire:model="vendor_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-select label="Estado" name="vendor_estado" wire:model="vendor_estado" :options="$estadoArray" />
+                <x-form-input label="Teléfono" name="vendor_telefono" wire:model="vendor_telefono" placeholder="Ingrese teléfono" />
             </div>
         </div>
 
-        <div class="w-full max-w-[749px] space-y-6">
-            <h3 class="text-xl">Datos Incoterm</h3>
+        <div class="w-full max-w-[1254px] space-y-6">
+            <h3 class="text-xl">Datos Ship to</h3>
 
-            <div class="max-w-[364px]">
-                <x-form-select label="Seleccione tipo de Incoterm" name="tipos_incoterm" :options="$tiposIncotermArray" />
+            <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <x-form-input label="Dirección" name="ship_to_direccion" wire:model="ship_to_direccion" placeholder="Ingrese dirección" />
+                <x-form-input label="Código postal" name="ship_to_codigo_postal" wire:model="ship_to_codigo_postal" placeholder="Ingrese código postal" />
+                <x-form-select label="País" name="ship_to_pais" wire:model="ship_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-select label="Estado" name="ship_to_estado" wire:model="ship_to_estado" :options="$estadoArray" />
+                <x-form-input label="Teléfono" name="ship_to_telefono" wire:model="ship_to_telefono" placeholder="Ingrese teléfono" />
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1254px] space-y-6">
+            <h3 class="text-xl">Datos de facturación</h3>
+
+            <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <x-form-input label="Dirección" name="bill_to_direccion" wire:model="bill_to_direccion" placeholder="Ingrese dirección" />
+                <x-form-input label="Código postal" name="bill_to_codigo_postal" wire:model="bill_to_codigo_postal" placeholder="Ingrese código postal" />
+                <x-form-select label="País" name="bill_to_pais" wire:model="bill_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-select label="Estado" name="bill_to_estado" wire:model="bill_to_estado" :options="$estadoArray" />
+                <x-form-input label="Teléfono" name="bill_to_telefono" wire:model="bill_to_telefono" placeholder="Ingrese teléfono" />
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1254px] space-y-6">
+            <h3 class="text-xl">Totales</h3>
+
+            <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <x-form-input label="Total neto" type="number" step="0.01" name="net_total" wire:model="net_total" placeholder="0.00" />
+                <x-form-input label="Costo adicional" type="number" step="0.01" name="additional_cost" wire:model="additional_cost" placeholder="0.00" />
+                <x-form-input label="Total" type="number" step="0.01" name="total" wire:model="total" placeholder="0.00" />
+                <x-form-input label="Costo de seguro" type="number" step="0.01" name="insurance_cost" wire:model="insurance_cost" placeholder="0.00" />
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1254px] space-y-6">
+            <h3 class="text-xl">Dimensiones</h3>
+
+            <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <x-form-input label="Alto (cm)" type="number" step="0.01" name="height_cm" wire:model="height_cm" placeholder="0.00" />
+                <x-form-input label="Ancho (cm)" type="number" step="0.01" name="width_cm" wire:model="width_cm" placeholder="0.00" />
+                <x-form-input label="Largo (cm)" type="number" step="0.01" name="length_cm" wire:model="length_cm" placeholder="0.00" />
+                <x-form-input label="Volumen (m³)" type="number" step="0.001" name="volume_m3" wire:model="volume_m3" placeholder="0.000" />
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1254px] space-y-6">
+            <h3 class="text-xl">Fechas</h3>
+
+            <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <x-form-input label="Fecha de entrega solicitada" type="datetime-local" name="requested_delivery_date" wire:model="requested_delivery_date" />
+                <x-form-input label="Fecha estimada de recogida" type="datetime-local" name="estimated_pickup_date" wire:model="estimated_pickup_date" />
+                <x-form-input label="Fecha real de recogida" type="datetime-local" name="actual_pickup_date" wire:model="actual_pickup_date" />
+                <x-form-input label="Llegada estimada al hub" type="datetime-local" name="estimated_hub_arrival" wire:model="estimated_hub_arrival" />
+                <x-form-input label="Llegada real al hub" type="datetime-local" name="actual_hub_arrival" wire:model="actual_hub_arrival" />
+                <x-form-input label="ETD (Fecha estimada de salida)" type="datetime-local" name="etd_date" wire:model="etd_date" />
+                <x-form-input label="ATD (Fecha real de salida)" type="datetime-local" name="atd_date" wire:model="atd_date" />
+                <x-form-input label="ETA (Fecha estimada de llegada)" type="datetime-local" name="eta_date" wire:model="eta_date" />
+                <x-form-input label="ATA (Fecha real de llegada)" type="datetime-local" name="ata_date" wire:model="ata_date" />
             </div>
         </div>
 
