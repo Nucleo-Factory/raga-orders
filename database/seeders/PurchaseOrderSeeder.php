@@ -23,10 +23,25 @@ class PurchaseOrderSeeder extends Seeder
             Schema::disableForeignKeyConstraints();
 
             // Limpiar datos existentes
-            DB::table('purchase_order_product')->delete();
-            DB::table('boarding_documents')->delete();
-            DB::table('tracking_data_p_o_s')->delete();
-            DB::table('purchase_orders')->delete();
+            // Verificar si la tabla purchase_order_product existe antes de intentar eliminarla
+            if (Schema::hasTable('purchase_order_product')) {
+                DB::table('purchase_order_product')->delete();
+            }
+
+            // Verificar si la tabla boarding_documents existe antes de intentar eliminarla
+            if (Schema::hasTable('boarding_documents')) {
+                DB::table('boarding_documents')->delete();
+            }
+
+            // Verificar si la tabla tracking_data_p_o_s existe antes de intentar eliminarla
+            if (Schema::hasTable('tracking_data_p_o_s')) {
+                DB::table('tracking_data_p_o_s')->delete();
+            }
+
+            // Verificar si la tabla purchase_orders existe antes de intentar eliminarla
+            if (Schema::hasTable('purchase_orders')) {
+                DB::table('purchase_orders')->delete();
+            }
 
             // Get all companies
             $companies = Company::all();
@@ -66,22 +81,28 @@ class PurchaseOrderSeeder extends Seeder
 
                         // Add boarding documents if order is approved or later
                         if (in_array($purchaseOrder->status, ['approved', 'shipped', 'delivered'])) {
-                            BoardingDocument::factory()
-                                ->for($purchaseOrder)
-                                ->create(['document_type' => 'invoice']);
+                            // Verificar si la clase BoardingDocument existe y si la tabla está disponible
+                            if (class_exists(BoardingDocument::class) && Schema::hasTable('boarding_documents')) {
+                                BoardingDocument::factory()
+                                    ->for($purchaseOrder)
+                                    ->create(['document_type' => 'invoice']);
 
-                            BoardingDocument::factory()
-                                ->for($purchaseOrder)
-                                ->create(['document_type' => 'packing_list']);
+                                BoardingDocument::factory()
+                                    ->for($purchaseOrder)
+                                    ->create(['document_type' => 'packing_list']);
+                            }
                         }
 
                         // Add tracking data if order is shipped or delivered
                         if (in_array($purchaseOrder->status, ['shipped', 'delivered'])) {
-                            TrackingDataPO::factory()
-                                ->for($purchaseOrder)
-                                ->create([
-                                    'status' => $purchaseOrder->status === 'delivered' ? 'delivered' : 'in_transit'
-                                ]);
+                            // Verificar si la clase TrackingDataPO existe y si la tabla está disponible
+                            if (class_exists(TrackingDataPO::class) && Schema::hasTable('tracking_data_p_o_s')) {
+                                TrackingDataPO::factory()
+                                    ->for($purchaseOrder)
+                                    ->create([
+                                        'status' => $purchaseOrder->status === 'delivered' ? 'delivered' : 'in_transit'
+                                    ]);
+                            }
                         }
                     });
             }
