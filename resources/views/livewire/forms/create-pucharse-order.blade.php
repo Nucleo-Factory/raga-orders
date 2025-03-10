@@ -135,48 +135,163 @@
             </div>
         </div>
 
-        <div class="w-full max-w-[749px] space-y-6">
+        <div class="w-full max-w-[1254px] space-y-6">
             <h3 class="text-xl">Carga / Contenido</h3>
 
-            {{-- TODO: Añadir funcionalidad "Agregar nueva fila" --}}
-            <div class="flex flex-col items-center space-y-[0.625rem]">
-                <table class="border-none text-[#6B7280]">
-                    <thead>
-                        <tr>
-                            <th class="bg-[#F9FAFB]">SKU</th>
-                            <th class="bg-[#F9FAFB]">Descripción material</th>
-                            <th class="bg-[#F9FAFB]">Peso</th>
-                            <th class="bg-[#F9FAFB]">Peso Real</th>
-                            <th class="bg-[#F9FAFB]">Volúmen</th>
-                        </tr>
-                    </thead>
-                    <tbody class="font-inter">
-                        <tr>
-                            <td>111</td>
-                            <td>Lorem ipsum</td>
-                            <td>111</td>
-                            <td>111</td>
-                            <td>111</td>
-                        </tr>
-                        <tr>
-                            <td>111</td>
-                            <td>Lorem ipsum</td>
-                            <td>111</td>
-                            <td>111</td>
-                            <td>111</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="flex flex-col space-y-4">
+                <!-- Buscador de productos -->
+                <div class="flex items-end gap-4">
+                    <div class="w-full max-w-md">
+                        <label for="searchTerm" class="block text-sm font-medium text-gray-700">Buscar producto</label>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                id="searchTerm"
+                                wire:model.live="searchTerm"
+                                wire:keyup="searchProducts"
+                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                placeholder="Buscar por ID o descripción"
+                            >
+                            @if(count($searchResults) > 0)
+                                <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg">
+                                    <ul class="py-1 overflow-auto text-base rounded-md max-h-60 sm:text-sm">
+                                        @foreach($searchResults as $product)
+                                            <li
+                                                class="relative py-2 pl-3 cursor-pointer select-none pr-9 hover:bg-gray-100"
+                                                wire:click="selectProduct({{ $product->id }})"
+                                            >
+                                                <div class="flex items-center">
+                                                    <span class="font-medium">{{ $product->material_id }}</span>
+                                                    <span class="ml-2 text-gray-500">{{ $product->description }}</span>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
-                <x-white-btn class="flex items-center gap-[0.625rem]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"
-                        fill="none">
-                        <path
-                            d="M5.66683 4.83203H9.16683V5.16536H5.66683H5.16683V5.66536V9.16536H4.8335V5.66536V5.16536H4.3335H0.833496V4.83203H4.3335H4.8335V4.33203V0.832031H5.16683V4.33203V4.83203H5.66683Z"
-                            fill="black" stroke="#0F172A" />
-                    </svg>
-                    <span>Agregar nueva fila</span>
-                </x-white-btn>
+                    <div class="w-24">
+                        <label for="quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                        <input
+                            type="number"
+                            id="quantity"
+                            wire:model="quantity"
+                            min="1"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                    </div>
+
+                    <button
+                        type="button"
+                        wire:click="addProduct"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        @if(!$selectedProduct) disabled @endif
+                    >
+                        Agregar
+                    </button>
+                </div>
+
+                <!-- Producto seleccionado -->
+                @if($selectedProduct)
+                    <div class="p-3 mt-2 rounded-md bg-gray-50">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="font-medium">{{ $selectedProduct->material_id }}</p>
+                                <p class="text-sm text-gray-500">{{ $selectedProduct->description }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">Precio: {{ number_format($selectedProduct->price_per_unit, 2) }}</p>
+                                <p class="text-sm text-gray-500">Subtotal: {{ number_format($selectedProduct->price_per_unit * $quantity, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Tabla de productos agregados -->
+                <div class="mt-4">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">ID</th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Descripción</th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Precio unitario</th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Cantidad</th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Subtotal</th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($orderProducts as $index => $product)
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{{ $product['material_id'] }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $product['description'] }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{{ number_format($product['price_per_unit'], 2) }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        <input
+                                            type="number"
+                                            wire:model.live="orderProducts.{{ $index }}.quantity"
+                                            wire:change="updateQuantity({{ $index }}, $event.target.value)"
+                                            min="1"
+                                            class="block w-20 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        >
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{{ number_format($product['subtotal'], 2) }}</td>
+                                    <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                        <button
+                                            type="button"
+                                            wire:click="removeProduct({{ $index }})"
+                                            class="text-red-600 hover:text-red-900"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">No hay productos agregados</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">Total Neto:</td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{{ number_format($net_total, 2) }}</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">Costo Adicional:</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                                    <input
+                                        type="number"
+                                        wire:model.live="additional_cost"
+                                        step="0.01"
+                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">Costo de Seguro:</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                                    <input
+                                        type="number"
+                                        wire:model.live="insurance_cost"
+                                        step="0.01"
+                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    >
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm font-bold text-right text-gray-900">TOTAL:</td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">{{ number_format($total, 2) }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
     </x-form>
