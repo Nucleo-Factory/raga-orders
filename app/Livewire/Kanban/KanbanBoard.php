@@ -152,6 +152,6 @@ class KanbanBoard extends Component {
     {
         return view('livewire.kanban.kanban-board', [
             'tasksByColumn' => $this->tasksByColumn
-        ]);
+        ])->layout('layouts.app');
     }
 }

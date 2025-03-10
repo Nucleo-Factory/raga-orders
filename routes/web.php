@@ -28,6 +28,10 @@ Route::middleware(['auth'])->group(function () {
     Route::view('purchase-orders', 'purchase-orders.index')
         ->name('purchase-orders.index');
 
+    // Listar tableros Kanban
+    Route::get('purchase-orders/kanban-boards', \App\Livewire\Kanban\KanbanBoardList::class)
+        ->name('purchase-orders.kanban-boards');
+
     // Kanban de órdenes de compra
     Route::get('purchase-orders/kanban/{boardId?}', \App\Livewire\Kanban\KanbanBoard::class)
         ->name('purchase-orders.kanban');
