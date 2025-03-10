@@ -12,7 +12,7 @@
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input label="Número PO" type="text" name="order_number" wire:model="order_number" placeholder="Ingrese número PO" />
-                    <x-form-input label="Fecha de orden" type="date" name="order_date" wire:model="order_date" />
+                    <x-form-input label="Fecha de creación" type="date" name="order_date" wire:model="order_date" />
                     <x-form-select label="Moneda" name="currency" wire:model="currency" :options="$currencyArray" />
                     <x-form-select label="Incoterms" name="incoterms" wire:model="incoterms" :options="$tiposIncotermArray" />
                     <x-form-select label="Términos de pago" name="payment_terms" wire:model="payment_terms" :options="$paymentTermsArray" />

@@ -141,4 +141,43 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(TrackingDataPO::class);
     }
+
+    /**
+     * Get the kanban status for the purchase order.
+     */
+    public function kanbanStatus(): BelongsTo
+    {
+        return $this->belongsTo(KanbanStatus::class);
+    }
+
+    /**
+     * Move the purchase order to a new kanban status.
+     */
+    public function moveToKanbanStatus(KanbanStatus $status): self
+    {
+        $this->update(['kanban_status_id' => $status->id]);
+        return $this;
+    }
+
+    /**
+     * Move the purchase order to the next kanban status.
+     */
+    public function moveToNextKanbanStatus(): ?self
+    {
+        if ($this->kanbanStatus && $nextStatus = $this->kanbanStatus->nextStatus()) {
+            return $this->moveToKanbanStatus($nextStatus);
+        }
+        return null;
+    }
+
+    /**
+     * Move the purchase order to the previous kanban status.
+     */
+    public function moveToPreviousKanbanStatus(): ?self
+    {
+        if ($this->kanbanStatus && $prevStatus = $this->kanbanStatus->previousStatus()) {
+            return $this->moveToKanbanStatus($prevStatus);
+        }
+        return null;
+    }
 }

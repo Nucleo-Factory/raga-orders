@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,        // Users depend on companies
             ProductSeeder::class,     // Products are independent
             PurchaseOrderSeeder::class, // Purchase orders depend on companies and products
+            KanbanSeeder::class,
         ]);
     }
 }

@@ -2,89 +2,156 @@
 
 namespace App\Livewire\Kanban;
 
+use App\Models\KanbanBoard as KanbanBoardModel;
+use App\Models\KanbanStatus;
+use App\Models\PurchaseOrder;
 use Livewire\Component;
-use Livewire\Attributes\On;
+use Illuminate\Support\Facades\DB;
 
 class KanbanBoard extends Component {
+    public $boardId;
+    public $board;
     public $columns = [];
     public $tasks = [];
+    public $tasksByColumn = [];
 
-    public function mount() {
+    public function mount($boardId = null) {
+        // Si no se proporciona un ID de tablero, intentamos obtener el tablero predeterminado
+        if (!$boardId) {
+            // Obtener el tablero predeterminado para la compañía del usuario actual
+            $companyId = auth()->user()->company_id ?? null;
+            $this->board = KanbanBoardModel::where('company_id', $companyId)
+                ->where('type', 'purchase_orders')
+                ->where('is_active', true)
+                ->first();
+
+            if ($this->board) {
+                $this->boardId = $this->board->id;
+            }
+        } else {
+            $this->boardId = $boardId;
+            $this->board = KanbanBoardModel::findOrFail($boardId);
+        }
+
+        $this->loadData();
+    }
+
+    public function loadData() {
         $this->loadColumns();
         $this->loadTasks();
+        $this->organizeTasksByColumn();
     }
 
     public function loadColumns() {
-        $this->columns = [
-            ['id' => 'pending', 'name' => 'Pendientes'],
-            ['id' => 'in_progress', 'name' => 'En Progreso'],
-            ['id' => 'review', 'name' => 'En Revisión'],
-            ['id' => 'completed', 'name' => 'Completadas'],
-        ];
+        if (!$this->board) {
+            $this->columns = [];
+            return;
+        }
+
+        // Cargar las columnas (estados) del tablero
+        $statuses = $this->board->statuses()->orderBy('position')->get();
+
+        $this->columns = $statuses->map(function($status) {
+            return [
+                'id' => $status->id,
+                'slug' => $status->slug,
+                'name' => $status->name,
+                'color' => $status->color,
+                'position' => $status->position,
+            ];
+        })->toArray();
     }
 
     public function loadTasks() {
-        $this->tasks = [
-            [
-                'id' => 1,
-                'po' => '12345a',
-                'trackingId' => '11111',
-                'hubLocation' => 'New Jersey',
-                'leadTime' => '2024-01-01',
-                'recolectaTime' => '2024-11-11',
-                'pickupTime' => '2024-11-11',
-                'totalWeight' => '10 tons',
-                'status' => 'pending',
-            ],
-            [
-                'id' => 2,
-                'po' => '12345b',
-                'trackingId' => '22222',
-                'hubLocation' => 'California',
-                'leadTime' => '2024-02-01',
-                'recolectaTime' => '2024-12-11',
-                'pickupTime' => '2024-12-11',
-                'totalWeight' => '15 tons',
-                'status' => 'in_progress',
-            ],
-            [
-                'id' => 3,
-                'po' => '12345c',
-                'trackingId' => '33333',
-                'hubLocation' => 'Texas',
-                'leadTime' => '2024-03-01',
-                'recolectaTime' => '2024-13-11',
-                'pickupTime' => '2024-13-11',
-                'totalWeight' => '20 tons',
-                'status' => 'review',
-            ],
-            [
-                'id' => 4,
-                'po' => '12345d',
-                'trackingId' => '44444',
-                'hubLocation' => 'Florida',
-                'leadTime' => '2024-04-01',
-                'recolectaTime' => '2024-14-11',
-                'pickupTime' => '2024-14-11',
-                'totalWeight' => '25 tons',
-                'status' => 'completed',
-            ],
-        ];
+        if (!$this->board) {
+            $this->tasks = [];
+            return;
+        }
+
+        // Obtener el estado por defecto
+        $defaultStatus = $this->board->statuses()->where('is_default', true)->first();
+
+        // Obtener los IDs de los estados de este tablero
+        $statusIds = collect($this->columns)->pluck('id')->toArray();
+
+        // Cargar las órdenes de compra de la compañía del usuario
+        $companyId = auth()->user()->company_id ?? null;
+        $purchaseOrders = PurchaseOrder::with(['company', 'kanbanStatus'])
+            ->where('company_id', $companyId)
+            ->get();
+
+        // Limpiar el array de tareas
+        $this->tasks = [];
+
+        foreach ($purchaseOrders as $order) {
+            // Si la orden no tiene un estado de Kanban asignado, asignarle el estado por defecto
+            if (!$order->kanban_status_id && $defaultStatus) {
+                $order->update(['kanban_status_id' => $defaultStatus->id]);
+                $order->refresh();
+            }
+
+            // Si después de intentar asignar un estado, sigue sin tenerlo, o si el estado no pertenece a este tablero, continuar
+            if (!$order->kanban_status_id || !in_array($order->kanban_status_id, $statusIds)) {
+                continue;
+            }
+
+            $this->tasks[] = [
+                'id' => $order->id,
+                'po' => $order->order_number,
+                'vendor' => $order->vendor_id,
+                'status' => $order->kanban_status_id,
+                'status_slug' => $order->kanbanStatus->slug ?? 'unknown',
+                'order_date' => $order->order_date ? $order->order_date->format('Y-m-d') : null,
+                'requested_delivery_date' => $order->requested_delivery_date ? $order->requested_delivery_date->format('Y-m-d') : null,
+                'total' => $order->total,
+                'company' => $order->company->name ?? 'N/A',
+            ];
+        }
     }
 
-    #[On('task-moved')]
-    public function moveTask($taskId, $newStatus) {
-        foreach ($this->tasks as $key => $task) {
-            if ($task['id'] == $taskId) {
-                // Update the status
-                $this->tasks[$key]['status'] = $newStatus;
-                break;
+    public function organizeTasksByColumn() {
+        $this->tasksByColumn = [];
+
+        // Inicializar un array vacío para cada columna
+        foreach ($this->columns as $column) {
+            $this->tasksByColumn[$column['id']] = [];
+        }
+
+        // Organizar las tareas por columna
+        foreach ($this->tasks as $task) {
+            if (isset($this->tasksByColumn[$task['status']])) {
+                $this->tasksByColumn[$task['status']][] = $task;
             }
+        }
+    }
+
+    public function moveTask($taskId, $newStatus) {
+        // Log para depuración
+        \Log::info("Moving task $taskId to status $newStatus");
+
+        try {
+            // Actualizar directamente en la base de datos
+            DB::table('purchase_orders')
+                ->where('id', $taskId)
+                ->update(['kanban_status_id' => $newStatus]);
+
+            // Log para depuración
+            \Log::info("Task moved successfully");
+
+            // Recargar los datos
+            $this->loadData();
+
+            // Forzar la actualización de la vista
+            $this->dispatch('refreshKanban');
+        } catch (\Exception $e) {
+            \Log::error("Error moving task: " . $e->getMessage());
         }
     }
 
     public function render()
     {
-        return view('livewire.kanban.kanban-board');
+        return view('livewire.kanban.kanban-board', [
+            'tasksByColumn' => $this->tasksByColumn
+        ]);
     }
 }

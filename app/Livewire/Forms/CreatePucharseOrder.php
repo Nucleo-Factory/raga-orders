@@ -12,8 +12,23 @@ class CreatePucharseOrder extends Component
     public $hubArray = ["1" => "Hub 1", "2" => "Hub 2"];
     public $paisArray = ["mx" => "México", "us" => "Estados Unidos"];
     public $estadoArray = ["cdmx" => "CDMX", "ny" => "New York"];
-    public $tiposIncotermArray = ["value1" => "Tipo 1", "value2" => "Tipo 2", "value3" => "Tipo 3"];
-    public $currencyArray = ["MXN" => "Peso Mexicano", "USD" => "Dólar Estadounidense", "EUR" => "Euro"];
+    public $tiposIncotermArray = [
+        "CIF" => "CIF",
+        "CIP" => "CIP",
+        "CFR" => "CFR",
+        "CPT" => "CPT",
+        "DAT" => "DAT",
+        "DAP" => "DAP",
+        "DDP" => "DDP",
+        "DEQ" => "DEQ",
+        "DES" => "DES",
+        "EXD" => "EXD",
+        "EXQ" => "EXQ",
+        "EXW" => "EXW",
+        "FCA" => "FCA",
+        "FOB" => "FOB",
+    ];
+    public $currencyArray = ["CRC" => "Colones", "USD" => "Dólar Estadounidense", "EUR" => "Euro"];
     public $paymentTermsArray = ["30" => "30 días", "60" => "60 días", "90" => "90 días"];
 
     // Datos generales
@@ -196,10 +211,21 @@ class CreatePucharseOrder extends Component
             'order_number' => 'required|string|max:255',
         ]);
 
+        // Obtener el tablero Kanban predeterminado para la compañía del usuario
+        $companyId = auth()->user()->company_id ?? 1;
+        $kanbanBoard = \App\Models\KanbanBoard::where('company_id', $companyId)
+            ->where('type', 'purchase_orders')
+            ->where('is_active', true)
+            ->first();
+
+        // Obtener el estado por defecto del tablero Kanban
+        $defaultKanbanStatus = $kanbanBoard ? $kanbanBoard->defaultStatus() : null;
+
         $purchaseOrder = \App\Models\PurchaseOrder::create([
-            'company_id' => auth()->user()->company_id ?? 1,
+            'company_id' => $companyId,
             'order_number' => $this->order_number,
             'status' => 'draft',
+            'kanban_status_id' => $defaultKanbanStatus ? $defaultKanbanStatus->id : null,
             'notes' => $this->notes,
 
             // Vendor information
