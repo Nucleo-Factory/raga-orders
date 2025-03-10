@@ -11,8 +11,8 @@
     <nav>
         <ul class="space-y-2">
             <li>
-                <x-sidebar-link>
-                    <div class="flex h-6 w-6 items-center justify-center">
+                <x-sidebar-link href="{{ route('dashboard') }}">
+                    <div class="flex items-center justify-center w-6 h-6">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="23" viewBox="0 0 17 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -21,13 +21,13 @@
                         </svg>
                     </div>
 
-                    <span class="link-text">Componente botón</span>
+                    <span class="link-text">Ordenes de compra</span>
                 </x-sidebar-link>
             </li>
 
             <li>
-                <x-sidebar-link>
-                    <div class="flex h-6 w-6 items-center justify-center">
+                <x-sidebar-link href="{{ route('products.create') }}">
+                    <div class="flex items-center justify-center w-6 h-6">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="23" viewBox="0 0 22 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -36,7 +36,7 @@
                         </svg>
                     </div>
 
-                    <span class="link-text">Componente botón 2</span>
+                    <span class="link-text">Productos</span>
                 </x-sidebar-link>
             </li>
         </ul>

@@ -17,5 +17,8 @@ Route::view('new-purchase-order', 'new-purchase-order')
     ->middleware(['auth'])
     ->name('new-purchase-order');
 
+Route::view('products/create', 'products.create')
+    ->middleware(['auth'])
+    ->name('products.create');
 
 require __DIR__ . '/auth.php';

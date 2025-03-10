@@ -16,12 +16,18 @@ class Product extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'material_id',
         'description',
-        'price',
-        'sku',
-        'stock',
-        'status',
+        'legacy_material',
+        'contract',
+        'order_quantity',
+        'qty_unit',
+        'price_per_unit',
+        'price_per_uon',
+        'net_value',
+        'vat_rate',
+        'vat_value',
+        'delivery_date',
     ];
 
     /**
@@ -30,9 +36,13 @@ class Product extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'price' => 'decimal:2',
-        'stock' => 'integer',
-        'status' => 'string',
+        'order_quantity' => 'decimal:2',
+        'price_per_unit' => 'decimal:2',
+        'price_per_uon' => 'decimal:2',
+        'net_value' => 'decimal:2',
+        'vat_rate' => 'decimal:2',
+        'vat_value' => 'decimal:2',
+        'delivery_date' => 'date',
     ];
 
     /**

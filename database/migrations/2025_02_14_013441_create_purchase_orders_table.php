@@ -22,16 +22,41 @@ return new class extends Migration
             $table->enum('status', ['draft', 'pending', 'approved', 'shipped', 'delivered', 'cancelled']);
             $table->decimal('total_amount', 10, 2)->default(0);
 
-            // Información general
-            $table->string('vendor')->nullable();
-            $table->string('material_description')->nullable();
-            $table->string('unit_of_measure')->nullable();
-            $table->decimal('quantity_kgs', 10, 2)->nullable();
-            $table->integer('estimated_pallets')->nullable();
-            $table->integer('actual_pallets')->nullable();
-            $table->string('shipping_number')->nullable();
-            $table->string('booking_number')->nullable();
-            $table->string('container_number')->nullable();
+            // Vendor information
+            $table->string('vendor_id')->nullable();
+            $table->string('vendor_direccion')->nullable();
+            $table->string('vendor_codigo_postal')->nullable();
+            $table->string('vendor_pais')->nullable();
+            $table->string('vendor_estado')->nullable();
+            $table->string('vendor_telefono')->nullable();
+
+            // Ship to information
+            $table->string('ship_to_direccion')->nullable();
+            $table->string('ship_to_codigo_postal')->nullable();
+            $table->string('ship_to_pais')->nullable();
+            $table->string('ship_to_estado')->nullable();
+            $table->string('ship_to_telefono')->nullable();
+
+            // Bill to information
+            $table->string('bill_to_direccion')->nullable();
+            $table->string('bill_to_codigo_postal')->nullable();
+            $table->string('bill_to_pais')->nullable();
+            $table->string('bill_to_estado')->nullable();
+            $table->string('bill_to_telefono')->nullable();
+
+            // Order details
+            $table->date('order_date')->nullable();
+            $table->string('currency')->nullable();
+            $table->string('incoterms')->nullable();
+            $table->string('payment_terms')->nullable();
+            $table->string('order_place')->nullable();
+            $table->string('email_agent')->nullable();
+
+            // Totals
+            $table->decimal('net_total', 12, 2)->nullable();
+            $table->decimal('additional_cost', 12, 2)->nullable();
+            $table->decimal('total', 12, 2)->nullable();
+
 
             // Dimensiones
             $table->decimal('height_cm', 8, 2)->nullable();

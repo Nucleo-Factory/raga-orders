@@ -20,7 +20,7 @@ class PurchaseOrderSeeder extends Seeder
         $companies = Company::all();
 
         // Get some products to attach to orders
-        $products = Product::where('status', 'active')->take(10)->get();
+        $products = Product::take(10)->get();
 
         foreach ($companies as $company) {
             // Create 5 purchase orders for each company
@@ -42,7 +42,7 @@ class PurchaseOrderSeeder extends Seeder
                     foreach ($orderProducts as $product) {
                         $purchaseOrder->products()->attach($product->id, [
                             'quantity' => rand(1, 10),
-                            'unit_price' => $product->price,
+                            'unit_price' => $product->price_per_unit,
                         ]);
                     }
 
@@ -88,7 +88,7 @@ class PurchaseOrderSeeder extends Seeder
         foreach ($testProducts as $product) {
             $testOrder->products()->attach($product->id, [
                 'quantity' => 1,
-                'unit_price' => $product->price,
+                'unit_price' => $product->price_per_unit,
             ]);
         }
     }
