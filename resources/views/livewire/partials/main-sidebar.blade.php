@@ -1,18 +1,16 @@
 <sidebar
-    class="main-sidebar fixed left-0 top-0 z-10 flex h-full max-h-[1000px] flex-col gap-8 rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white px-2 py-6 text-[0.875rem] transition-all duration-500 sm:static sm:px-3 sm:py-[2.625rem]">
-    <div class="mx-auto">
+    class="main-sidebar fixed left-0 top-0 z-10 flex h-full max-h-[1000px] flex-col gap-8 rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-[#f7f7f7] font-inter text-[0.875rem] transition-none sm:static">
+    <div class="">
         <a href="/">
-            <img src="{{ asset("img/logo-negro.png") }}" alt="Raga Logo">
+            <img src="{{ asset('img/logo-negro.png') }}" alt="Raga Logo">
         </a>
     </div>
 
-    <div class="h-[1px] w-full bg-[#B9B9B9]"></div>
-
-    <nav>
+    <nav class="bg-white">
         <ul class="space-y-2">
             <li>
                 <x-sidebar-link href="{{ route('dashboard') }}">
-                    <div class="flex items-center justify-center w-6 h-6">
+                    <div class="flex h-6 w-6 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="23" viewBox="0 0 17 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -27,8 +25,10 @@
 
             <li>
                 <x-sidebar-link href="{{ route('purchase-orders.kanban-boards') }}">
-                    <div class="flex items-center justify-center w-6 h-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="flex h-6 w-6 items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="3" y1="9" x2="21" y2="9"></line>
                             <line x1="9" y1="21" x2="9" y2="9"></line>
@@ -41,7 +41,7 @@
 
             <li>
                 <x-sidebar-link href="{{ route('products.create') }}">
-                    <div class="flex items-center justify-center w-6 h-6">
+                    <div class="flex h-6 w-6 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="23" viewBox="0 0 22 23"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"

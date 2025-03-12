@@ -172,11 +172,11 @@ th {
         border: none;
     }
 
-    .main-sidebar {
-        transition: all 0.5s ease-in-out;
+    .main-sidebar .sidebar-link {
+        @apply transition-all duration-500
     }
 
     .main-sidebar .link-text {
-        @apply text-nowrap overflow-hidden transition-all duration-500;
+        @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s];
     }
 }
