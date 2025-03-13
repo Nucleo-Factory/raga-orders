@@ -18,7 +18,7 @@ sidebarLinkTextAll.forEach((linkText) => {
 
 sidebarEl.addEventListener("mouseenter", function () {
     sidebarLinkAll.forEach((link) => {
-        link.style.gap = "1rem";
+        link.style.gap = "0.75rem";
     });
 
     sidebarLinkTextAll.forEach((linkText) => {
