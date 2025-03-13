@@ -1,6 +1,6 @@
-@props(["href" => "/"])
+@props(['href' => '/', 'class' => ''])
 
 <a href="{{ $href }}"
-    class="sidebar-link flex items-center rounded-md px-2 py-1 hover:bg-stone-200 sm:px-4 sm:py-2">
+    class="sidebar-link {{ $class }} group flex items-center rounded-lg px-2 py-1 sm:px-3 sm:py-[0.625rem]">
     {{ $slot }}
 </a>
