@@ -184,3 +184,9 @@ th {
         @apply transition-all duration-500;
     }
 }
+
+@layer components {
+    .primary-btn {
+        @apply w-full rounded-[0.375rem] bg-[#565AFF] px-3 py-[0.625rem] text-center font-sans text-lg font-extrabold text-white transition-colors duration-500 hover:bg-[#7477ff] hover:text-slate-300 active:scale-[0.99];
+    }
+}
