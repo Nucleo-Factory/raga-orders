@@ -64,7 +64,7 @@
                     </div>
 
                     <div
-                        class="link-text {{ $url === route('dashboard') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
+                        class="link-text {{ $url === route('dashboard') ? 'text-[#565AFF]' : 'group-hover:text-black' }}">
                         <span>Inicio</span>
                     </div>
                 </x-sidebar-link>
