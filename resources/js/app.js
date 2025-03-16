@@ -12,22 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     let sidebarExpanded = false;
 
-    sidebarLinkAll.forEach((link) => {
-        link.style.gap = "0";
-    });
-
-    sidebarLinkTextAll.forEach((linkText) => {
-        linkText.style.width = "0";
-        linkText.style.opacity = "0";
-    });
-
-    if (logoutBtnText) {
-        logoutBtnText.style.gap = "0";
-    }
-
-    togglerBtn.style.transition = "transform 0.3s ease";
-    togglerBtn.style.transform = "rotate(180deg)";
-
     function expandSidebar() {
         sidebarLinkAll.forEach((link) => {
             link.style.gap = "0.75rem";

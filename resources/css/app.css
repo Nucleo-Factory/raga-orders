@@ -173,15 +173,19 @@ th {
     }
 
     .main-sidebar .sidebar-link {
-        @apply transition-all duration-500;
+        @apply transition-all duration-500 gap-0;
     }
 
     .main-sidebar .link-text {
-        @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s];
+        @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s] w-0 opacity-0;
     }
 
     .main-sidebar .logout-btn {
-        @apply transition-all duration-500;
+        @apply transition-all duration-500 gap-0;
+    }
+
+    .main-sidebar .sidebar-toggler-btn {
+        @apply rotate-180 transition-[transform_0.3s_ease];
     }
 }
 
