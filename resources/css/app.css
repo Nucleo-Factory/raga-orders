@@ -172,16 +172,15 @@ th {
         border: none;
     }
 
-    .main-sidebar .sidebar-link {
+    .main-sidebar .sidebar-link,
+    .main-sidebar .logout-btn,
+    .main-sidebar .profile-container {
         @apply transition-all duration-500 gap-0;
     }
 
-    .main-sidebar .link-text {
+    .main-sidebar .link-text,
+    .main-sidebar .profile-name {
         @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s] w-0 opacity-0;
-    }
-
-    .main-sidebar .logout-btn {
-        @apply transition-all duration-500 gap-0;
     }
 
     .main-sidebar .sidebar-toggler-btn {

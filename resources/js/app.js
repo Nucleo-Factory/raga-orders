@@ -3,12 +3,14 @@ import Sortable from "sortablejs";
 
 window.Sortable = Sortable;
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const sidebarEl = document.querySelector(".main-sidebar");
     const sidebarLinkAll = sidebarEl.querySelectorAll(".sidebar-link");
     const sidebarLinkTextAll = sidebarEl.querySelectorAll(".link-text");
     const logoutBtnText = sidebarEl.querySelector(".logout-btn");
-    const togglerBtn = document.querySelector(".sidebar-toggler-btn");
+    const togglerBtn = sidebarEl.querySelector(".sidebar-toggler-btn");
+    const profileContainer = sidebarEl.querySelector(".profile-container");
+    const profileName = sidebarEl.querySelector(".profile-name");
 
     let sidebarExpanded = false;
 
@@ -27,6 +29,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         togglerBtn.style.transform = "rotate(0deg)";
+
+        profileContainer.style.gap = "0.625rem";
+        profileName.style.width = profileName.scrollWidth + "px";
+        profileName.style.opacity = "1";
     }
 
     function collapseSidebar() {
@@ -44,9 +50,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         togglerBtn.style.transform = "rotate(180deg)";
+
+        profileContainer.style.gap = "0";
+        profileName.style.width = "0";
+        profileName.style.opacity = "0";
     }
 
-    togglerBtn.addEventListener("click", function() {
+    togglerBtn.addEventListener("click", function () {
         sidebarExpanded = !sidebarExpanded;
 
         if (sidebarExpanded) {
