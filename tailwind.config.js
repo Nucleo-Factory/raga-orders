@@ -13,6 +13,7 @@ export default {
         extend: {
             fontFamily: {
                 inter: ['Inter', ...defaultTheme.fontFamily.sans],
+                "dm-sans": ['Inter', ...defaultTheme.fontFamily.sans],
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             boxShadow: {

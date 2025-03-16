@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Forms\ShowPucharseOrder;
+use App\Livewire\Settings\Index;
+use App\Livewire\Settings\Notifications;
+use App\Livewire\Settings\Password;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -43,6 +46,18 @@ Route::middleware(['auth'])->group(function () {
     // Editar una orden de compra (redirige al formulario de edición)
     Route::view('purchase-orders/{id}/edit', 'purchase-orders.edit')
         ->name('purchase-orders.edit');
+});
+
+// Rutas para configuraciones
+Route::middleware(['auth'])->group(function () {
+    Route::get('settings', Index::class)
+        ->name('settings.index');
+
+    Route::get('settings/notifications', Notifications::class)
+        ->name('settings.notifications');
+
+    Route::get('settings/password', Password::class)
+        ->name('settings.password');
 });
 
 require __DIR__ . '/auth.php';
