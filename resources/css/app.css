@@ -174,12 +174,16 @@ th {
 
     .main-sidebar .sidebar-link,
     .main-sidebar .logout-btn,
-    .main-sidebar .profile-container {
+    .main-sidebar .profile-container,
+    .main-sidebar .sidebar-dropdown,
+    .main-sidebar .sidebar-dropdown-text-container {
         @apply transition-all duration-500 gap-0;
     }
 
     .main-sidebar .link-text,
-    .main-sidebar .profile-name {
+    .main-sidebar .profile-name,
+    .main-sidebar .sidebar-dropdown-text,
+    .main-sidebar .sidebar-dropdown .icon {
         @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s] w-0 opacity-0;
     }
 
