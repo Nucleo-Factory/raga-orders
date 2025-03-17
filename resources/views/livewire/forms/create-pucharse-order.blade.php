@@ -5,19 +5,17 @@
         <x-black-btn wire:click="createPurchaseOrder">Crear nueva Orden</x-black-btn>
     </div>
 
-    <x-form>
+    <x-form method="GET" action="">
         <div class="flex gap-[3.5rem]">
             <div class="w-full max-w-[1254px] space-y-6">
                 <h3 class="text-xl">Datos generales</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                    <x-form-input label="Número PO" type="text" name="order_number" wire:model="order_number" placeholder="Ingrese número PO" />
-                    <x-form-input label="Fecha de creación" type="date" name="order_date" wire:model="order_date" />
-                    <x-form-select label="Moneda" name="currency" wire:model="currency" :options="$currencyArray" />
-                    <x-form-select label="Incoterms" name="incoterms" wire:model="incoterms" :options="$tiposIncotermArray" />
-                    <x-form-select label="Términos de pago" name="payment_terms" wire:model="payment_terms" :options="$paymentTermsArray" />
-                    <x-form-input label="Lugar de orden" type="text" name="order_place" wire:model="order_place" placeholder="Ingrese lugar de orden" />
-                    <x-form-input label="Email del agente" type="email" name="email_agent" wire:model="email_agent" placeholder="Ingrese email del agente" />
+                    <x-form-input label="Número PO" type="text" name="order_number" wireModel="order_number" placeholder="Ingrese número PO" />
+                    <x-form-input label="Fecha de creación" type="date" name="order_date" wireModel="order_date" />
+                    <x-form-select label="Moneda" name="currency" wireModel="currency" :options="$currencyArray" />
+                    <x-form-select label="Incoterms" name="incoterms" wireModel="incoterms" :options="$tiposIncotermArray" />
+                    <x-form-input label="Lugar de orden" type="text" name="order_place" wireModel="order_place" placeholder="Ingrese lugar de orden" />
                 </div>
             </div>
 
@@ -64,12 +62,10 @@
             <h3 class="text-xl">Datos vendor</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Código Vendor" name="vendor_id" wire:model="vendor_id" placeholder="Ingrese código" />
-                <x-form-input label="Dirección" name="vendor_direccion" wire:model="vendor_direccion" placeholder="Ingrese dirección" />
-                <x-form-input label="Código postal" name="vendor_codigo_postal" wire:model="vendor_codigo_postal" placeholder="Ingrese código postal" />
-                <x-form-select label="País" name="vendor_pais" wire:model="vendor_pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-select label="Estado" name="vendor_estado" wire:model="vendor_estado" :options="$estadoArray" />
-                <x-form-input label="Teléfono" name="vendor_telefono" wire:model="vendor_telefono" placeholder="Ingrese teléfono" />
+                <x-form-input label="Código Vendor" name="vendor_id" wireModel="vendor_id" placeholder="Ingrese código" />
+                <x-form-input label="Dirección" name="vendor_direccion" wireModel="vendor_direccion" placeholder="Ingrese dirección" />
+                <x-form-select label="País" name="vendor_pais" wireModel="vendor_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-input label="Teléfono" name="vendor_telefono" wireModel="vendor_telefono" placeholder="Ingrese teléfono" />
             </div>
         </div>
 
@@ -77,11 +73,10 @@
             <h3 class="text-xl">Datos Ship to</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Dirección" name="ship_to_direccion" wire:model="ship_to_direccion" placeholder="Ingrese dirección" />
-                <x-form-input label="Código postal" name="ship_to_codigo_postal" wire:model="ship_to_codigo_postal" placeholder="Ingrese código postal" />
-                <x-form-select label="País" name="ship_to_pais" wire:model="ship_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-select label="Estado" name="ship_to_estado" wire:model="ship_to_estado" :options="$estadoArray" />
-                <x-form-input label="Teléfono" name="ship_to_telefono" wire:model="ship_to_telefono" placeholder="Ingrese teléfono" />
+                <x-form-input label="Nombre" name="ship_to_nombre" wireModel="ship_to_nombre" placeholder="Ingrese nombre" />
+                <x-form-input label="Dirección" name="ship_to_direccion" wireModel="ship_to_direccion" placeholder="Ingrese dirección" />
+                <x-form-select label="País" name="ship_to_pais" wireModel="ship_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-input label="Teléfono" name="ship_to_telefono" wireModel="ship_to_telefono" placeholder="Ingrese teléfono" />
             </div>
         </div>
 
@@ -89,22 +84,21 @@
             <h3 class="text-xl">Datos de facturación</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Dirección" name="bill_to_direccion" wire:model="bill_to_direccion" placeholder="Ingrese dirección" />
-                <x-form-input label="Código postal" name="bill_to_codigo_postal" wire:model="bill_to_codigo_postal" placeholder="Ingrese código postal" />
-                <x-form-select label="País" name="bill_to_pais" wire:model="bill_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-select label="Estado" name="bill_to_estado" wire:model="bill_to_estado" :options="$estadoArray" />
-                <x-form-input label="Teléfono" name="bill_to_telefono" wire:model="bill_to_telefono" placeholder="Ingrese teléfono" />
+                <x-form-input label="Nombre" name="bill_to_nombre" wireModel="bill_to_nombre" placeholder="Ingrese nombre" />
+                <x-form-input label="Dirección" name="bill_to_direccion" wireModel="bill_to_direccion" placeholder="Ingrese dirección" />
+                <x-form-select label="País" name="bill_to_pais" wireModel="bill_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
+                <x-form-input label="Teléfono" name="bill_to_telefono" wireModel="bill_to_telefono" placeholder="Ingrese teléfono" />
             </div>
         </div>
 
         <div class="w-full max-w-[1254px] space-y-6">
-            <h3 class="text-xl">Totales</h3>
+            <h3 class="text-xl">Costos</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Total neto" type="number" step="0.01" name="net_total" wire:model="net_total" placeholder="0.00" />
-                <x-form-input label="Costo adicional" type="number" step="0.01" name="additional_cost" wire:model="additional_cost" placeholder="0.00" />
-                <x-form-input label="Total" type="number" step="0.01" name="total" wire:model="total" placeholder="0.00" />
-                <x-form-input label="Costo de seguro" type="number" step="0.01" name="insurance_cost" wire:model="insurance_cost" placeholder="0.00" />
+                <x-form-input label="Total neto" type="number" step="0.01" name="net_total" wireModel="net_total" placeholder="0.00" />
+                <x-form-input label="Costo adicional" type="number" step="0.01" name="additional_cost" wireModel="additional_cost" placeholder="0.00" />
+                <x-form-input label="Total" type="number" step="0.01" name="total" wireModel="total" placeholder="0.00" />
+                <x-form-input label="Costo de seguro" type="number" step="0.01" name="insurance_cost" wireModel="insurance_cost" placeholder="0.00" />
             </div>
         </div>
 
@@ -112,10 +106,13 @@
             <h3 class="text-xl">Dimensiones</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Alto (cm)" type="number" step="0.01" name="height_cm" wire:model="height_cm" placeholder="0.00" />
-                <x-form-input label="Ancho (cm)" type="number" step="0.01" name="width_cm" wire:model="width_cm" placeholder="0.00" />
-                <x-form-input label="Largo (cm)" type="number" step="0.01" name="length_cm" wire:model="length_cm" placeholder="0.00" />
-                <x-form-input label="Volumen (m³)" type="number" step="0.001" name="volume_m3" wire:model="volume_m3" placeholder="0.000" />
+                <x-form-input label="Largo (in)" type="number" step="0.01" name="largo" wireModel="largo" placeholder="0.00" />
+                <x-form-input label="Ancho (in)" type="number" step="0.01" name="ancho" wireModel="ancho" placeholder="0.00" />
+                <x-form-input label="Alto (in)" type="number" step="0.01" name="alto" wireModel="alto" placeholder="0.00" />
+                <x-form-input label="Volumen (ft³)" type="number" step="0.001" name="volumen" wireModel="volumen" placeholder="0.000" />
+                <x-form-input label="Pallets" type="number" name="pallets" wireModel="pallets" placeholder="0" step="1" min="0" />
+                <x-form-input label="Peso (kg)" type="number" step="0.01" name="peso_kg" wireModel="peso_kg" placeholder="0.00" />
+                <x-form-input label="Peso (lb)" type="number" step="0.01" name="peso_lb" wireModel="peso_lb" placeholder="0.00" min="0" />
             </div>
         </div>
 
@@ -123,15 +120,17 @@
             <h3 class="text-xl">Fechas</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Fecha de entrega solicitada" type="datetime-local" name="requested_delivery_date" wire:model="requested_delivery_date" />
-                <x-form-input label="Fecha estimada de recogida" type="datetime-local" name="estimated_pickup_date" wire:model="estimated_pickup_date" />
-                <x-form-input label="Fecha real de recogida" type="datetime-local" name="actual_pickup_date" wire:model="actual_pickup_date" />
-                <x-form-input label="Llegada estimada al hub" type="datetime-local" name="estimated_hub_arrival" wire:model="estimated_hub_arrival" />
-                <x-form-input label="Llegada real al hub" type="datetime-local" name="actual_hub_arrival" wire:model="actual_hub_arrival" />
-                <x-form-input label="ETD (Fecha estimada de salida)" type="datetime-local" name="etd_date" wire:model="etd_date" />
-                <x-form-input label="ATD (Fecha real de salida)" type="datetime-local" name="atd_date" wire:model="atd_date" />
-                <x-form-input label="ETA (Fecha estimada de llegada)" type="datetime-local" name="eta_date" wire:model="eta_date" />
-                <x-form-input label="ATA (Fecha real de llegada)" type="datetime-local" name="ata_date" wire:model="ata_date" />
+                <x-form-input label="Fecha requerida en destino" type="date" name="date_required_in_destination" wireModel="date_required_in_destination" />
+                <x-form-input label="Fecha pickup planificada" type="date" name="date_planned_pickup" wireModel="date_planned_pickup" />
+                <x-form-input label="Fecha pickup real" type="date" name="date_actual_pickup" wireModel="date_actual_pickup" />
+                <x-form-input label="Fecha estimada de llegada al hub" type="date" name="date_estimated_hub_arrival" wireModel="date_estimated_hub_arrival" />
+                <x-form-input label="Fecha de llegada real al hub" type="date" name="date_actual_hub_arrival" wireModel="date_actual_hub_arrival" />
+                <x-form-input label="Fecha ETD (Fecha estimada de salida)" type="date" name="date_etd" wireModel="date_etd" />
+                <x-form-input label="Fecha ATD (Fecha real de salida)" type="date" name="date_atd" wireModel="date_atd" />
+                <x-form-input label="Fecha ETA (Fecha estimada de llegada)" type="date" name="date_eta" wireModel="date_eta" />
+                <x-form-input label="Fecha ATA (Fecha real de llegada)" type="date" name="date_ata" wireModel="date_ata" />
+                <x-form-input label="Fecha de consolidado" type="date" name="date_consolidation" wireModel="date_consolidation" />
+                <x-form-input label="Fecha de release" type="date" name="release_date" wireModel="release_date" />
             </div>
         </div>
 
@@ -296,3 +295,109 @@
         </div>
     </x-form>
 </div>
+
+<script>
+    // Ejecutar cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para encontrar un campo por su nombre
+        function findField(name) {
+            return document.querySelector(`input[name="${name}"]`);
+        }
+
+        // Obtener referencias a los campos
+        const lengthField = findField('largo');
+        const widthField = findField('ancho');
+        const heightField = findField('alto');
+        const volumeField = findField('volumen');
+        const weightKgField = findField('peso_kg');
+        const weightLbField = findField('peso_lb');
+
+        console.log('Campos encontrados:', {
+            length: lengthField,
+            width: widthField,
+            height: heightField,
+            volume: volumeField,
+            weightKg: weightKgField,
+            weightLb: weightLbField
+        });
+
+        // Función para calcular el volumen
+        function calculateVolume() {
+            console.log('Calculando volumen');
+            const length = parseFloat(lengthField.value) || 0;
+            const width = parseFloat(widthField.value) || 0;
+            const height = parseFloat(heightField.value) || 0;
+
+            if (length && width && height) {
+                const volume = (length * width * height) / 1728;
+                volumeField.value = volume.toFixed(3);
+
+                // Disparar evento de cambio para que Livewire detecte el cambio
+                volumeField.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('Volumen calculado:', volume.toFixed(3));
+            }
+        }
+
+        // Función para convertir kg a lb
+        function convertKgToLb() {
+            console.log('Convirtiendo kg a lb');
+            const kg = parseFloat(weightKgField.value) || 0;
+
+            if (kg) {
+                const lb = kg * 2.20462;
+                weightLbField.value = lb.toFixed(2);
+
+                // Disparar evento de cambio para que Livewire detecte el cambio
+                weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('Peso convertido a lb:', lb.toFixed(2));
+            }
+        }
+
+        // Función para convertir lb a kg
+        function convertLbToKg() {
+            console.log('Convirtiendo lb a kg');
+            const lb = parseFloat(weightLbField.value) || 0;
+
+            if (lb) {
+                const kg = lb * 0.453592;
+                weightKgField.value = kg.toFixed(2);
+
+                // Disparar evento de cambio para que Livewire detecte el cambio
+                weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('Peso convertido a kg:', kg.toFixed(2));
+            }
+        }
+
+        // Agregar event listeners
+        if (lengthField) {
+            lengthField.addEventListener('input', calculateVolume);
+            console.log('Event listener agregado a length');
+        }
+
+        if (widthField) {
+            widthField.addEventListener('input', calculateVolume);
+            console.log('Event listener agregado a width');
+        }
+
+        if (heightField) {
+            heightField.addEventListener('input', calculateVolume);
+            console.log('Event listener agregado a height');
+        }
+
+        if (weightKgField) {
+            weightKgField.addEventListener('input', convertKgToLb);
+            console.log('Event listener agregado a weightKg');
+        }
+
+        if (weightLbField) {
+            weightLbField.addEventListener('input', convertLbToKg);
+            console.log('Event listener agregado a weightLb');
+        }
+
+        // Calcular valores iniciales si ya hay datos
+        calculateVolume();
+        convertKgToLb();
+
+        console.log('Script de cálculo inicializado');
+    });
+</script>

@@ -25,27 +25,34 @@ Route::view('products/create', 'products.create')
     ->middleware(['auth'])
     ->name('products.create');
 
-// Rutas para órdenes de compra
+// Rutas para documentación de envío
 Route::middleware(['auth'])->group(function () {
-    // Listar órdenes de compra
+    // Vista principal de documentación de envío
+    Route::view('shipping-documentation', 'shipping-documentation.index')
+        ->name('shipping-documentation.index');
+
+    // Rutas para órdenes de compra (si no existen ya)
     Route::view('purchase-orders', 'purchase-orders.index')
         ->name('purchase-orders.index');
 
-    // Listar tableros Kanban
-    Route::get('purchase-orders/kanban-boards', \App\Livewire\Kanban\KanbanBoardList::class)
-        ->name('purchase-orders.kanban-boards');
-
-    // Kanban de órdenes de compra
-    Route::get('purchase-orders/kanban/{boardId?}', \App\Livewire\Kanban\KanbanBoard::class)
-        ->name('purchase-orders.kanban');
+    Route::view('new-purchase-order', 'new-purchase-order')
+        ->name('new-purchase-order');
 
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
         ->name('purchase-orders.show');
 
-    // Editar una orden de compra (redirige al formulario de edición)
+    // Editar una orden de compra
     Route::view('purchase-orders/{id}/edit', 'purchase-orders.edit')
         ->name('purchase-orders.edit');
+
+    // Kanban de órdenes de compra (si lo necesitas)
+    Route::get('purchase-orders/kanban/{boardId?}', \App\Livewire\Kanban\KanbanBoard::class)
+        ->name('purchase-orders.kanban');
+
+    // Listar tableros Kanban (si lo necesitas)
+    Route::get('purchase-orders/kanban-boards', \App\Livewire\Kanban\KanbanBoardList::class)
+        ->name('purchase-orders.kanban-boards');
 });
 
 // Rutas para configuraciones

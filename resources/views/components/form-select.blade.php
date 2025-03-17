@@ -4,6 +4,7 @@
     'options' => [],
     'optionPlaceholder' => 'Elija opción',
     'selectClasses' => 'rounded-[0.5rem] border border-[#D1D5DB] px-3 py-2 text-[0.875rem] text-[#6B7280]',
+    'wireModel' => '',
 ])
 
 <div class="flex flex-col gap-2">
@@ -12,7 +13,7 @@
             {{ $label }}
         </label>
     @endif
-    <select id="{{ $name }}" name="{{ $name }}" class="{{ $selectClasses }}">
+    <select id="{{ $name }}" name="{{ $name }}" class="{{ $selectClasses }}" @if($wireModel) wire:model="{{ $wireModel }}" @endif {{ $attributes }}>
         <option value="">{{ $optionPlaceholder }}</option>
         @foreach ($options as $key => $option)
             <option value="{{ $key }}">{{ $option }}</option>

@@ -10,8 +10,8 @@ class CreatePucharseOrder extends Component
     // Arrays para selects
     public $modalidadArray = ["op1" => "Modalidad 1", "op2" => "Modalidad 2"];
     public $hubArray = ["1" => "Hub 1", "2" => "Hub 2"];
-    public $paisArray = ["mx" => "México", "us" => "Estados Unidos"];
-    public $estadoArray = ["cdmx" => "CDMX", "ny" => "New York"];
+    public $paisArray = ["cr" => "Costa Rica", "us" => "Estados Unidos"];
+    public $estadoArray = ["cr" => "San José", "us" => "Miami"];
     public $tiposIncotermArray = [
         "CIF" => "CIF",
         "CIP" => "CIP",
@@ -40,23 +40,19 @@ class CreatePucharseOrder extends Component
     // Vendor information
     public $vendor_id;
     public $vendor_direccion;
-    public $vendor_codigo_postal;
     public $vendor_pais;
-    public $vendor_estado;
     public $vendor_telefono;
 
     // Ship to information
+    public $ship_to_nombre;
     public $ship_to_direccion;
-    public $ship_to_codigo_postal;
     public $ship_to_pais;
-    public $ship_to_estado;
     public $ship_to_telefono;
 
     // Bill to information
+    public $bill_to_nombre;
     public $bill_to_direccion;
-    public $bill_to_codigo_postal;
     public $bill_to_pais;
-    public $bill_to_estado;
     public $bill_to_telefono;
 
     // Order details
@@ -73,21 +69,25 @@ class CreatePucharseOrder extends Component
     public $total = 0;
 
     // Dimensiones
-    public $height_cm;
-    public $width_cm;
-    public $length_cm;
-    public $volume_m3;
+    public $largo;
+    public $ancho;
+    public $alto;
+    public $volumen;
+    public $peso_kg;
+    public $peso_lb;
 
     // Fechas
-    public $requested_delivery_date;
-    public $estimated_pickup_date;
-    public $actual_pickup_date;
-    public $estimated_hub_arrival;
-    public $actual_hub_arrival;
-    public $etd_date; // Estimated Time of Departure
-    public $atd_date; // Actual Time of Departure
-    public $eta_date; // Estimated Time of Arrival
-    public $ata_date; // Actual Time of Arrival
+    public $date_required_in_destination;
+    public $date_planned_pickup;
+    public $date_actual_pickup;
+    public $date_estimated_hub_arrival;
+    public $date_actual_hub_arrival;
+    public $date_etd;
+    public $date_atd;
+    public $date_eta;
+    public $date_ata;
+    public $date_consolidation;
+    public $release_date;
 
     // Costos
     public $insurance_cost = 0;
@@ -231,23 +231,19 @@ class CreatePucharseOrder extends Component
             // Vendor information
             'vendor_id' => $this->vendor_id,
             'vendor_direccion' => $this->vendor_direccion,
-            'vendor_codigo_postal' => $this->vendor_codigo_postal,
             'vendor_pais' => $this->vendor_pais,
-            'vendor_estado' => $this->vendor_estado,
             'vendor_telefono' => $this->vendor_telefono,
 
             // Ship to information
+            'ship_to_nombre' => $this->ship_to_nombre,
             'ship_to_direccion' => $this->ship_to_direccion,
-            'ship_to_codigo_postal' => $this->ship_to_codigo_postal,
             'ship_to_pais' => $this->ship_to_pais,
-            'ship_to_estado' => $this->ship_to_estado,
             'ship_to_telefono' => $this->ship_to_telefono,
 
             // Bill to information
+            'bill_to_nombre' => $this->bill_to_nombre,
             'bill_to_direccion' => $this->bill_to_direccion,
-            'bill_to_codigo_postal' => $this->bill_to_codigo_postal,
             'bill_to_pais' => $this->bill_to_pais,
-            'bill_to_estado' => $this->bill_to_estado,
             'bill_to_telefono' => $this->bill_to_telefono,
 
             // Order details
@@ -264,21 +260,25 @@ class CreatePucharseOrder extends Component
             'total' => $this->total,
 
             // Dimensiones
-            'height_cm' => $this->height_cm,
-            'width_cm' => $this->width_cm,
-            'length_cm' => $this->length_cm,
-            'volume_m3' => $this->volume_m3,
+            'height' => $this->alto,
+            'width' => $this->ancho,
+            'length' => $this->largo,
+            'volume' => $this->volumen,
+            'weight_kg' => $this->peso_kg,
+            'weight_lb' => $this->peso_lb,
 
             // Fechas
-            'requested_delivery_date' => $this->requested_delivery_date,
-            'estimated_pickup_date' => $this->estimated_pickup_date,
-            'actual_pickup_date' => $this->actual_pickup_date,
-            'estimated_hub_arrival' => $this->estimated_hub_arrival,
-            'actual_hub_arrival' => $this->actual_hub_arrival,
-            'etd_date' => $this->etd_date,
-            'atd_date' => $this->atd_date,
-            'eta_date' => $this->eta_date,
-            'ata_date' => $this->ata_date,
+            'date_required_in_destination' => $this->date_required_in_destination,
+            'date_planned_pickup' => $this->date_planned_pickup,
+            'date_actual_pickup' => $this->date_actual_pickup,
+            'date_estimated_hub_arrival' => $this->date_estimated_hub_arrival,
+            'date_actual_hub_arrival' => $this->date_actual_hub_arrival,
+            'date_etd' => $this->date_etd,
+            'date_atd' => $this->date_atd,
+            'date_eta' => $this->date_eta,
+            'date_ata' => $this->date_ata,
+            'date_consolidation' => $this->date_consolidation,
+            'release_date' => $this->release_date,
 
             // Costos
             'insurance_cost' => $this->insurance_cost,
@@ -299,5 +299,23 @@ class CreatePucharseOrder extends Component
 
     public function render() {
         return view('livewire.forms.create-pucharse-order');
+    }
+
+    // Métodos para actualizar los cálculos
+    public function updated($propertyName)
+    {
+        // Cuando se actualiza cualquier dimensión, recalcular el volumen
+        if (in_array($propertyName, ['largo', 'ancho', 'alto'])) {
+            if (is_numeric($this->largo) && is_numeric($this->ancho) && is_numeric($this->alto)) {
+                // Convertir pulgadas cúbicas a pies cúbicos (dividir por 1728)
+                $this->volumen = round(($this->largo * $this->ancho * $this->alto) / 1728, 3);
+            }
+        }
+
+        // Cuando se actualiza el peso en kg, convertir a lb
+        if ($propertyName === 'peso_kg' && is_numeric($this->peso_kg)) {
+            // 1 kg = 2.20462 libras
+            $this->peso_lb = round($this->peso_kg * 2.20462, 2);
+        }
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Blade;
+use Livewire\Livewire;
+use App\Livewire\Tables\PurchaseOrdersTable;
+use App\Livewire\Ui\PurchaseOrderCard;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
-        Blade::component('layouts.settings', 'settings-layout');
+        Livewire::component('tables.purchase-orders-table', PurchaseOrdersTable::class);
+        Livewire::component('ui.purchase-order-card', PurchaseOrderCard::class);
     }
 }

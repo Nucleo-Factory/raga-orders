@@ -59,21 +59,25 @@ return new class extends Migration
 
 
             // Dimensiones
-            $table->decimal('height_cm', 8, 2)->nullable();
-            $table->decimal('width_cm', 8, 2)->nullable();
-            $table->decimal('length_cm', 8, 2)->nullable();
-            $table->decimal('volume_m3', 10, 3)->nullable();
+            $table->decimal('length', 8, 2)->nullable();
+            $table->decimal('width', 8, 2)->nullable();
+            $table->decimal('height', 8, 2)->nullable();
+            $table->decimal('volume', 10, 3)->nullable();
+            $table->decimal('weight_kg', 8, 2)->nullable();
+            $table->decimal('weight_lb', 8, 2)->nullable();
 
             // Fechas
-            $table->datetime('requested_delivery_date')->nullable();
-            $table->datetime('estimated_pickup_date')->nullable();
-            $table->datetime('actual_pickup_date')->nullable();
-            $table->datetime('estimated_hub_arrival')->nullable();
-            $table->datetime('actual_hub_arrival')->nullable();
-            $table->datetime('etd_date')->nullable(); // Estimated Time of Departure
-            $table->datetime('atd_date')->nullable(); // Actual Time of Departure
-            $table->datetime('eta_date')->nullable(); // Estimated Time of Arrival
-            $table->datetime('ata_date')->nullable(); // Actual Time of Arrival
+            $table->datetime('date_required_in_destination')->nullable();
+            $table->datetime('date_planned_pickup')->nullable();
+            $table->datetime('date_actual_pickup')->nullable();
+            $table->datetime('date_estimated_hub_arrival')->nullable();
+            $table->datetime('date_actual_hub_arrival')->nullable();
+            $table->datetime('date_etd')->nullable();
+            $table->datetime('date_atd')->nullable();
+            $table->datetime('date_eta')->nullable();
+            $table->datetime('date_ata')->nullable();
+            $table->datetime('date_consolidation')->nullable();
+            $table->datetime('release_date')->nullable();
 
             // Costos
             $table->decimal('insurance_cost', 10, 2)->nullable();
