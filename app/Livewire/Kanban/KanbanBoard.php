@@ -7,6 +7,7 @@ use App\Models\KanbanStatus;
 use App\Models\PurchaseOrder;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 class KanbanBoard extends Component {
     public $boardId;
@@ -14,14 +15,27 @@ class KanbanBoard extends Component {
     public $columns = [];
     public $tasks = [];
     public $tasksByColumn = [];
+    public $boardType;
 
     public function mount($boardId = null) {
-        // Si no se proporciona un ID de tablero, intentamos obtener el tablero predeterminado
+        // Determinar el tipo de tablero según la ruta actual
+        $currentRoute = Route::currentRouteName();
+
+        if ($currentRoute === 'dashboard') {
+            $this->boardType = 'po_stages'; // Etapas PO
+        } elseif ($currentRoute === 'shipping-documentation.index') {
+            $this->boardType = 'shipping_documentation'; // Documentación de embarque
+        } else {
+            // Si no es ninguna de las rutas específicas, usar el tipo por defecto
+            $this->boardType = 'purchase_orders';
+        }
+
+        // Si no se proporciona un ID de tablero, intentamos obtener el tablero según el tipo
         if (!$boardId) {
-            // Obtener el tablero predeterminado para la compañía del usuario actual
+            // Obtener el tablero para la compañía del usuario actual según el tipo
             $companyId = auth()->user()->company_id ?? null;
             $this->board = KanbanBoardModel::where('company_id', $companyId)
-                ->where('type', 'purchase_orders')
+                ->where('type', $this->boardType)
                 ->where('is_active', true)
                 ->first();
 
@@ -31,6 +45,7 @@ class KanbanBoard extends Component {
         } else {
             $this->boardId = $boardId;
             $this->board = KanbanBoardModel::findOrFail($boardId);
+            $this->boardType = $this->board->type;
         }
 
         $this->loadData();
@@ -151,7 +166,8 @@ class KanbanBoard extends Component {
     public function render()
     {
         return view('livewire.kanban.kanban-board', [
-            'tasksByColumn' => $this->tasksByColumn
+            'tasksByColumn' => $this->tasksByColumn,
+            'boardType' => $this->boardType
         ])->layout('layouts.app');
     }
 }

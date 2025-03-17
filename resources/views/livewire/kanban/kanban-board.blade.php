@@ -1,5 +1,5 @@
 <div>
-    <div class="flex w-full p-4 space-x-4 overflow-x-auto" wire:poll.10s >
+    <div class="flex w-full p-4 space-x-4" wire:poll.10s >
         @if(!$board)
             <div class="p-6 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>

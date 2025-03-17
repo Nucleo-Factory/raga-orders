@@ -31,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
     Route::view('shipping-documentation', 'shipping-documentation.index')
         ->name('shipping-documentation.index');
 
+    Route::view('shipping-documentation/create', 'shipping-documentation.create')
+        ->name('shipping-documentation.create');
+
     // Rutas para órdenes de compra (si no existen ya)
     Route::view('purchase-orders', 'purchase-orders.index')
         ->name('purchase-orders.index');
