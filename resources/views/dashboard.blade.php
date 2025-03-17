@@ -84,7 +84,7 @@
     <x-modal-success title="Operación exitosa"
         content="La operación se encuentra pendiente de aprobación por parte de su supervisor" maxWidth="xs" />
 
-    <div class="flex max-h-[587px] w-full gap-x-10 overflow-auto">
+    <div class="flex w-full overflow-auto gap-x-10">
         <livewire:kanban.kanban-board />
     </div>
 </x-app-layout>

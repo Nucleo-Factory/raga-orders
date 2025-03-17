@@ -68,7 +68,6 @@
             display: flex;
             overflow-x: auto;
             padding-bottom: 1rem;
-            margin: 0 -0.5rem;
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             scrollbar-width: thin;

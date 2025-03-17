@@ -103,6 +103,33 @@ class CreatePucharseOrder extends Component
     {
         // Inicializar el array de productos vacío
         $this->orderProducts = [];
+
+        // Generar un número de orden único
+        $this->generateUniqueOrderNumber();
+    }
+
+    /**
+     * Genera un número de orden único
+     */
+    public function generateUniqueOrderNumber()
+    {
+        // Formato: PO-YYYYMMDD-XXXX donde XXXX es un número secuencial
+        $prefix = 'PO-' . date('Ymd') . '-';
+
+        // Obtener el último número de orden con este prefijo
+        $lastOrder = \App\Models\PurchaseOrder::where('order_number', 'like', $prefix . '%')
+            ->orderBy('order_number', 'desc')
+            ->first();
+
+        if ($lastOrder) {
+            // Extraer el número secuencial y aumentarlo en 1
+            $lastNumber = substr($lastOrder->order_number, strlen($prefix));
+            $newNumber = intval($lastNumber) + 1;
+            $this->order_number = $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        } else {
+            // Si no hay órdenes previas con este prefijo, empezar con 0001
+            $this->order_number = $prefix . '0001';
+        }
     }
 
     public function searchProducts()
@@ -208,42 +235,59 @@ class CreatePucharseOrder extends Component
     public function createPurchaseOrder() {
         // Validar los datos
         $validated = $this->validate([
-            'order_number' => 'required|string|max:255',
+            'order_number' => 'required|string|max:255|unique:purchase_orders,order_number',
         ]);
 
         // Obtener el tablero Kanban predeterminado para la compañía del usuario
         $companyId = auth()->user()->company_id ?? 1;
         $kanbanBoard = \App\Models\KanbanBoard::where('company_id', $companyId)
-            ->where('type', 'purchase_orders')
+            ->where('type', 'po_stages')
             ->where('is_active', true)
             ->first();
 
-        // Obtener el estado por defecto del tablero Kanban
-        $defaultKanbanStatus = $kanbanBoard ? $kanbanBoard->defaultStatus() : null;
+        // Buscar específicamente el estado "Recepción" en el tablero Kanban
+        $recepcionStatus = null;
+        if ($kanbanBoard) {
+            $recepcionStatus = $kanbanBoard->statuses()
+                ->where('name', 'Recepción')
+                ->first();
+
+            // Si no se encuentra "Recepción", usar el estado por defecto como respaldo
+            if (!$recepcionStatus) {
+                $recepcionStatus = $kanbanBoard->defaultStatus();
+            }
+        }
 
         $purchaseOrder = \App\Models\PurchaseOrder::create([
             'company_id' => $companyId,
             'order_number' => $this->order_number,
             'status' => 'draft',
-            'kanban_status_id' => $defaultKanbanStatus ? $defaultKanbanStatus->id : null,
+            'kanban_status_id' => $recepcionStatus ? $recepcionStatus->id : null,
             'notes' => $this->notes,
+            'total_amount' => $this->total, // Asegurar que total_amount se llene
 
             // Vendor information
             'vendor_id' => $this->vendor_id,
             'vendor_direccion' => $this->vendor_direccion,
+            'vendor_codigo_postal' => null, // Agregar campo faltante
             'vendor_pais' => $this->vendor_pais,
+            'vendor_estado' => null, // Agregar campo faltante
             'vendor_telefono' => $this->vendor_telefono,
 
             // Ship to information
-            'ship_to_nombre' => $this->ship_to_nombre,
+            'ship_to_nombre' => $this->ship_to_nombre, // Este campo no existe en la migración
             'ship_to_direccion' => $this->ship_to_direccion,
+            'ship_to_codigo_postal' => null, // Agregar campo faltante
             'ship_to_pais' => $this->ship_to_pais,
+            'ship_to_estado' => null, // Agregar campo faltante
             'ship_to_telefono' => $this->ship_to_telefono,
 
             // Bill to information
-            'bill_to_nombre' => $this->bill_to_nombre,
+            'bill_to_nombre' => $this->bill_to_nombre, // Este campo no existe en la migración
             'bill_to_direccion' => $this->bill_to_direccion,
+            'bill_to_codigo_postal' => null, // Agregar campo faltante
             'bill_to_pais' => $this->bill_to_pais,
+            'bill_to_estado' => null, // Agregar campo faltante
             'bill_to_telefono' => $this->bill_to_telefono,
 
             // Order details
@@ -260,10 +304,10 @@ class CreatePucharseOrder extends Component
             'total' => $this->total,
 
             // Dimensiones
-            'height' => $this->alto,
-            'width' => $this->ancho,
-            'length' => $this->largo,
-            'volume' => $this->volumen,
+            'length' => $this->largo, // Corregir nombre del campo
+            'width' => $this->ancho, // Corregir nombre del campo
+            'height' => $this->alto, // Corregir nombre del campo
+            'volume' => $this->volumen, // Corregir nombre del campo
             'weight_kg' => $this->peso_kg,
             'weight_lb' => $this->peso_lb,
 
@@ -282,6 +326,14 @@ class CreatePucharseOrder extends Component
 
             // Costos
             'insurance_cost' => $this->insurance_cost,
+            'ground_transport_cost_1' => null, // Agregar campos faltantes
+            'ground_transport_cost_2' => null,
+            'estimated_pallet_cost' => null,
+            'other_costs' => null,
+            'other_expenses' => null,
+
+            // Comentarios
+            'comments' => null,
         ]);
 
         // Guardar los productos asociados a la orden de compra
@@ -294,7 +346,7 @@ class CreatePucharseOrder extends Component
 
         // Redireccionar o mostrar mensaje de éxito
         session()->flash('message', 'Orden de compra creada con éxito.');
-        return redirect()->route('purchase-orders.index');
+        return redirect()->route('dashboard');
     }
 
     public function render() {
