@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('shipping_document_id')->constrained()->onDelete('cascade');
 
             // Ensure each purchase order can only be in a shipping document once
-            $table->unique(['purchase_order_id', 'shipping_document_id']);
+            $table->unique(['purchase_order_id', 'shipping_document_id'], 'po_sd_unique');
 
             // Additional columns if needed
             $table->text('notes')->nullable();
