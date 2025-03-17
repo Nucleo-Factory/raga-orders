@@ -43,7 +43,7 @@
     </div>
 
     <nav class="flex w-full flex-col items-center space-y-2 p-6 text-[#898989]">
-        <a href="#" class="profile-container mb-10 flex items-center overflow-hidden">
+        <a href="#" class="flex items-center mb-10 overflow-hidden profile-container">
             <div class="avatar-container h-[2.625rem] w-[2.625rem] overflow-hidden rounded-full bg-gray-400">
                 <img class="avatar" src="{{ asset('img/person1.png') }}" alt="Avatar">
             </div>
@@ -60,7 +60,7 @@
             <li>
                 <x-sidebar-link href="{{ route('dashboard') }}"
                     class="{{ request()->routeIs('dashboard') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex h-5 w-5 items-center justify-center">
+                    <div class="flex items-center justify-center w-5 h-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 17"
                             fill="none">
                             <path
@@ -78,9 +78,9 @@
             </li>
 
             <li>
-                <x-sidebar-link href="{{ route('purchase-orders.kanban-boards') }}"
-                    class="{{ request()->routeIs('purchase-orders.kanban-boards') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex h-5 w-5 items-center justify-center">
+                <x-sidebar-link href="{{ route('purchase-orders.index') }}"
+                    class="{{ request()->routeIs('purchase-orders.index') ? 'bg-[#E0E5FF]' : '' }}">
+                    <div class="flex items-center justify-center w-5 h-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 16 20"
                             fill="none">
                             <path
@@ -99,30 +99,30 @@
                     </div>
 
                     <div
-                        class="link-text {{ request()->routeIs('purchase-orders.kanban-boards') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
-                        <span>Operaciones</span>
+                        class="link-text {{ request()->routeIs('purchase-orders.index') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
+                        <span>Ordenes de compra</span>
                     </div>
                 </x-sidebar-link>
             </li>
 
             <li>
-                <x-sidebar-link href="{{ route('products.create') }}"
-                    class="{{ request()->routeIs('products.create') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex h-5 w-5 items-center justify-center">
+                <x-sidebar-link href="{{ route('shipping-documentation.index') }}"
+                    class="{{ request()->routeIs('shipping-documentation.index') ? 'bg-[#E0E5FF]' : '' }}">
+                    <div class="flex items-center justify-center w-5 h-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" viewBox="0 0 18 20"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M8.99843 0.83252C7.43357 0.83252 5.94449 1.49597 4.85467 2.65839C3.76732 3.81822 3.1651 5.3808 3.1651 6.99919C3.1651 9.99624 2.56384 11.8633 2.00648 12.9532C1.727 13.4997 1.45489 13.8582 1.26601 14.0708C1.17136 14.1774 1.09701 14.248 1.05225 14.2878C1.02986 14.3077 1.01483 14.3199 1.00833 14.3251L1.00587 14.327C0.717296 14.5384 0.595507 14.911 0.704575 15.2526C0.814855 15.5981 1.13584 15.8325 1.49843 15.8325H16.4984C16.861 15.8325 17.182 15.5981 17.2923 15.2526C17.4014 14.911 17.2796 14.5384 16.991 14.327L16.9885 14.3251C16.982 14.3199 16.967 14.3077 16.9446 14.2878C16.8999 14.248 16.8255 14.1774 16.7309 14.0708C16.542 13.8582 16.2699 13.4997 15.9904 12.9532C15.433 11.8633 14.8318 9.99624 14.8318 6.99919C14.8318 5.3808 14.2296 3.81824 13.1422 2.6584C12.0526 1.49723 10.5627 0.83252 8.99843 0.83252ZM1.00587 14.327L1.00833 14.3251L1.00587 14.327ZM1.00833 14.3251L1.00511 14.3276L1.00833 14.3251ZM14.5065 13.712C14.5897 13.8748 14.6733 14.0258 14.7563 14.1659H3.24057C3.32352 14.0258 3.40716 13.8748 3.49038 13.712C4.18303 12.3576 4.83177 10.2246 4.83177 6.99919C4.83177 5.78925 5.28289 4.63848 6.07053 3.79832C6.85737 2.95907 7.91163 2.49919 8.99843 2.49919C10.0841 2.49919 11.1392 2.95965 11.9263 3.7983L13.2165 8.52504C13.383 10.9153 13.9295 12.5837 14.5065 13.712ZM13.2165 8.52504C13.1832 8.04605 13.1651 7.5376 13.1651 6.99919C13.1651 5.78937 12.7138 4.63844 11.9263 3.7983L13.2165 8.52504Z"
-                                class="{{ request()->routeIs('products.create') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->routeIs('shipping-documentation.index') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                             <path
                                 d="M8.27796 17.0817C8.04737 16.6834 7.53755 16.5474 7.13924 16.778C6.74094 17.0086 6.60498 17.5184 6.83557 17.9167C7.05512 18.2959 7.37051 18.6108 7.75013 18.8296C8.12975 19.0485 8.56024 19.1637 8.99843 19.1637C9.43662 19.1637 9.86712 19.0485 10.2467 18.8296C10.6264 18.6108 10.9417 18.2959 11.1613 17.9167C11.3919 17.5184 11.2559 17.0086 10.8576 16.778C10.4593 16.5474 9.9495 16.6834 9.7189 17.0817C9.64577 17.208 9.54071 17.3129 9.41426 17.3858C9.2878 17.4587 9.1444 17.4971 8.99843 17.4971C8.85246 17.4971 8.70906 17.4587 8.58261 17.3858C8.45615 17.3129 8.35109 17.208 8.27796 17.0817Z"
-                                class="{{ request()->routeIs('products.create') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->routeIs('shipping-documentation.index') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                         </svg>
                     </div>
 
                     <div
-                        class="link-text {{ request()->routeIs('products.create') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
-                        <span>Inicio</span>
+                        class="link-text {{ request()->routeIs('shipping-documentation.index') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
+                        <span>Documentos de embarques</span>
                     </div>
                 </x-sidebar-link>
             </li>
@@ -172,13 +172,13 @@
                 fill="none">
                 <path
                     d="M2.83325 0.666626C2.17021 0.666626 1.53433 0.930018 1.06548 1.39886C0.596644 1.8677 0.333252 2.50358 0.333252 3.16663V14.8333C0.333252 15.4963 0.596644 16.1322 1.06548 16.6011C1.53433 17.0699 2.17021 17.3333 2.83325 17.3333H11.1666C11.8296 17.3333 12.4655 17.0699 12.9344 16.6011C13.4032 16.1322 13.6666 15.4963 13.6666 14.8333V14C13.6666 13.5397 13.2935 13.1666 12.8333 13.1666C12.373 13.1666 11.9999 13.5397 11.9999 14V14.8333C11.9999 15.0543 11.9121 15.2663 11.7558 15.4225C11.5996 15.5788 11.3876 15.6666 11.1666 15.6666H2.83325C2.61224 15.6666 2.40028 15.5788 2.244 15.4225C2.08772 15.2663 1.99992 15.0543 1.99992 14.8333V3.16663C1.99992 2.94561 2.08772 2.73365 2.244 2.57737C2.40028 2.42109 2.61224 2.33329 2.83325 2.33329H11.1666C11.3876 2.33329 11.5996 2.42109 11.7558 2.57737C11.9121 2.73365 11.9999 2.94561 11.9999 3.16663V3.99996C11.9999 4.4602 12.373 4.83329 12.8333 4.83329C13.2935 4.83329 13.6666 4.4602 13.6666 3.99996V3.16663C13.6666 2.50358 13.4032 1.8677 12.9344 1.39886C12.4655 0.930018 11.8296 0.666626 11.1666 0.666626H2.83325Z"
-                    class="fill-white transition-colors duration-500 group-hover:fill-slate-300" />
+                    class="transition-colors duration-500 fill-white group-hover:fill-slate-300" />
                 <path
                     d="M10.9225 5.9107C10.5971 5.58527 10.0694 5.58527 9.744 5.9107C9.41856 6.23614 9.41856 6.76378 9.744 7.08921L10.8214 8.16663H6.99992C6.53968 8.16663 6.16658 8.53972 6.16658 8.99996C6.16658 9.4602 6.53968 9.83329 6.99992 9.83329H10.8214L9.744 10.9107C9.41856 11.2361 9.41856 11.7638 9.744 12.0892C10.0694 12.4147 10.5971 12.4147 10.9225 12.0892L13.4225 9.58921C13.7479 9.26378 13.7479 8.73614 13.4225 8.4107L10.9225 5.9107Z"
-                    class="fill-white transition-colors duration-500 group-hover:fill-slate-300" />
+                    class="transition-colors duration-500 fill-white group-hover:fill-slate-300" />
             </svg>
 
-            <div class="link-text font-sans text-lg font-extrabold group-hover:text-slate-300">
+            <div class="font-sans text-lg font-extrabold link-text group-hover:text-slate-300">
                 <span class="transition-colors duration-500">Cerrar sesión</span>
             </div>
         </button>

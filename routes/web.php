@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('shipping-documentation.create');
 
     // Rutas para órdenes de compra (si no existen ya)
-    Route::view('purchase-orders', 'purchase-orders.index')
+    Route::view('purchase-orders', 'purchase-orders.kanban')
         ->name('purchase-orders.index');
 
     Route::view('new-purchase-order', 'new-purchase-order')

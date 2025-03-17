@@ -21,7 +21,7 @@ class KanbanBoard extends Component {
         // Determinar el tipo de tablero según la ruta actual
         $currentRoute = Route::currentRouteName();
 
-        if ($currentRoute === 'dashboard') {
+        if ($currentRoute === 'purchase-orders.index') {
             $this->boardType = 'po_stages'; // Etapas PO
         } elseif ($currentRoute === 'shipping-documentation.index') {
             $this->boardType = 'shipping_documentation'; // Documentación de embarque

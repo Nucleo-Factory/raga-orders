@@ -4,43 +4,11 @@
 
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Documentación de embarque" subtitle="Gestiona todas las etapas de documentación de embarque" />
+        <x-view-title title="Etapas PO" subtitle="Gestiona todas las etapas de tus órdenes de compra" />
 
-        <a href="/shipping-documentation/create" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Crear nueva documentación
+        <a href="/new-purchase-order" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
+            Cargar nueva orden de compra
         </a>
-    </div>
-
-    <!-- Tabs for switching between views -->
-    <div x-data="{ activeTab: 'table' }" class="mb-6">
-        <div class="border-b border-gray-200">
-            <nav class="flex -mb-px space-x-8" aria-label="Tabs">
-                <button
-                    @click="activeTab = 'table'"
-                    :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'table', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'table' }"
-                    class="px-1 py-4 text-sm font-medium border-b-2 whitespace-nowrap"
-                >
-                    Vista Kanban
-                </button>
-                <button
-                    @click="activeTab = 'kanban'"
-                    :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'kanban', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'kanban' }"
-                    class="px-1 py-4 text-sm font-medium border-b-2 whitespace-nowrap"
-                >
-                    Vista de Tabla
-                </button>
-            </nav>
-        </div>
-
-        <!-- Table View -->
-        <div x-show="activeTab === 'table'" class="mt-4">
-            <livewire:shipping-documentation.shipping-documentation-kanban />
-        </div>
-
-        <!-- Kanban View -->
-        <div x-show="activeTab === 'kanban'" class="mt-4">
-            <livewire:shipping-documentation.shipping-documentation-table />
-        </div>
     </div>
 
     <div x-data="{ open: false }" class="relative">
@@ -115,4 +83,8 @@
 
     <x-modal-success title="Operación exitosa"
         content="La operación se encuentra pendiente de aprobación por parte de su supervisor" maxWidth="xs" />
+
+    <div class="flex w-full overflow-auto gap-x-10">
+        <livewire:kanban.kanban-board />
+    </div>
 </x-app-layout>

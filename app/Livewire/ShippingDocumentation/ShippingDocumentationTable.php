@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Livewire\ShippingDocumentation;
+
+use App\Models\ShippingDocument;
+use App\Models\PurchaseOrder;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class ShippingDocumentationTable extends Component
+{
+    use WithPagination;
+
+    protected $paginationTheme = 'tailwind';
+
+    public $search = '';
+    public $sortField = 'creation_date';
+    public $sortDirection = 'desc';
+    public $perPage = 10;
+    public $statusFilter = '';
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'sortField' => ['except' => 'creation_date'],
+        'sortDirection' => ['except' => 'desc'],
+        'statusFilter' => ['except' => ''],
+    ];
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+
+        $this->sortField = $field;
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Get the shipping documents query
+     */
+    private function getShippingDocumentsQuery()
+    {
+        $query = ShippingDocument::query()
+            ->with(['purchaseOrders', 'company'])
+            ->when($this->search, function ($query) {
+                $query->where('document_number', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('purchaseOrders', function ($query) {
+                        $query->where('order_number', 'like', '%' . $this->search . '%');
+                    });
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            });
+
+        // Handle sorting
+        if ($this->sortField === 'creation_date') {
+            $query->orderBy('creation_date', $this->sortDirection);
+        } elseif ($this->sortField === 'document_number') {
+            $query->orderBy('document_number', $this->sortDirection);
+        } elseif ($this->sortField === 'status') {
+            $query->orderBy('status', $this->sortDirection);
+        } elseif ($this->sortField === 'weight_kg') {
+            $query->orderBy('total_weight_kg', $this->sortDirection);
+        } else {
+            // Default sorting
+            $query->orderBy('creation_date', 'desc');
+        }
+
+        return $query;
+    }
+
+    public function render()
+    {
+        $shippingDocuments = $this->getShippingDocumentsQuery()->paginate($this->perPage);
+
+        // Group purchase orders by shipping document
+        $groupedPurchaseOrders = [];
+        foreach ($shippingDocuments as $document) {
+            $groupedPurchaseOrders[$document->id] = $document->purchaseOrders;
+        }
+
+        return view('livewire.shipping-documentation.shipping-documentation-table', [
+            'shippingDocuments' => $shippingDocuments,
+            'groupedPurchaseOrders' => $groupedPurchaseOrders
+        ]);
+    }
+}

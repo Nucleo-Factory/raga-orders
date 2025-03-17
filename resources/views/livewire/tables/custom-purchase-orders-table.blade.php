@@ -1,4 +1,16 @@
 <div>
+    @if (session()->has('message'))
+        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-4">
         <div class="flex items-center space-x-4">
             <div>
@@ -24,16 +36,41 @@
                     <option value="delivered">Entregada</option>
                 </select>
             </div>
+
+            <div>
+                <label for="consolidableFilter" class="sr-only">Filtrar por consolidable</label>
+                <select wire:model.live="consolidableFilter" id="consolidableFilter" class="block w-full border-gray-300 rounded-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <option value="">Todos</option>
+                    <option value="yes">Consolidables</option>
+                    <option value="no">No Consolidables</option>
+                </select>
+            </div>
         </div>
 
-        <div>
-            <label for="perPage" class="sr-only">Por página</label>
-            <select wire:model.live="perPage" id="perPage" class="block w-full border-gray-300 rounded-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option value="10">10 por página</option>
-                <option value="25">25 por página</option>
-                <option value="50">50 por página</option>
-                <option value="100">100 por página</option>
-            </select>
+        <div class="flex items-center space-x-4">
+            @if(count($selected) > 0)
+                <span class="text-sm font-medium text-gray-700">
+                    {{ count($selected) }} {{ count($selected) === 1 ? 'orden seleccionada' : 'órdenes seleccionadas' }}
+                </span>
+            @endif
+
+            <button
+                wire:click="createShippingDocument"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 @if(count($selected) === 0) opacity-50 cursor-not-allowed @endif"
+                @if(count($selected) === 0) disabled @endif
+            >
+                Crear Documento de Embarque
+            </button>
+
+            <div>
+                <label for="perPage" class="sr-only">Por página</label>
+                <select wire:model.live="perPage" id="perPage" class="block w-full border-gray-300 rounded-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <option value="10">10 por página</option>
+                    <option value="25">25 por página</option>
+                    <option value="50">50 por página</option>
+                    <option value="100">100 por página</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -41,6 +78,15 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                wire:model.live="selectAll"
+                                class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            >
+                        </div>
+                    </th>
                     <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_number')">
                             <span>Número de Orden</span>
@@ -111,6 +157,9 @@
                             @endif
                         </div>
                     </th>
+                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <span>Consolidable?</span>
+                    </th>
                     <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
                         Acciones
                     </th>
@@ -119,6 +168,14 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($purchaseOrders as $order)
                     <tr>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                wire:model.live="selected"
+                                value="{{ $order->id }}"
+                                class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            >
+                        </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                             {{ $order->order_number }}
                         </td>
@@ -142,6 +199,12 @@
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                             {{ $order->total ? number_format($order->total, 2) : 'N/A' }}
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
+                                {{ $order->isConsolidable() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $order->isConsolidable() ? 'Sí' : 'No' }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                             <a href="/purchase-orders/{{ $order->id }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                             <a href="/purchase-orders/{{ $order->id }}/edit" class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
@@ -149,7 +212,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-4 text-sm text-center text-gray-500">
                             No se encontraron órdenes de compra
                         </td>
                     </tr>

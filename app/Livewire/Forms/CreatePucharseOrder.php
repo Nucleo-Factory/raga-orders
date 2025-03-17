@@ -352,22 +352,4 @@ class CreatePucharseOrder extends Component
     public function render() {
         return view('livewire.forms.create-pucharse-order');
     }
-
-    // Métodos para actualizar los cálculos
-    public function updated($propertyName)
-    {
-        // Cuando se actualiza cualquier dimensión, recalcular el volumen
-        if (in_array($propertyName, ['largo', 'ancho', 'alto'])) {
-            if (is_numeric($this->largo) && is_numeric($this->ancho) && is_numeric($this->alto)) {
-                // Convertir pulgadas cúbicas a pies cúbicos (dividir por 1728)
-                $this->volumen = round(($this->largo * $this->ancho * $this->alto) / 1728, 3);
-            }
-        }
-
-        // Cuando se actualiza el peso en kg, convertir a lb
-        if ($propertyName === 'peso_kg' && is_numeric($this->peso_kg)) {
-            // 1 kg = 2.20462 libras
-            $this->peso_lb = round($this->peso_kg * 2.20462, 2);
-        }
-    }
 }

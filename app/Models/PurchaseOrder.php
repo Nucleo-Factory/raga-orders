@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class PurchaseOrder extends Model
 {
@@ -110,8 +111,8 @@ class PurchaseOrder extends Model
         'width' => 'decimal:2',
         'height' => 'decimal:2',
         'volume' => 'decimal:3',
-        'weight_kg' => 'decimal:2',
-        'weight_lb' => 'decimal:2',
+        'weight_kg' => 'integer',
+        'weight_lb' => 'integer',
         'insurance_cost' => 'decimal:2',
         'order_date' => 'date',
         'date_required_in_destination' => 'datetime',
@@ -142,6 +143,16 @@ class PurchaseOrder extends Model
     {
         return $this->belongsToMany(Product::class, 'purchase_order_product')
             ->withPivot('quantity', 'unit_price')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the shipping documents associated with this purchase order.
+     */
+    public function shippingDocuments(): BelongsToMany
+    {
+        return $this->belongsToMany(ShippingDocument::class, 'purchase_order_shipping_document')
+            ->withPivot('notes')
             ->withTimestamps();
     }
 
@@ -198,5 +209,51 @@ class PurchaseOrder extends Model
             return $this->moveToKanbanStatus($prevStatus);
         }
         return null;
+    }
+
+    /**
+     * Determine if the purchase order is consolidable based on weight.
+     *
+     * Rules:
+     * - 0 to 5000 kg: Not consolidable
+     * - 5001 to 15000 kg: Consolidable
+     * - 15001+ kg: Not consolidable
+     *
+     * @return bool
+     */
+    public function isConsolidable(): bool
+    {
+        $weight = $this->weight_kg ?? 0;
+        return $weight > 5000 && $weight <= 15000;
+    }
+
+    /**
+     * Get the total weight in kg.
+     *
+     * @return float
+     */
+    public function getTotalWeightAttribute(): float
+    {
+        return $this->weight_kg ?? 0;
+    }
+
+    /**
+     * Check if a collection of orders can be consolidated together.
+     *
+     * @param \Illuminate\Support\Collection $orders
+     * @return bool
+     */
+    public static function canBeConsolidatedTogether($orders)
+    {
+        // Check if all orders are consolidable individually
+        foreach ($orders as $order) {
+            if (!$order->isConsolidable()) {
+                return false;
+            }
+        }
+
+        // Check if the total weight of all orders is within the consolidable range
+        $totalWeight = $orders->sum('weight_kg');
+        return $totalWeight > 5000 && $totalWeight <= 15000;
     }
 }
