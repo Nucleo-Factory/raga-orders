@@ -8,8 +8,8 @@
     "totalWeight" => "10 Ton",
 ])
 
-<li class="flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs">
-    <div class="space-y-2">
+<li class="kanban-card flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs min-h-[180px]">
+    <div class="space-y-2 flex flex-col justify-between w-1/2">
         <div class="flex gap-4">
             <input type="checkbox" name="" id="">
 
@@ -29,7 +29,7 @@
         </p>
     </div>
 
-    <div>
+    <div class="flex flex-col justify-between w-1/2">
         <div class="mb-4 flex items-center justify-between gap-2 rounded-[0.375rem] bg-[#E9E9E9] p-2">
             <p>HUB: <span>{{ $hubLocation }}</span></p>
 
