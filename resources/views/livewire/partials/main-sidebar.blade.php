@@ -167,7 +167,7 @@
 
     <div class="flex items-center justify-center border-t border-[#D2D2D2] bg-[#f7f7f7] px-6 py-6">
         <button
-            class="logout-btn group flex items-center rounded-[0.375rem] bg-[#565AFF] px-3 py-[0.625rem] text-white transition-colors duration-500 hover:bg-[#7477ff]">
+            class="logout-btn group flex w-full items-center justify-center rounded-[0.375rem] bg-[#565AFF] px-3 py-[0.625rem] text-white transition-colors duration-500 hover:bg-[#7477ff]">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="18" viewBox="0 0 14 18"
                 fill="none">
                 <path
