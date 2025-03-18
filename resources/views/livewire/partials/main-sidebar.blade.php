@@ -1,5 +1,5 @@
 <sidebar
-    class="main-sidebar fixed left-0 top-0 z-10 grid h-full max-h-[1000px] grid-rows-[auto_1fr_auto] rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white font-inter text-[0.875rem] transition-none">
+    class="main-sidebar grid h-full max-h-[1000px] grid-rows-[auto_1fr_auto] rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white font-inter text-[0.875rem] transition-none">
     <div class="relative flex items-center justify-center border-b border-[#D2D2D2] bg-[#f7f7f7] px-6 py-6">
         <a href="/">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="32" viewBox="0 0 28 32" fill="none">
