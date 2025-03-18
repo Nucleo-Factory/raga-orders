@@ -19,14 +19,14 @@
         @livewireStyles
     </head>
 
-    <body class="bg-[#EDEDED] sm:flex">
+    <body class="bg-[#EDEDED] grid grid-cols-[auto,1fr]">
         <!-- Aqui debe ir el componente sidebar -->
         <livewire:partials.main-sidebar />
         <!-- Aqui debe ir el componente sidebar -->
 
         <!-- Static sidebar for desktop -->
 
-        <div class="h-full transition-all duration-500 pl-14 lg:pl-20 grow" :class="{ 'w-6rem': isCollapsed }">
+        <div class="h-full overflow-y-auto transition-all duration-500 grow" :class="{ 'w-6rem': isCollapsed }">
             <!-- Aqui debe ir el componente header -->
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
