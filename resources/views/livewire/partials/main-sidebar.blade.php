@@ -127,7 +127,8 @@
                 </x-sidebar-link>
             </li>
             <li>
-                <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}">
+                <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}"
+                    route="{{ route('settings.index') }}">
                     <x-slot:icon>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"
                             fill="none">
