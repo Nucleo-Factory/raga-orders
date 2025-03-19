@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Forms\ShowPucharseOrder;
+use App\Livewire\Forms\PucharseOrderDetail;
 use App\Livewire\Settings\Index;
 use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
@@ -44,6 +45,10 @@ Route::middleware(['auth'])->group(function () {
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
         ->name('purchase-orders.show');
+
+    // TODO: La ruta de arriba es lo mismo que esta (?)
+    Route::get('purchase-orders/{id}/detail', PucharseOrderDetail::class)
+        ->name('purchase-orders.detail');
 
     // Editar una orden de compra
     Route::view('purchase-orders/{id}/edit', 'purchase-orders.edit')
