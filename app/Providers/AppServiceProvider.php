@@ -26,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('ui.purchase-order-card', PurchaseOrderCard::class);
         Livewire::component('tables.vendors-table', \App\Livewire\Tables\VendorsTable::class);
         Livewire::component('forms.vendor-form', \App\Livewire\Forms\VendorForm::class);
+        Livewire::component('tables.ship-to-table', \App\Livewire\Tables\ShipToTable::class);
+        Livewire::component('forms.ship-to-form', \App\Livewire\Forms\ShipToForm::class);
     }
 }
