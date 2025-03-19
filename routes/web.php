@@ -42,11 +42,16 @@ Route::middleware(['auth'])->group(function () {
         ->name('shipping-documentation.create');
 
     // Rutas para órdenes de compra (si no existen ya)
-    Route::view('purchase-orders', 'purchase-orders.kanban')
+    Route::view('purchase-orders', 'purchase-orders.index')
         ->name('purchase-orders.index');
 
-    Route::view('new-purchase-order', 'new-purchase-order')
-        ->name('new-purchase-order');
+    // Formulario creación de órdenes de compra
+    Route::view('purchase-orders/create', 'purchase-orders.create')
+        ->name('purchase-orders.create');
+
+    // Seguimiento órdenes de compra
+    Route::view('purchase-orders/tracking', 'purchase-orders.kanban')
+        ->name('purchase-orders.tracking');
 
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
