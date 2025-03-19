@@ -5,7 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\PurchaseOrder;
 use Livewire\Component;
 
-class ShowPucharseOrder extends Component
+class PucharseOrderDetail extends Component
 {
     public $purchaseOrder;
     public $orderProducts = [];
@@ -70,7 +70,7 @@ class ShowPucharseOrder extends Component
 
     public function render()
     {
-        return view('livewire.forms.show-pucharse-order')
+        return view('livewire.forms.pucharse-order-detail')
             ->layout('layouts.app');
     }
 }
