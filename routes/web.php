@@ -22,9 +22,15 @@ Route::view('new-purchase-order', 'new-purchase-order')
     ->middleware(['auth'])
     ->name('new-purchase-order');
 
-Route::view('products/create', 'products.create')
-    ->middleware(['auth'])
-    ->name('products.create');
+Route::middleware(['auth'])->group(function () {
+    // Vista principal de Productos
+    Route::view('products', 'products.index')
+        ->name('products.index');
+
+    // Formulario creación de productos
+    Route::view('products/create', 'products.create')
+        ->name('products.create');
+});
 
 // Rutas para documentación de envío
 Route::middleware(['auth'])->group(function () {
