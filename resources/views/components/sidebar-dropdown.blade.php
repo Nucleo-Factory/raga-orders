@@ -1,4 +1,8 @@
-@props(['active' => false])
+@props(['active' => false, 'route' => ''])
+
+@php
+    $path = parse_url($route, PHP_URL_PATH);
+@endphp
 
 <div x-data="{
     open: false,
@@ -7,8 +11,8 @@
         if (document.querySelector('.main-sidebar.sidebar-expanded')) {
             this.open = !this.open;
         } else {
-            // Si el sidebar no está expandido, redirigir a /settings
-            window.location.href = '/settings';
+            // Si el sidebar no está expandido, redirigir a /$route
+            window.location.href = '{{ $path }}';
         }
     },
     init() {
