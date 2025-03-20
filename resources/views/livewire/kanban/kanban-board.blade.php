@@ -71,10 +71,13 @@
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             scrollbar-width: thin;
+            max-height: 600px;
         }
 
         .kanban-column {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 100%;
+            min-height: 600px;
         }
 
         .sortable-fallback {

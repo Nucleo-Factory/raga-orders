@@ -27,7 +27,7 @@
                     <x-form-input label="Fecha de creación" type="date" name="order_date" wireModel="order_date" />
                     <x-form-select label="Moneda" name="currency" wireModel="currency" :options="$currencyArray" />
                     <x-form-select label="Incoterms" name="incoterms" wireModel="incoterms" :options="$tiposIncotermArray" />
-                    <x-form-input label="Lugar de orden" type="text" name="order_place" wireModel="order_place" placeholder="Ingrese lugar de orden" />
+                    <x-form-input label="HUB" type="text" name="order_place" wireModel="order_place" placeholder="Ingrese lugar de orden" />
                 </div>
             </div>
 
