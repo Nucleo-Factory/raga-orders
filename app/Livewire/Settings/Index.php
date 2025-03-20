@@ -9,6 +9,6 @@ class Index extends Component
     public function render()
     {
         return view('livewire.settings.index')
-            ->layout('layouts.settings');
+            ->layout('layouts.settings.preferences');
     }
 }
