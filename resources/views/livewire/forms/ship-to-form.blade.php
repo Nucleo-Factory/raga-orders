@@ -1,8 +1,10 @@
 <div>
+    <div class="flex max-w-[1254px] items-center justify-between mb-10">
+        <x-view-title title="{{ $title }}" subtitle="{{ $subtitle }}" />
+    </div>
+
     <form wire:submit.prevent="saveShipTo">
         <div class="w-full max-w-[1254px] space-y-6">
-            <h3 class="text-xl">Datos de la Dirección de Envío</h3>
-
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                 <!-- Información básica -->
                 <x-form-input
@@ -82,11 +84,11 @@
                 />
             </div>
 
-            <div class="flex justify-end space-x-4 mt-6">
-                <a href="{{ route('ship-to.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+            <div class="flex justify-end mt-6 space-x-4">
+                <a href="{{ route('ship-to.index') }}" class="px-4 py-2 text-gray-700 bg-gray-300 rounded-md hover:bg-gray-400">
                     Cancelar
                 </a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
                     {{ $isEdit ? 'Actualizar' : 'Crear' }} Dirección de Envío
                 </button>
             </div>

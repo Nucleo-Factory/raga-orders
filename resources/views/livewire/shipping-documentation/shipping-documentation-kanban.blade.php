@@ -1,5 +1,5 @@
-<div class="container w-full px-0 mx-0">
-    <div class="flex w-full !max-w-full pb-4 overflow-x-auto kanban-container" wire:poll.10s>
+<div class="w-full px-0 mx-0">
+    <div class="flex w-full gap-4 !max-w-full pb-4 overflow-x-auto kanban-container" wire:poll.10s>
         @if(!$board)
             <div class="p-6 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
@@ -72,7 +72,6 @@
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             scrollbar-width: thin;
-            max-width: 1430px
         }
 
         .kanban-column {
