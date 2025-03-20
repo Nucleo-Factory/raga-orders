@@ -177,7 +177,7 @@ th {
     .main-sidebar .profile-container,
     .main-sidebar .sidebar-dropdown,
     .main-sidebar .sidebar-dropdown-text-container {
-        @apply transition-all duration-500 gap-0;
+        @apply gap-0 transition-all duration-500;
     }
 
     .main-sidebar .link-text,
@@ -250,7 +250,7 @@ th {
     background-color: #f3f4f6;
     border-radius: 0.5rem;
     padding: 1rem;
-    margin: 0 0.5rem;
+    margin: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 

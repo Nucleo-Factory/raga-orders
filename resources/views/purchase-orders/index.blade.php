@@ -58,5 +58,9 @@
     </x-toast>
 
     {{-- Lista --}}
+
+    <div class="flex w-full overflow-auto gap-x-10">
+        <livewire:kanban.kanban-board />
+    </div>
 </x-app-layout>
-1
+
