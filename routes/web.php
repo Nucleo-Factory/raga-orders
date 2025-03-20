@@ -56,6 +56,9 @@ Route::middleware(['auth'])->group(function () {
     Route::view('purchase-orders/consolidated-orders', 'purchase-orders.consolidated-orders')
         ->name('purchase-orders.consolidated-orders');
 
+    Route::view('purchase-orders/consolidated-orders/{id}/detail', 'purchase-orders.consolidated-order-detail')
+        ->name('purchase-orders.consolidated-order-detail');
+
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
         ->name('purchase-orders.show');

@@ -43,7 +43,7 @@
     </div>
 
     <nav class="flex w-full flex-col items-center space-y-2 p-6 text-[#898989]">
-        <a href="#" class="flex items-center mb-10 overflow-hidden profile-container">
+        <a href="#" class="profile-container mb-10 flex items-center overflow-hidden">
             <div class="avatar-container h-[2.625rem] w-[2.625rem] overflow-hidden rounded-full bg-gray-400">
                 <img class="avatar" src="{{ asset('img/person1.png') }}" alt="Avatar">
             </div>
@@ -60,7 +60,7 @@
             <li>
                 <x-sidebar-link href="{{ route('dashboard') }}"
                     class="{{ request()->routeIs('dashboard') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex items-center justify-center w-5 h-5">
+                    <div class="flex h-5 w-5 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 17"
                             fill="none">
                             <path
@@ -78,37 +78,55 @@
             </li>
 
             <li>
-                <x-sidebar-link href="{{ route('purchase-orders.index') }}"
-                    class="{{ request()->routeIs('purchase-orders.index') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex items-center justify-center w-5 h-5">
+                <x-sidebar-dropdown
+                    active="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') }}"
+                    route="{{ route('purchase-orders.index') }}">
+                    <x-slot:icon>
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 16 20"
                             fill="none">
                             <path
                                 d="M4.66667 7.49998C4.20643 7.49998 3.83333 7.87308 3.83333 8.33331C3.83333 8.79355 4.20643 9.16665 4.66667 9.16665H11.3333C11.7936 9.16665 12.1667 8.79355 12.1667 8.33331C12.1667 7.87308 11.7936 7.49998 11.3333 7.49998H4.66667Z"
-                                class="{{ request()->routeIs('purchase-orders.kanban-boards') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                             <path
                                 d="M4.66667 10.8333C4.20643 10.8333 3.83333 11.2064 3.83333 11.6666C3.83333 12.1269 4.20643 12.5 4.66667 12.5H8C8.46024 12.5 8.83333 12.1269 8.83333 11.6666C8.83333 11.2064 8.46024 10.8333 8 10.8333H4.66667Z"
-                                class="{{ request()->routeIs('purchase-orders.kanban-boards') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                             <path
                                 d="M4.66667 14.1666C4.20643 14.1666 3.83333 14.5397 3.83333 15C3.83333 15.4602 4.20643 15.8333 4.66667 15.8333H11.3333C11.7936 15.8333 12.1667 15.4602 12.1667 15C12.1667 14.5397 11.7936 14.1666 11.3333 14.1666H4.66667Z"
-                                class="{{ request()->routeIs('purchase-orders.kanban-boards') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M15.399 4.2813C15.3319 4.11899 15.2335 3.97153 15.1093 3.84739L12.4863 1.22442C12.2365 0.974305 11.8976 0.833625 11.5441 0.833313H1.83333C1.47971 0.833313 1.14057 0.973789 0.890524 1.22384C0.640476 1.47389 0.5 1.81302 0.5 2.16665V17.8333C0.5 18.0084 0.534488 18.1818 0.601494 18.3436C0.668499 18.5053 0.766711 18.6523 0.890524 18.7761C1.01433 18.8999 1.16132 18.9981 1.32309 19.0652C1.48486 19.1322 1.65824 19.1666 1.83333 19.1666H14.1667C14.3418 19.1666 14.5151 19.1322 14.6769 19.0652C14.8387 18.9981 14.9857 18.8999 15.1095 18.7761C15.2333 18.6523 15.3315 18.5053 15.3985 18.3436C15.4655 18.1818 15.5 18.0084 15.5 17.8333V4.7919L14.6667 4.79165L15.5 4.79369L15.5 4.7919C15.5002 4.61672 15.4659 4.44321 15.399 4.2813ZM10.5 4.58331C10.5 5.27367 11.0596 5.83331 11.75 5.83331H13.8333V17.5H2.16667V2.49998H10.5V4.58331ZM13.0715 4.16665L12.1667 3.26182V4.16665H13.0715Z"
-                                class="{{ request()->routeIs('purchase-orders.kanban-boards') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
+                                class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'fill-[#565AFF]' : 'group-hover:fill-black fill-[#898989]' }} transition-colors duration-500" />
                         </svg>
-                    </div>
+                    </x-slot:icon>
 
-                    <div
-                        class="link-text {{ request()->routeIs('purchase-orders.index') ? 'text-[#565AFF]' : 'group-hover:text-black' }} transition-colors duration-500">
-                        <span>Ordenes de compra</span>
-                    </div>
-                </x-sidebar-link>
+                    <x-slot:title>Operaciones</x-slot:title>
+
+                    <ul
+                        class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'border-[#565AFF]' : 'border-gray-200' }} ml-[0.625rem] mt-2 flex flex-col space-y-1 border-l-2 pl-2.5">
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('purchase-orders.create') }}" :active="request()->routeIs('purchase-orders.create')">
+                                Generar Órdenes
+                            </x-sidebar-dropdown-item>
+                        </li>
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('purchase-orders.tracking') }}" :active="request()->routeIs('purchase-orders.tracking')">
+                                Seguimiento Órdenes
+                            </x-sidebar-dropdown-item>
+                        </li>
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('purchase-orders.consolidated-orders') }}"
+                                :active="request()->routeIs('purchase-orders.consolidated-orders')">
+                                Órdenes Consolidadas
+                            </x-sidebar-dropdown-item>
+                        </li>
+                    </ul>
+                </x-sidebar-dropdown>
             </li>
 
             <li>
                 <x-sidebar-link href="{{ route('shipping-documentation.index') }}"
                     class="{{ request()->routeIs('shipping-documentation.index') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex items-center justify-center w-5 h-5">
+                    <div class="flex h-5 w-5 items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" viewBox="0 0 18 20"
                             fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -126,8 +144,10 @@
                     </div>
                 </x-sidebar-link>
             </li>
+
             <li>
-                <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}">
+                <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}"
+                    route="{{ route('settings.index') }}">
                     <x-slot:icon>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"
                             fill="none">
@@ -172,13 +192,13 @@
                 fill="none">
                 <path
                     d="M2.83325 0.666626C2.17021 0.666626 1.53433 0.930018 1.06548 1.39886C0.596644 1.8677 0.333252 2.50358 0.333252 3.16663V14.8333C0.333252 15.4963 0.596644 16.1322 1.06548 16.6011C1.53433 17.0699 2.17021 17.3333 2.83325 17.3333H11.1666C11.8296 17.3333 12.4655 17.0699 12.9344 16.6011C13.4032 16.1322 13.6666 15.4963 13.6666 14.8333V14C13.6666 13.5397 13.2935 13.1666 12.8333 13.1666C12.373 13.1666 11.9999 13.5397 11.9999 14V14.8333C11.9999 15.0543 11.9121 15.2663 11.7558 15.4225C11.5996 15.5788 11.3876 15.6666 11.1666 15.6666H2.83325C2.61224 15.6666 2.40028 15.5788 2.244 15.4225C2.08772 15.2663 1.99992 15.0543 1.99992 14.8333V3.16663C1.99992 2.94561 2.08772 2.73365 2.244 2.57737C2.40028 2.42109 2.61224 2.33329 2.83325 2.33329H11.1666C11.3876 2.33329 11.5996 2.42109 11.7558 2.57737C11.9121 2.73365 11.9999 2.94561 11.9999 3.16663V3.99996C11.9999 4.4602 12.373 4.83329 12.8333 4.83329C13.2935 4.83329 13.6666 4.4602 13.6666 3.99996V3.16663C13.6666 2.50358 13.4032 1.8677 12.9344 1.39886C12.4655 0.930018 11.8296 0.666626 11.1666 0.666626H2.83325Z"
-                    class="transition-colors duration-500 fill-white group-hover:fill-slate-300" />
+                    class="fill-white transition-colors duration-500 group-hover:fill-slate-300" />
                 <path
                     d="M10.9225 5.9107C10.5971 5.58527 10.0694 5.58527 9.744 5.9107C9.41856 6.23614 9.41856 6.76378 9.744 7.08921L10.8214 8.16663H6.99992C6.53968 8.16663 6.16658 8.53972 6.16658 8.99996C6.16658 9.4602 6.53968 9.83329 6.99992 9.83329H10.8214L9.744 10.9107C9.41856 11.2361 9.41856 11.7638 9.744 12.0892C10.0694 12.4147 10.5971 12.4147 10.9225 12.0892L13.4225 9.58921C13.7479 9.26378 13.7479 8.73614 13.4225 8.4107L10.9225 5.9107Z"
-                    class="transition-colors duration-500 fill-white group-hover:fill-slate-300" />
+                    class="fill-white transition-colors duration-500 group-hover:fill-slate-300" />
             </svg>
 
-            <div class="font-sans text-lg font-extrabold link-text group-hover:text-slate-300">
+            <div class="link-text font-sans text-lg font-extrabold group-hover:text-slate-300">
                 <span class="transition-colors duration-500">Cerrar sesión</span>
             </div>
         </button>
