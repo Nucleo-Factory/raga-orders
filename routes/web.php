@@ -92,6 +92,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchase-orders/consolidated-orders/{id}/detail', PucharseOrderConsolidateDetail::class)
         ->name('purchase-orders.consolidated-order-detail');
 
+    // Solicitudes y aprobaciones
+    Route::view('purchase-orders/requests', 'purchase-orders.requests')
+        ->name('purchase-orders.requests');
+
+    // Kanban de órdenes de compra
+    Route::get('purchase-orders/kanban/{boardId?}', \App\Livewire\Kanban\KanbanBoard::class)
+        ->name('purchase-orders.kanban');
+
+    // Listar tableros Kanban
+    Route::get('purchase-orders/kanban-boards', \App\Livewire\Kanban\KanbanBoardList::class)
+        ->name('purchase-orders.kanban-boards');
+
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
         ->name('purchase-orders.show');
@@ -103,14 +115,6 @@ Route::middleware(['auth'])->group(function () {
     // Editar una orden de compra
     Route::view('purchase-orders/{id}/edit', 'purchase-orders.edit')
         ->name('purchase-orders.edit');
-
-    // Kanban de órdenes de compra (si lo necesitas)
-    Route::get('purchase-orders/kanban/{boardId?}', \App\Livewire\Kanban\KanbanBoard::class)
-        ->name('purchase-orders.kanban');
-
-    // Listar tableros Kanban (si lo necesitas)
-    Route::get('purchase-orders/kanban-boards', \App\Livewire\Kanban\KanbanBoardList::class)
-        ->name('purchase-orders.kanban-boards');
 });
 
 // Rutas para configuraciones
@@ -131,7 +135,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.roles');
 
     Route::get('settings/roles/{roleId}/edit', RoleEdit::class)
-        ->name('settings.role-edit');
+        ->name('settings.roles.edit');
+
+    Route::view('settings/roles/create', 'livewire.settings.role-create')
+        ->name('settings.roles.create');
 });
 
 Route::view('support', 'support.index')

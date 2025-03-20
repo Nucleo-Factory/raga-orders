@@ -117,6 +117,41 @@
                                 Órdenes Consolidadas
                             </x-sidebar-dropdown-item>
                         </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('shipping-documentation.index') }}"
+                                :active="request()->routeIs('shipping-documentation.index')">
+                                Forecast de materiales
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('products.index') }}"
+                                :active="request()->routeIs('products.index')">
+                                Adquisicion de materia prima
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('purchase-orders.requests') }}"
+                                :active="request()->routeIs('purchase-orders.requests')">
+                                Solicitudes y aprobaciones
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('vendors.index') }}"
+                                :active="request()->routeIs('vendors.index')">
+                                Proveedores
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('ship-to.index') }}"
+                                :active="request()->routeIs('ship-to.index')">
+                                Direcciones de entrega
+                            </x-sidebar-dropdown-item>
+                        </li>
                     </ul>
                 </x-sidebar-dropdown>
             </li>
