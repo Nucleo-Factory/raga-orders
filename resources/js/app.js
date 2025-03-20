@@ -11,14 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const togglerBtn = sidebarEl.querySelector(".sidebar-toggler-btn");
     const profileContainer = sidebarEl.querySelector(".profile-container");
     const profileName = sidebarEl.querySelector(".profile-name");
-    const sidebarDropdown = sidebarEl.querySelector('.sidebar-dropdown')
-    const sidebarDropdownTextContainer = sidebarEl.querySelector(
-        ".sidebar-dropdown-text-container"
-    );
-    const sidebarDropdownText = sidebarEl.querySelector(
-        ".sidebar-dropdown-text"
-    );
-    const sidebarDropdownArrowIcon = sidebarEl.querySelector('.sidebar-dropdown .icon');
+    const sidebarDropdowns = sidebarEl.querySelectorAll('.sidebar-dropdown');
+    const sidebarDropdownTextContainers = sidebarEl.querySelectorAll(".sidebar-dropdown-text-container");
+    const sidebarDropdownTexts = sidebarEl.querySelectorAll(".sidebar-dropdown-text");
+    const sidebarDropdownArrowIcons = sidebarEl.querySelectorAll('.sidebar-dropdown .icon');
+    const sidebarDropdownItemsText = sidebarEl.querySelectorAll('.dropdown-item-text');
 
     let sidebarExpanded = false;
 
@@ -43,16 +40,28 @@ document.addEventListener("DOMContentLoaded", function () {
         profileName.style.width = profileName.scrollWidth + "px";
         profileName.style.opacity = "1";
 
-        sidebarDropdown.style.gap = "0.75rem"
+        sidebarDropdowns.forEach((dropdown) => {
+            dropdown.style.gap = "0.75rem";
+        });
 
-        sidebarDropdownTextContainer.style.gap = "0.625rem";
+        sidebarDropdownTextContainers.forEach((container) => {
+            container.style.gap = "0.625rem";
+        });
 
-        sidebarDropdownText.style.width =
-            sidebarDropdownText.scrollWidth + "px";
-        sidebarDropdownText.style.opacity = "1";
+        sidebarDropdownTexts.forEach((text) => {
+            text.style.width = text.scrollWidth + "px";
+            text.style.opacity = "1";
+        });
 
-        sidebarDropdownArrowIcon.style.width = sidebarDropdownArrowIcon.scrollWidth + "px";
-        sidebarDropdownArrowIcon.style.opacity = "1"
+        sidebarDropdownArrowIcons.forEach((icon) => {
+            icon.style.width = icon.scrollWidth + "px";
+            icon.style.opacity = "1";
+        });
+
+        sidebarDropdownItemsText.forEach((itemText) => {
+            itemText.style.width = itemText.scrollWidth + "px";
+            itemText.style.opacity = "1";
+        });
     }
 
     function collapseSidebar() {
@@ -77,15 +86,28 @@ document.addEventListener("DOMContentLoaded", function () {
         profileName.style.width = "0";
         profileName.style.opacity = "0";
 
-        sidebarDropdown.style.gap = "0"
+        sidebarDropdowns.forEach((dropdown) => {
+            dropdown.style.gap = "0";
+        });
 
-        sidebarDropdownTextContainer.style.gap = "0";
+        sidebarDropdownTextContainers.forEach((container) => {
+            container.style.gap = "0";
+        });
 
-        sidebarDropdownText.style.width = "0";
-        sidebarDropdownText.style.opacity = "0";
+        sidebarDropdownTexts.forEach((text) => {
+            text.style.width = "0";
+            text.style.opacity = "0";
+        });
 
-        sidebarDropdownArrowIcon.style.width = "0";
-        sidebarDropdownArrowIcon.style.opacity = "0"
+        sidebarDropdownArrowIcons.forEach((icon) => {
+            icon.style.width = "0";
+            icon.style.opacity = "0";
+        });
+
+        sidebarDropdownItemsText.forEach((itemText) => {
+            itemText.style.width = "0";
+            itemText.style.opacity = "0";
+        });
     }
 
     togglerBtn.addEventListener("click", function () {
