@@ -8,7 +8,8 @@ use App\Models\KanbanBoard;
 use App\Models\KanbanStatus;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
-use App\Models\User;
+use App\Models\Vendor;
+use App\Models\ShipTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Livewire\Livewire;
@@ -22,29 +23,39 @@ class PurchaseOrderTest extends TestCase
     /** @test */
     public function it_can_create_a_purchase_order()
     {
-        // Create a company
+        // Create a test company for the purchase order
         $company = Company::factory()->create();
 
-        // Create a user associated with the company
-        $user = User::factory()->create([
-            'company_id' => $company->id
-        ]);
-        $this->actingAs($user);
+        // Create a kanban board with a default status for the company
+        $kanbanBoard = KanbanBoard::factory()
+            ->create([
+                'company_id' => $company->id,
+                'type' => 'po_stages',
+                'is_active' => true,
+            ]);
 
-        // Create a kanban board with a default status
-        $kanbanBoard = KanbanBoard::create([
-            'name' => 'Purchase Orders',
-            'description' => 'Kanban board for purchase orders',
+        $defaultStatus = KanbanStatus::factory()
+            ->create([
+                'kanban_board_id' => $kanbanBoard->id,
+                'name' => 'Recepción',
+                'is_default' => true,
+            ]);
+
+        // Create vendor and ship-to for testing
+        $vendor = Vendor::factory()->create([
             'company_id' => $company->id,
-            'type' => 'purchase_orders',
-            'is_active' => true,
+            'name' => 'Test Vendor',
+            'vendor_direccion' => '123 Vendor St',
+            'vendor_pais' => 'us',
+            'vendor_telefono' => '123-456-7890',
         ]);
 
-        $defaultStatus = KanbanStatus::create([
-            'name' => 'New',
-            'kanban_board_id' => $kanbanBoard->id,
-            'position' => 1,
-            'is_default' => true,
+        $shipTo = ShipTo::factory()->create([
+            'company_id' => $company->id,
+            'name' => 'Test Ship To',
+            'ship_to_direccion' => '456 Ship St',
+            'ship_to_pais' => 'us',
+            'ship_to_telefono' => '987-654-3210',
         ]);
 
         // Create a product to add to the order
@@ -63,16 +74,17 @@ class PurchaseOrderTest extends TestCase
             ->set('order_place', 'Test Location')
 
             // Vendor information
-            ->set('vendor_id', 'VENDOR-001')
-            ->set('vendor_direccion', '123 Vendor St')
-            ->set('vendor_pais', 'us')
-            ->set('vendor_telefono', '123-456-7890')
+            ->set('vendor_id', $vendor->id)
+            ->set('vendor_direccion', $vendor->vendor_direccion)
+            ->set('vendor_pais', $vendor->vendor_pais)
+            ->set('vendor_telefono', $vendor->vendor_telefono)
 
             // Ship to information
-            ->set('ship_to_nombre', 'Test Shipping')
-            ->set('ship_to_direccion', '456 Ship St')
-            ->set('ship_to_pais', 'us')
-            ->set('ship_to_telefono', '987-654-3210')
+            ->set('ship_to_id', $shipTo->id)
+            ->set('ship_to_nombre', $shipTo->name)
+            ->set('ship_to_direccion', $shipTo->ship_to_direccion)
+            ->set('ship_to_pais', $shipTo->ship_to_pais)
+            ->set('ship_to_telefono', $shipTo->ship_to_telefono)
 
             // Bill to information
             ->set('bill_to_nombre', 'Test Billing')
@@ -102,7 +114,7 @@ class PurchaseOrderTest extends TestCase
         $this->assertDatabaseHas('purchase_orders', [
             'order_number' => 'PO-TEST-001',
             'status' => 'draft',
-            'vendor_id' => 'VENDOR-001',
+            'vendor_id' => $vendor->id,
             'currency' => 'USD',
             'incoterms' => 'FOB',
             'kanban_status_id' => $defaultStatus->id,

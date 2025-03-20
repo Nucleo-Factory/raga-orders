@@ -3,6 +3,8 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Product;
+use App\Models\Vendor;
+use App\Models\ShipTo;
 use Livewire\Component;
 
 class CreatePucharseOrder extends Component
@@ -30,6 +32,8 @@ class CreatePucharseOrder extends Component
     ];
     public $currencyArray = ["CRC" => "Colones", "USD" => "Dólar Estadounidense", "EUR" => "Euro"];
     public $paymentTermsArray = ["30" => "30 días", "60" => "60 días", "90" => "90 días"];
+    public $vendorArray = [];
+    public $shipToArray = [];
 
     // Datos generales
     public $order_number;
@@ -44,6 +48,7 @@ class CreatePucharseOrder extends Component
     public $vendor_telefono;
 
     // Ship to information
+    public $ship_to_id;
     public $ship_to_nombre;
     public $ship_to_direccion;
     public $ship_to_pais;
@@ -99,6 +104,12 @@ class CreatePucharseOrder extends Component
     public $selectedProduct = null;
     public $quantity = 1;
 
+    // Watchers
+    protected $listeners = [
+        'vendorSelected' => 'onVendorSelected',
+        'shipToSelected' => 'onShipToSelected'
+    ];
+
     public function mount()
     {
         // Inicializar el array de productos vacío
@@ -130,6 +141,47 @@ class CreatePucharseOrder extends Component
             // Si no hay órdenes previas con este prefijo, empezar con 0001
             $this->order_number = $prefix . '0001';
         }
+    }
+
+    /**
+     * Cuando se selecciona un vendor, rellenar los datos automáticamente
+     */
+    public function onVendorSelected()
+    {
+        if ($this->vendor_id) {
+            $vendor = Vendor::find($this->vendor_id);
+            if ($vendor) {
+                $this->vendor_direccion = $vendor->vendor_direccion;
+                $this->vendor_pais = $vendor->vendor_pais;
+                $this->vendor_telefono = $vendor->vendor_telefono;
+            }
+        }
+    }
+
+    /**
+     * Cuando se selecciona un ship to, rellenar los datos automáticamente
+     */
+    public function onShipToSelected()
+    {
+        if ($this->ship_to_id) {
+            $shipTo = ShipTo::find($this->ship_to_id);
+            if ($shipTo) {
+                $this->ship_to_nombre = $shipTo->name;
+                $this->ship_to_direccion = $shipTo->ship_to_direccion;
+                $this->ship_to_pais = $shipTo->ship_to_pais;
+                $this->ship_to_telefono = $shipTo->ship_to_telefono;
+            }
+        }
+    }
+
+    public function updatedVendorId()
+    {
+        $this->onVendorSelected();
+    }
+
+    public function updatedShipToId()
+    {
+        $this->onShipToSelected();
     }
 
     public function searchProducts()
@@ -275,7 +327,8 @@ class CreatePucharseOrder extends Component
             'vendor_telefono' => $this->vendor_telefono,
 
             // Ship to information
-            'ship_to_nombre' => $this->ship_to_nombre, // Este campo no existe en la migración
+            'ship_to_id' => $this->ship_to_id, // Añadir ship_to_id para relacionar con ShipTo
+            'ship_to_nombre' => $this->ship_to_nombre,
             'ship_to_direccion' => $this->ship_to_direccion,
             'ship_to_codigo_postal' => null, // Agregar campo faltante
             'ship_to_pais' => $this->ship_to_pais,
@@ -350,6 +403,21 @@ class CreatePucharseOrder extends Component
     }
 
     public function render() {
+        // Cargar los vendors y ship tos desde la base de datos
+        $companyId = auth()->user()->company_id ?? 1;
+
+        // Obtener los vendors y formatearlos para el selector
+        $vendors = Vendor::where('company_id', $companyId)
+                          ->where('status', 'active')
+                          ->get();
+        $this->vendorArray = $vendors->pluck('name', 'id')->toArray();
+
+        // Obtener los ship tos y formatearlos para el selector
+        $shipTos = ShipTo::where('company_id', $companyId)
+                          ->where('status', 'active')
+                          ->get();
+        $this->shipToArray = $shipTos->pluck('name', 'id')->toArray();
+
         return view('livewire.forms.create-pucharse-order');
     }
 }

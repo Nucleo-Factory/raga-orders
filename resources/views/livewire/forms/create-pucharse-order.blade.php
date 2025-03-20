@@ -69,10 +69,7 @@
             <h3 class="text-xl">Datos vendor</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Código Vendor" name="vendor_id" wireModel="vendor_id" placeholder="Ingrese código" />
-                <x-form-input label="Dirección" name="vendor_direccion" wireModel="vendor_direccion" placeholder="Ingrese dirección" />
-                <x-form-select label="País" name="vendor_pais" wireModel="vendor_pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-input label="Teléfono" name="vendor_telefono" wireModel="vendor_telefono" placeholder="Ingrese teléfono" />
+                <x-form-select label="Seleccionar Vendor" name="vendor_id" wireModel="vendor_id" :options="$vendorArray" />
             </div>
         </div>
 
@@ -80,10 +77,7 @@
             <h3 class="text-xl">Datos Ship to</h3>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                <x-form-input label="Nombre" name="ship_to_nombre" wireModel="ship_to_nombre" placeholder="Ingrese nombre" />
-                <x-form-input label="Dirección" name="ship_to_direccion" wireModel="ship_to_direccion" placeholder="Ingrese dirección" />
-                <x-form-select label="País" name="ship_to_pais" wireModel="ship_to_pais" :options="$paisArray" optionPlaceholder="Elije país" />
-                <x-form-input label="Teléfono" name="ship_to_telefono" wireModel="ship_to_telefono" placeholder="Ingrese teléfono" />
+                <x-form-select label="Seleccionar Ship to" name="ship_to_id" wireModel="ship_to_id" :options="$shipToArray" />
             </div>
         </div>
 

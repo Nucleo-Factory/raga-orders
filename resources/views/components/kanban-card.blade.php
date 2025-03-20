@@ -8,10 +8,27 @@
     "totalWeight" => "10 Ton",
 ])
 
-<li class="kanban-card flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs min-h-[180px]">
-    <div class="space-y-2 flex flex-col justify-between w-1/2">
+<li class="kanban-card flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs min-h-[180px] relative"
+    x-data
+    x-init="
+        $el.addEventListener('click', () => {
+            window.selectedTaskId = '{{ $trackingId }}';
+            console.log('Card clicked, set ID:', window.selectedTaskId);
+            document.dispatchEvent(new CustomEvent('card-selected', { detail: { id: '{{ $trackingId }}' } }));
+        });
+    "
+    data-task-id="{{ $trackingId }}">
+
+    <!-- Botón de ver detalles -->
+    <a href="/purchase-orders/{{ $trackingId }}/detail"
+       class="absolute px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded top-2 right-2 hover:bg-blue-200"
+       @click.stop>
+       Ver detalle
+    </a>
+
+    <div class="flex flex-col justify-between w-1/2 space-y-2">
         <div class="flex gap-4">
-            <input type="checkbox" name="" id="">
+            <input type="checkbox" name="" id="" @click.stop>
 
             <div class="space-y-1 font-bold">
                 <p>PO: {{ $po }}</p>
@@ -40,7 +57,7 @@
             </svg>
         </div>
 
-        <div class="mb-2 flex gap-2">
+        <div class="flex gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <path
                     d="M5.625 10.25C5.32663 10.25 5.04048 10.3685 4.8295 10.5795C4.61853 10.7905 4.5 11.0766 4.5 11.375C4.5 11.6734 4.61853 11.9595 4.8295 12.1705C5.04048 12.3815 5.32663 12.5 5.625 12.5C5.92337 12.5 6.20952 12.3815 6.4205 12.1705C6.63147 11.9595 6.75 11.6734 6.75 11.375C6.75 11.0766 6.63147 10.7905 6.4205 10.5795C6.20952 10.3685 5.92337 10.25 5.625 10.25ZM7.875 11.375C7.875 11.0766 7.99353 10.7905 8.2045 10.5795C8.41548 10.3685 8.70163 10.25 9 10.25H12.375C12.6734 10.25 12.9595 10.3685 13.1705 10.5795C13.3815 10.7905 13.5 11.0766 13.5 11.375C13.5 11.6734 13.3815 11.9595 13.1705 12.1705C12.9595 12.3815 12.6734 12.5 12.375 12.5H9C8.70163 12.5 8.41548 12.3815 8.2045 12.1705C7.99353 11.9595 7.875 11.6734 7.875 11.375ZM5.625 13.25C5.32663 13.25 5.04048 13.3685 4.8295 13.5795C4.61853 13.7905 4.5 14.0766 4.5 14.375C4.5 14.6734 4.61853 14.9595 4.8295 15.1705C5.04048 15.3815 5.32663 15.5 5.625 15.5H9C9.29837 15.5 9.58452 15.3815 9.79549 15.1705C10.0065 14.9595 10.125 14.6734 10.125 14.375C10.125 14.0766 10.0065 13.7905 9.79549 13.5795C9.58452 13.3685 9.29837 13.25 9 13.25H5.625Z"

@@ -6,6 +6,7 @@ use App\Livewire\Forms\PucharseOrderDetail;
 use App\Livewire\Settings\Index;
 use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
+use App\Http\Controllers\VendorController;
 use App\Livewire\Settings\History;
 use App\Livewire\Settings\Roles;
 use App\Livewire\Settings\RoleEdit;
@@ -43,6 +44,28 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('shipping-documentation/create', 'shipping-documentation.create')
         ->name('shipping-documentation.create');
+
+    // Rutas para proveedores
+    Route::view('vendors', 'vendors.index')
+        ->name('vendors.index');
+
+    Route::view('vendors/create', 'vendors.create')
+        ->name('vendors.create');
+
+    Route::get('vendors/{vendor}/edit', function ($vendor) {
+        return view('vendors.edit', ['vendor' => \App\Models\Vendor::findOrFail($vendor)]);
+    })->name('vendors.edit');
+
+    // Rutas para direcciones de envío (ship-to)
+    Route::view('ship-to', 'ship-to.index')
+        ->name('ship-to.index');
+
+    Route::view('ship-to/create', 'ship-to.create')
+        ->name('ship-to.create');
+
+    Route::get('ship-to/{shipTo}/edit', function ($shipTo) {
+        return view('ship-to.edit', ['shipTo' => \App\Models\ShipTo::findOrFail($shipTo)]);
+    })->name('ship-to.edit');
 
     Route::view('shipping-documentation/requests', 'shipping-documentation.requests')
         ->name('shipping-documentation.requests');

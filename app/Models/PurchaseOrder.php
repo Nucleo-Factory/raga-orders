@@ -35,6 +35,7 @@ class PurchaseOrder extends Model
         'vendor_telefono',
 
         // Ship to information
+        'ship_to_id',
         'ship_to_nombre',
         'ship_to_direccion',
         'ship_to_codigo_postal',
@@ -134,6 +135,22 @@ class PurchaseOrder extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the vendor that owns the purchase order.
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    /**
+     * Get the ship-to that owns the purchase order.
+     */
+    public function shipTo(): BelongsTo
+    {
+        return $this->belongsTo(ShipTo::class);
     }
 
     /**
