@@ -53,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
     Route::view('purchase-orders/tracking', 'purchase-orders.kanban')
         ->name('purchase-orders.tracking');
 
+    Route::view('purchase-orders/consolidated-orders', 'purchase-orders.consolidated-orders')
+        ->name('purchase-orders.consolidated-orders');
+
     // Ver detalles de una orden de compra
     Route::get('purchase-orders/{id}', ShowPucharseOrder::class)
         ->name('purchase-orders.show');
