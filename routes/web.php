@@ -130,4 +130,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.role-edit');
 });
 
+Route::view('support', 'support.index')
+    ->middleware(['auth'])
+    ->name('support.index');
+
 require __DIR__ . '/auth.php';
