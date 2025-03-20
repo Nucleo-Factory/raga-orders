@@ -77,7 +77,7 @@
                 @forelse($processedRows as $row)
                     <tr>
                         @foreach($headers as $key => $header)
-                            <td class="px-6 py-4 {{ $key === 'actions' ? 'whitespace-nowrap text-sm font-medium' : 'whitespace-nowrap' }}">
+                            <td class="px-6 py-4 {{ $key === 'actions' ? 'whitespace-nowrap text-sm font-medium' : '' }}">
                                 @if($key === 'actions')
                                     @if($showActions)
                                         <div class="flex items-center space-x-2">

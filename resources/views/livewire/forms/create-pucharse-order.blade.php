@@ -1,8 +1,13 @@
 <div>
     <div class="flex max-w-[1254px] items-center justify-between">
-        <x-view-title title="Crear nueva Orden de compra" subtitle="Ingrese los datos para cargar su Orden de compra" />
+        <x-view-title
+            title="{{ isset($id) ? 'Editar Orden de compra: ' . $order_number : 'Crear nueva Orden de compra' }}"
+            subtitle="{{ isset($id) ? 'Modifique los datos de la Orden de compra' : 'Ingrese los datos para cargar su Orden de compra' }}"
+        />
 
-        <x-black-btn wire:click="createPurchaseOrder">Crear nueva Orden</x-black-btn>
+        <x-black-btn wire:click="createPurchaseOrder">
+            {{ isset($id) ? 'Actualizar Orden' : 'Crear nueva Orden' }}
+        </x-black-btn>
     </div>
 
     <x-form method="GET" action="">

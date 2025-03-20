@@ -120,6 +120,7 @@ class KanbanBoard extends Component {
                 'requested_delivery_date' => $order->requested_delivery_date ? $order->requested_delivery_date->format('Y-m-d') : null,
                 'total' => $order->total,
                 'company' => $order->company->name ?? 'N/A',
+                'created_at' => $order->created_at,
             ];
         }
     }
@@ -137,6 +138,13 @@ class KanbanBoard extends Component {
             if (isset($this->tasksByColumn[$task['status']])) {
                 $this->tasksByColumn[$task['status']][] = $task;
             }
+        }
+
+        // Ordenar las tareas por fecha de creación (de más nueva a más antigua) en cada columna
+        foreach ($this->tasksByColumn as $columnId => $tasks) {
+            usort($this->tasksByColumn[$columnId], function($a, $b) {
+                return $b['created_at'] <=> $a['created_at'];
+            });
         }
     }
 

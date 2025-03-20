@@ -1,6 +1,6 @@
 <div>
     <div class="flex max-w-[1254px] items-center justify-between">
-        <x-view-title title="Crear nuevo Producto" subtitle="Ingrese los datos para crear un nuevo producto" />
+        <x-view-title :title="$title" :subtitle="$subtitle" />
 
         <x-black-btn wire:click="createProduct">Crear Producto</x-black-btn>
     </div>

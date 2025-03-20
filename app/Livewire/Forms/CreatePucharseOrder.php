@@ -104,19 +104,105 @@ class CreatePucharseOrder extends Component
     public $selectedProduct = null;
     public $quantity = 1;
 
+    public $id;
+    public $purchaseOrder;
+
     // Watchers
     protected $listeners = [
         'vendorSelected' => 'onVendorSelected',
         'shipToSelected' => 'onShipToSelected'
     ];
 
-    public function mount()
+    public function mount($id = null)
     {
-        // Inicializar el array de productos vacío
-        $this->orderProducts = [];
+        $this->id = $id;
 
-        // Generar un número de orden único
-        $this->generateUniqueOrderNumber();
+        if ($this->id) {
+            $this->purchaseOrder = \App\Models\PurchaseOrder::with('products')->find($this->id);
+
+            if ($this->purchaseOrder) {
+                // Cargar datos generales
+                $this->order_number = $this->purchaseOrder->order_number;
+                $this->status = $this->purchaseOrder->status;
+                $this->notes = $this->purchaseOrder->notes;
+                $this->company_id = $this->purchaseOrder->company_id;
+
+                // Vendor information
+                $this->vendor_id = $this->purchaseOrder->vendor_id;
+                $this->vendor_direccion = $this->purchaseOrder->vendor_direccion;
+                $this->vendor_pais = $this->purchaseOrder->vendor_pais;
+                $this->vendor_telefono = $this->purchaseOrder->vendor_telefono;
+
+                // Ship to information
+                $this->ship_to_id = $this->purchaseOrder->ship_to_id;
+                $this->ship_to_nombre = $this->purchaseOrder->ship_to_nombre;
+                $this->ship_to_direccion = $this->purchaseOrder->ship_to_direccion;
+                $this->ship_to_pais = $this->purchaseOrder->ship_to_pais;
+                $this->ship_to_telefono = $this->purchaseOrder->ship_to_telefono;
+
+                // Bill to information
+                $this->bill_to_nombre = $this->purchaseOrder->bill_to_nombre;
+                $this->bill_to_direccion = $this->purchaseOrder->bill_to_direccion;
+                $this->bill_to_pais = $this->purchaseOrder->bill_to_pais;
+                $this->bill_to_telefono = $this->purchaseOrder->bill_to_telefono;
+
+                // Order details
+                $this->order_date = $this->purchaseOrder->order_date ? $this->purchaseOrder->order_date->format('Y-m-d') : null;
+                $this->currency = $this->purchaseOrder->currency;
+                $this->incoterms = $this->purchaseOrder->incoterms;
+                $this->payment_terms = $this->purchaseOrder->payment_terms;
+                $this->order_place = $this->purchaseOrder->order_place;
+                $this->email_agent = $this->purchaseOrder->email_agent;
+
+                // Totals
+                $this->net_total = $this->purchaseOrder->net_total;
+                $this->additional_cost = $this->purchaseOrder->additional_cost;
+                $this->total = $this->purchaseOrder->total;
+
+                // Dimensiones
+                $this->largo = $this->purchaseOrder->length;
+                $this->ancho = $this->purchaseOrder->width;
+                $this->alto = $this->purchaseOrder->height;
+                $this->volumen = $this->purchaseOrder->volume;
+                $this->peso_kg = $this->purchaseOrder->weight_kg;
+                $this->peso_lb = $this->purchaseOrder->weight_lb;
+
+                // Fechas
+                $this->date_required_in_destination = $this->purchaseOrder->date_required_in_destination ? $this->purchaseOrder->date_required_in_destination->format('Y-m-d') : null;
+                $this->date_planned_pickup = $this->purchaseOrder->date_planned_pickup ? $this->purchaseOrder->date_planned_pickup->format('Y-m-d') : null;
+                $this->date_actual_pickup = $this->purchaseOrder->date_actual_pickup ? $this->purchaseOrder->date_actual_pickup->format('Y-m-d') : null;
+                $this->date_estimated_hub_arrival = $this->purchaseOrder->date_estimated_hub_arrival ? $this->purchaseOrder->date_estimated_hub_arrival->format('Y-m-d') : null;
+                $this->date_actual_hub_arrival = $this->purchaseOrder->date_actual_hub_arrival ? $this->purchaseOrder->date_actual_hub_arrival->format('Y-m-d') : null;
+                $this->date_etd = $this->purchaseOrder->date_etd ? $this->purchaseOrder->date_etd->format('Y-m-d') : null;
+                $this->date_atd = $this->purchaseOrder->date_atd ? $this->purchaseOrder->date_atd->format('Y-m-d') : null;
+                $this->date_eta = $this->purchaseOrder->date_eta ? $this->purchaseOrder->date_eta->format('Y-m-d') : null;
+                $this->date_ata = $this->purchaseOrder->date_ata ? $this->purchaseOrder->date_ata->format('Y-m-d') : null;
+                $this->date_consolidation = $this->purchaseOrder->date_consolidation ? $this->purchaseOrder->date_consolidation->format('Y-m-d') : null;
+                $this->release_date = $this->purchaseOrder->release_date ? $this->purchaseOrder->release_date->format('Y-m-d') : null;
+
+                // Costos
+                $this->insurance_cost = $this->purchaseOrder->insurance_cost;
+
+                // Cargar productos
+                $this->orderProducts = [];
+                foreach ($this->purchaseOrder->products as $product) {
+                    $this->orderProducts[] = [
+                        'id' => $product->id,
+                        'material_id' => $product->material_id,
+                        'description' => $product->description,
+                        'price_per_unit' => $product->pivot->unit_price,
+                        'quantity' => $product->pivot->quantity,
+                        'subtotal' => $product->pivot->unit_price * $product->pivot->quantity
+                    ];
+                }
+            }
+        } else {
+            // Inicializar el array de productos vacío
+            $this->orderProducts = [];
+
+            // Generar un número de orden único
+            $this->generateUniqueOrderNumber();
+        }
     }
 
     /**
@@ -284,63 +370,75 @@ class CreatePucharseOrder extends Component
         $this->calculateTotals();
     }
 
+    /**
+     * Prepara los campos de fecha para el procesamiento, convirtiendo strings vacíos a null
+     */
+    protected function prepareDateFields()
+    {
+        $dateFields = [
+            'order_date',
+            'date_required_in_destination',
+            'date_planned_pickup',
+            'date_actual_pickup',
+            'date_estimated_hub_arrival',
+            'date_actual_hub_arrival',
+            'date_etd',
+            'date_atd',
+            'date_eta',
+            'date_ata',
+            'date_consolidation',
+            'release_date'
+        ];
+
+        foreach ($dateFields as $field) {
+            if (empty($this->$field)) {
+                $this->$field = null;
+            }
+        }
+    }
+
     public function createPurchaseOrder() {
         // Validar los datos
         $validated = $this->validate([
-            'order_number' => 'required|string|max:255|unique:purchase_orders,order_number',
+            'order_number' => 'required|string|max:255|unique:purchase_orders,order_number' . ($this->id ? ','.$this->id : ''),
         ]);
 
-        // Obtener el tablero Kanban predeterminado para la compañía del usuario
         $companyId = auth()->user()->company_id ?? 1;
-        $kanbanBoard = \App\Models\KanbanBoard::where('company_id', $companyId)
-            ->where('type', 'po_stages')
-            ->where('is_active', true)
-            ->first();
 
-        // Buscar específicamente el estado "Recepción" en el tablero Kanban
-        $recepcionStatus = null;
-        if ($kanbanBoard) {
-            $recepcionStatus = $kanbanBoard->statuses()
-                ->where('name', 'Recepción')
-                ->first();
+        // Asegurar que las fechas sean null si están vacías
+        $this->prepareDateFields();
 
-            // Si no se encuentra "Recepción", usar el estado por defecto como respaldo
-            if (!$recepcionStatus) {
-                $recepcionStatus = $kanbanBoard->defaultStatus();
-            }
-        }
-
-        $purchaseOrder = \App\Models\PurchaseOrder::create([
+        // Datos para crear o actualizar
+        $poData = [
             'company_id' => $companyId,
             'order_number' => $this->order_number,
-            'status' => 'draft',
-            'kanban_status_id' => $recepcionStatus ? $recepcionStatus->id : null,
+            'status' => $this->id ? $this->status : 'draft',
             'notes' => $this->notes,
-            'total_amount' => $this->total, // Asegurar que total_amount se llene
+            'total_amount' => $this->total,
 
             // Vendor information
             'vendor_id' => $this->vendor_id,
             'vendor_direccion' => $this->vendor_direccion,
-            'vendor_codigo_postal' => null, // Agregar campo faltante
+            'vendor_codigo_postal' => null,
             'vendor_pais' => $this->vendor_pais,
-            'vendor_estado' => null, // Agregar campo faltante
+            'vendor_estado' => null,
             'vendor_telefono' => $this->vendor_telefono,
 
             // Ship to information
-            'ship_to_id' => $this->ship_to_id, // Añadir ship_to_id para relacionar con ShipTo
+            'ship_to_id' => $this->ship_to_id,
             'ship_to_nombre' => $this->ship_to_nombre,
             'ship_to_direccion' => $this->ship_to_direccion,
-            'ship_to_codigo_postal' => null, // Agregar campo faltante
+            'ship_to_codigo_postal' => null,
             'ship_to_pais' => $this->ship_to_pais,
-            'ship_to_estado' => null, // Agregar campo faltante
+            'ship_to_estado' => null,
             'ship_to_telefono' => $this->ship_to_telefono,
 
             // Bill to information
-            'bill_to_nombre' => $this->bill_to_nombre, // Este campo no existe en la migración
+            'bill_to_nombre' => $this->bill_to_nombre,
             'bill_to_direccion' => $this->bill_to_direccion,
-            'bill_to_codigo_postal' => null, // Agregar campo faltante
+            'bill_to_codigo_postal' => null,
             'bill_to_pais' => $this->bill_to_pais,
-            'bill_to_estado' => null, // Agregar campo faltante
+            'bill_to_estado' => null,
             'bill_to_telefono' => $this->bill_to_telefono,
 
             // Order details
@@ -357,10 +455,10 @@ class CreatePucharseOrder extends Component
             'total' => $this->total,
 
             // Dimensiones
-            'length' => $this->largo, // Corregir nombre del campo
-            'width' => $this->ancho, // Corregir nombre del campo
-            'height' => $this->alto, // Corregir nombre del campo
-            'volume' => $this->volumen, // Corregir nombre del campo
+            'length' => $this->largo,
+            'width' => $this->ancho,
+            'height' => $this->alto,
+            'volume' => $this->volumen,
             'weight_kg' => $this->peso_kg,
             'weight_lb' => $this->peso_lb,
 
@@ -379,7 +477,7 @@ class CreatePucharseOrder extends Component
 
             // Costos
             'insurance_cost' => $this->insurance_cost,
-            'ground_transport_cost_1' => null, // Agregar campos faltantes
+            'ground_transport_cost_1' => null,
             'ground_transport_cost_2' => null,
             'estimated_pallet_cost' => null,
             'other_costs' => null,
@@ -387,7 +485,43 @@ class CreatePucharseOrder extends Component
 
             // Comentarios
             'comments' => null,
-        ]);
+        ];
+
+        // Si es una nueva orden, establecer el status en kanban
+        if (!$this->id) {
+            // Obtener el tablero Kanban predeterminado para la compañía del usuario
+            $kanbanBoard = \App\Models\KanbanBoard::where('company_id', $companyId)
+                ->where('type', 'po_stages')
+                ->where('is_active', true)
+                ->first();
+
+            // Buscar específicamente el estado "Recepción" en el tablero Kanban
+            $recepcionStatus = null;
+            if ($kanbanBoard) {
+                $recepcionStatus = $kanbanBoard->statuses()
+                    ->where('name', 'Recepción')
+                    ->first();
+
+                // Si no se encuentra "Recepción", usar el estado por defecto como respaldo
+                if (!$recepcionStatus) {
+                    $recepcionStatus = $kanbanBoard->defaultStatus();
+                }
+            }
+
+            $poData['kanban_status_id'] = $recepcionStatus ? $recepcionStatus->id : null;
+        }
+
+        if ($this->id) {
+            // Actualizar orden de compra existente
+            $purchaseOrder = \App\Models\PurchaseOrder::find($this->id);
+            $purchaseOrder->update($poData);
+
+            // Limpiar productos previos y agregar los nuevos
+            $purchaseOrder->products()->detach();
+        } else {
+            // Crear nueva orden de compra
+            $purchaseOrder = \App\Models\PurchaseOrder::create($poData);
+        }
 
         // Guardar los productos asociados a la orden de compra
         foreach ($this->orderProducts as $product) {
@@ -398,7 +532,8 @@ class CreatePucharseOrder extends Component
         }
 
         // Redireccionar o mostrar mensaje de éxito
-        session()->flash('message', 'Orden de compra creada con éxito.');
+        $successMessage = $this->id ? 'Orden de compra actualizada con éxito.' : 'Orden de compra creada con éxito.';
+        session()->flash('message', $successMessage);
         return redirect()->route('dashboard');
     }
 

@@ -10,7 +10,7 @@ use App\Http\Controllers\VendorController;
 use App\Livewire\Settings\History;
 use App\Livewire\Settings\Roles;
 use App\Livewire\Settings\RoleEdit;
-
+use App\Livewire\Forms\PucharseOrderConsolidateDetail;
 Route::view('/', 'welcome')
     ->name('welcome');
 
@@ -34,6 +34,10 @@ Route::middleware(['auth'])->group(function () {
     // Formulario creación de productos
     Route::view('products/create', 'products.create')
         ->name('products.create');
+
+    Route::get('products/{product}/edit', function ($product) {
+        return view('products.edit', ['product' => \App\Models\Product::findOrFail($product)]);
+    })->name('products.edit');
 });
 
 // Rutas para documentación de envío
@@ -85,7 +89,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('purchase-orders/consolidated-orders', 'purchase-orders.consolidated-orders')
         ->name('purchase-orders.consolidated-orders');
 
-    Route::view('purchase-orders/consolidated-orders/{id}/detail', 'purchase-orders.consolidated-order-detail')
+    Route::get('purchase-orders/consolidated-orders/{id}/detail', PucharseOrderConsolidateDetail::class)
         ->name('purchase-orders.consolidated-order-detail');
 
     // Ver detalles de una orden de compra
