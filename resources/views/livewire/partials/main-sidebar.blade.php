@@ -119,8 +119,8 @@
                         </li>
 
                         <li>
-                            <x-sidebar-dropdown-item href="{{ route('shipping-documentation.index') }}"
-                                :active="request()->routeIs('shipping-documentation.index')">
+                            <x-sidebar-dropdown-item href="{{ route('dashboard') }}"
+                                :active="request()->routeIs('dashboard')">
                                 Forecast de materiales
                             </x-sidebar-dropdown-item>
                         </li>

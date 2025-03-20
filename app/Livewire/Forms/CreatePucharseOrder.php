@@ -534,7 +534,7 @@ class CreatePucharseOrder extends Component
         // Redireccionar o mostrar mensaje de éxito
         $successMessage = $this->id ? 'Orden de compra actualizada con éxito.' : 'Orden de compra creada con éxito.';
         session()->flash('message', $successMessage);
-        return redirect()->route('dashboard');
+        return redirect()->route('purchase-orders.index');
     }
 
     public function render() {
