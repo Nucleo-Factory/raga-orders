@@ -169,14 +169,28 @@
                                 Generales
                             </x-sidebar-dropdown-item>
                         </li>
+
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.notifications') }}" :active="request()->routeIs('settings.notifications')">
                                 Notificaciones
                             </x-sidebar-dropdown-item>
                         </li>
+
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.password') }}" :active="request()->routeIs('settings.password')">
-                                Contraseña
+                                Cambiar Contraseña
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.roles') }}" :active="request()->routeIs('settings.roles')">
+                                Roles
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.history') }}" :active="request()->routeIs('settings.history')">
+                                Log Histórico
                             </x-sidebar-dropdown-item>
                         </li>
                     </ul>

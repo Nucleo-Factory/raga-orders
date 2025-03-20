@@ -6,6 +6,9 @@ use App\Livewire\Forms\PucharseOrderDetail;
 use App\Livewire\Settings\Index;
 use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
+use App\Livewire\Settings\History;
+use App\Livewire\Settings\Roles;
+use App\Livewire\Settings\RoleEdit;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -93,6 +96,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/password', Password::class)
         ->name('settings.password');
+
+    Route::get('settings/history', History::class)
+        ->name('settings.history');
+
+    Route::get('settings/roles', Roles::class)
+        ->name('settings.roles');
+
+    Route::get('settings/roles/{roleId}/edit', RoleEdit::class)
+        ->name('settings.role-edit');
 });
 
 require __DIR__ . '/auth.php';
