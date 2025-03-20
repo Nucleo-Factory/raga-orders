@@ -11,6 +11,8 @@ use App\Livewire\Settings\History;
 use App\Livewire\Settings\Roles;
 use App\Livewire\Settings\RoleEdit;
 use App\Livewire\Forms\PucharseOrderConsolidateDetail;
+use App\Livewire\Settings\Kanban;
+
 Route::view('/', 'welcome')
     ->name('welcome');
 
@@ -139,6 +141,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('settings/roles/create', 'livewire.settings.role-create')
         ->name('settings.roles.create');
+
+    Route::get('settings/kanban', Kanban::class)
+        ->name('settings.kanban');
 });
 
 Route::view('support', 'support.index')
