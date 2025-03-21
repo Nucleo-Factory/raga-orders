@@ -131,8 +131,8 @@
                         </li>
 
                         <li>
-                            <x-sidebar-dropdown-item href="{{ route('dashboard') }}"
-                                :active="request()->routeIs('dashboard')">
+                            <x-sidebar-dropdown-item href="{{ route('products.forecast') }}"
+                                :active="request()->routeIs('products.forecast')">
                                 Forecast de materiales
                             </x-sidebar-dropdown-item>
                         </li>

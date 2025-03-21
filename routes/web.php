@@ -40,6 +40,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('products/{product}/edit', function ($product) {
         return view('products.edit', ['product' => \App\Models\Product::findOrFail($product)]);
     })->name('products.edit');
+
+    Route::view('products/forecast', 'products.forecast')
+        ->name('products.forecast');
 });
 
 // Rutas para documentación de envío
