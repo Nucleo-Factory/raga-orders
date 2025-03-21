@@ -16,6 +16,9 @@ class KanbanBoard extends Component {
     public $tasks = [];
     public $tasksByColumn = [];
     public $boardType;
+    public $currentTaskId;
+    public $newColumnId;
+    public $currentTask = null;
 
     public function mount($boardId = null) {
         // Determinar el tipo de tablero según la ruta actual
@@ -164,10 +167,28 @@ class KanbanBoard extends Component {
             // Recargar los datos
             $this->loadData();
 
+            // Limpiar los datos temporales
+            $this->currentTaskId = null;
+            $this->newColumnId = null;
+            $this->currentTask = null;
+
             // Forzar la actualización de la vista
             $this->dispatch('refreshKanban');
         } catch (\Exception $e) {
             \Log::error("Error moving task: " . $e->getMessage());
+        }
+    }
+
+    public function setCurrentTask($taskId, $newColumnId) {
+        $this->currentTaskId = $taskId;
+        $this->newColumnId = $newColumnId;
+
+        // Buscar la tarea actual entre las tareas cargadas
+        foreach ($this->tasks as $task) {
+            if ($task['id'] == $taskId) {
+                $this->currentTask = $task;
+                break;
+            }
         }
     }
 

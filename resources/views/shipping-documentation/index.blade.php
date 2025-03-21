@@ -4,10 +4,10 @@
 
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Documentación de embarque" subtitle="Gestiona todas las etapas de documentación de embarque" />
+        <x-view-title title="Ordenes consolidadas" subtitle="Gestiona todas las etapas de tus embarques" />
 
         <a href="/shipping-documentation/create" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Crear nueva documentación
+            Crear una nueva orden
         </a>
     </div>
 
