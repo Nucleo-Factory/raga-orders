@@ -44,9 +44,21 @@
 
     <nav class="flex w-full flex-col items-center space-y-2 p-6 text-[#898989]">
         <a href="#" class="flex items-center mb-10 overflow-hidden profile-container">
-            <div class="avatar-container h-[2.625rem] w-[2.625rem] overflow-hidden rounded-full bg-gray-400">
-                <img class="avatar" src="{{ asset('img/person1.png') }}" alt="Avatar">
+            <div class="avatar-container h-[2.625rem] w-[2.625rem] overflow-hidden rounded-full bg-[#190FDB] flex items-center justify-center text-white font-medium"
+                 x-data="{
+                     name: '{{ auth()->user()->name }}',
+                     initials() {
+                         return this.name.split(' ')
+                             .map(part => part.charAt(0))
+                             .slice(0, 2)
+                             .join('')
+                             .toUpperCase();
+                     }
+                 }"
+                 x-text="initials()"
+                 x-on:profile-updated.window="name = $event.detail.name">
             </div>
+
             <div class="profile-name font-inter text-[#2E2E2E]">
                 <span class="text-sm">Hola 👋</span>
                 <div class="text-2xl" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
