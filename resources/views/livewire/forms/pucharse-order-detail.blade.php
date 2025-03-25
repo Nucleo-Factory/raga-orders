@@ -102,27 +102,28 @@
         <!-- Selector de pestañas -->
         <div class="flex items-center gap-6 text-lg font-bold">
             <button @click="activeTab = 'tab1'"
-                :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : ''"
-                class="border-b-2 border-transparent py-[0.625rem]">
+                :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
                 Información general
             </button>
             <button @click="activeTab = 'tab2'"
-                :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue' : ''"
-                class="border-b-2 border-transparent py-[0.625rem]">
+                :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
                 Comparación de costos
             </button>
             <button @click="activeTab = 'tab3'"
-                :class="activeTab === 'tab3' ? 'border-dark-blue text-dark-blue' : ''"
-                class="border-b-2 border-transparent py-[0.625rem]">
+                :class="activeTab === 'tab3' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
                 Costos y ahorros
             </button>
             <button @click="activeTab = 'tab4'"
-                :class="activeTab === 'tab4' ? 'border-dark-blue text-dark-blue' : ''"
-                class="border-b-2 border-transparent py-[0.625rem]">
+                :class="activeTab === 'tab4' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
                 Histórico
             </button>
 
-            <x-dropdown contentClasses="rounded-[1.25rem] px-[1.125rem] py-[0.625rem] bg-white">
+            <x-dropdown alignmentClasses="rounded-[1.25rem]"
+                contentClasses="rounded-[1.25rem] shadow-lg px-[1.125rem] py-[0.625rem] bg-white">
                 <x-slot:trigger>
                     <button class="rounded-[0.375rem] px-2 py-4 transition-colors duration-500 hover:bg-[#DDDDDD]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="4" viewBox="0 0 18 4"
