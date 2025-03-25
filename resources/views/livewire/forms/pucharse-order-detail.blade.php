@@ -350,15 +350,13 @@
                         </x-primary-button>
 
                         <x-secondary-button class="flex items-center gap-[0.625rem]">
-                            <x-slot:leftIcon>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
-                                    viewBox="0 0 21 22" fill="none">
-                                    <path
-                                        d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
-                                        stroke="#565AFF" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </x-slot:leftIcon>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
+                                viewBox="0 0 21 22" fill="none">
+                                <path
+                                    d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
+                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
 
                             <span>Adjuntar costos</span>
                         </x-secondary-button>
@@ -388,16 +386,13 @@
                         </x-primary-button>
 
                         <x-secondary-button class="group flex items-center gap-[0.625rem]">
-                            <x-slot:leftIcon>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
-                                    viewBox="0 0 21 22" fill="none">
-                                    <path
-                                        d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
-                                        stroke="#565AFF" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
-                                </svg>
-                            </x-slot:leftIcon>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
+                                viewBox="0 0 21 22" fill="none">
+                                <path
+                                    d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
+                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                            </svg>
 
                             <span>Adjuntar documentación</span>
                         </x-secondary-button>
