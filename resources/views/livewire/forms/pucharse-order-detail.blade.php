@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-[3.75rem]">
             <x-view-title>
-                <x-slot:title class="">
+                <x-slot:title>
                     {{ $purchaseOrder->order_number }}
                 </x-slot:title>
             </x-view-title>

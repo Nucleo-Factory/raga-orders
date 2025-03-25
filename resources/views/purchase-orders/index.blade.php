@@ -133,33 +133,6 @@
             </div>
 
             <div x-show="activeTab === 'tab2'" x-transition class="space-y-[1.875rem]">
-                <div class="items-centers flex justify-between">
-                    <x-search-input class="w-64" />
-
-                    <div class="flex gap-4">
-                        <x-primary-button>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
-                                fill="none">
-                                <path
-                                    d="M18.453 10.8927C18.1752 13.5026 16.6964 15.9483 14.2494 17.3611C10.1839 19.7083 4.98539 18.3153 2.63818 14.2499L2.38818 13.8168M1.54613 9.10664C1.82393 6.49674 3.30272 4.05102 5.74971 2.63825C9.8152 0.29104 15.0137 1.68398 17.3609 5.74947L17.6109 6.18248M1.49316 16.0657L2.22521 13.3336L4.95727 14.0657M15.0424 5.93364L17.7744 6.66569L18.5065 3.93364"
-                                    stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                    class="disabled:stroke-[#C2C2C2]" />
-                            </svg>
-                        </x-primary-button>
-
-                        <x-secondary-button class="flex items-center gap-[0.625rem]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
-                                fill="none">
-                                <path
-                                    d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
-                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-
-                            <span>Adjuntar costos</span>
-                        </x-secondary-button>
-                    </div>
-                </div>
-
                 {{-- Añadir tabla --}}
             </div>
         </div>
