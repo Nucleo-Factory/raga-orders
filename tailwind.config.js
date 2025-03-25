@@ -23,6 +23,14 @@ export default {
             backgroundImage: {
                 'home-hero': "url('/public/img/home-bg.png')",
             },
+            colors: {
+                'dark-blue': '#1108BC',
+                'light-blue': '#565AFF',
+                'neutral-blue': '#7288FF',
+                'success': '#5DD595',
+                'danger': '#FF3459',
+                'warning': '#FEAE33'
+            }
         },
     },
 
