@@ -356,8 +356,8 @@
             </div>
         </div>
 
+        <div class="w-full space-y-6 bg-white p-8">
             <h3 class="text-lg font-bold text-[#190FDB] border-b-2 border-[#190FDB] w-fit pb-2">Carga / Contenido</h3>
-        <div class="w-full space-y-6 rounded-2xl bg-white p-8">
 
             <div class="flex flex-col space-y-4">
                 <!-- Buscador de productos -->
