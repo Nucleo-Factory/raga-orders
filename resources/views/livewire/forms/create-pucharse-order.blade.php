@@ -356,8 +356,8 @@
             </div>
         </div>
 
-        <div class="w-full space-y-6 bg-white p-8">
-            <h3 class="text-lg font-bold text-[#190FDB] border-b-2 border-[#190FDB] w-fit pb-2">Carga / Contenido</h3>
+        <div class="w-full space-y-6 rounded-2xl bg-white p-8">
+            <h3 class="w-fit border-b-2 border-[#190FDB] pb-2 text-lg font-bold text-[#190FDB]">Carga / Contenido</h3>
 
             <div class="flex flex-col space-y-4">
                 <!-- Buscador de productos -->
@@ -399,8 +399,7 @@
                     </x-form-input>
 
                     <div class="h-fit self-end" x-data="{ selectedProduct: @entangle('selectedProduct') }">
-                        <x-primary-button
-                            class="border-[3px] border-[#565AFF] disabled:border-[#EDEDED]"
+                        <x-primary-button class="border-[3px] border-[#565AFF] disabled:border-[#EDEDED]"
                             x-bind:disabled="!selectedProduct" wire:click="addProduct">
                             Agregar
                         </x-primary-button>
@@ -431,22 +430,22 @@
                         <thead>
                             <tr>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     ID</th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Descripción</th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Precio unitario</th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Cantidad</th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Subtotal</th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-lg font-bold text-[#171717] bg-[#E0E5FF]">
+                                    class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Acciones</th>
                             </tr>
                         </thead>
