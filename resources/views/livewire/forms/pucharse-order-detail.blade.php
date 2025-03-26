@@ -3,6 +3,12 @@
 @endphp
 
 <div class="space-y-8">
+    <x-breadcrumbs :routes="[
+        ['name' => 'Inicio', 'url' => route('dashboard')],
+        ['name' => 'Categoría', 'url' => route('settings.index')],
+        ['name' => $purchaseOrder->order_number, 'url' => null]
+    ]"/>
+
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-[3.75rem]">
             <x-view-title>
