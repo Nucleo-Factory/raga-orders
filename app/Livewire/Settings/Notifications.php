@@ -9,6 +9,6 @@ class Notifications extends Component
     public function render()
     {
         return view('livewire.settings.notifications')
-            ->layout('layouts.settings');
+            ->layout('layouts.settings.preferences');
     }
 }

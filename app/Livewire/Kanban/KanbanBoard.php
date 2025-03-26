@@ -7,6 +7,7 @@ use App\Models\KanbanStatus;
 use App\Models\PurchaseOrder;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 class KanbanBoard extends Component {
     public $boardId;
@@ -14,14 +15,30 @@ class KanbanBoard extends Component {
     public $columns = [];
     public $tasks = [];
     public $tasksByColumn = [];
+    public $boardType;
+    public $currentTaskId;
+    public $newColumnId;
+    public $currentTask = null;
 
     public function mount($boardId = null) {
-        // Si no se proporciona un ID de tablero, intentamos obtener el tablero predeterminado
+        // Determinar el tipo de tablero según la ruta actual
+        $currentRoute = Route::currentRouteName();
+
+        if ($currentRoute === 'purchase-orders.index') {
+            $this->boardType = 'po_stages'; // Etapas PO
+        } elseif ($currentRoute === 'shipping-documentation.index') {
+            $this->boardType = 'shipping_documentation'; // Documentación de embarque
+        } else {
+            // Si no es ninguna de las rutas específicas, usar el tipo por defecto
+            $this->boardType = 'purchase_orders';
+        }
+
+        // Si no se proporciona un ID de tablero, intentamos obtener el tablero según el tipo
         if (!$boardId) {
-            // Obtener el tablero predeterminado para la compañía del usuario actual
+            // Obtener el tablero para la compañía del usuario actual según el tipo
             $companyId = auth()->user()->company_id ?? null;
             $this->board = KanbanBoardModel::where('company_id', $companyId)
-                ->where('type', 'purchase_orders')
+                ->where('type', $this->boardType)
                 ->where('is_active', true)
                 ->first();
 
@@ -31,6 +48,7 @@ class KanbanBoard extends Component {
         } else {
             $this->boardId = $boardId;
             $this->board = KanbanBoardModel::findOrFail($boardId);
+            $this->boardType = $this->board->type;
         }
 
         $this->loadData();
@@ -105,6 +123,7 @@ class KanbanBoard extends Component {
                 'requested_delivery_date' => $order->requested_delivery_date ? $order->requested_delivery_date->format('Y-m-d') : null,
                 'total' => $order->total,
                 'company' => $order->company->name ?? 'N/A',
+                'created_at' => $order->created_at,
             ];
         }
     }
@@ -122,6 +141,13 @@ class KanbanBoard extends Component {
             if (isset($this->tasksByColumn[$task['status']])) {
                 $this->tasksByColumn[$task['status']][] = $task;
             }
+        }
+
+        // Ordenar las tareas por fecha de creación (de más nueva a más antigua) en cada columna
+        foreach ($this->tasksByColumn as $columnId => $tasks) {
+            usort($this->tasksByColumn[$columnId], function($a, $b) {
+                return $b['created_at'] <=> $a['created_at'];
+            });
         }
     }
 
@@ -141,6 +167,11 @@ class KanbanBoard extends Component {
             // Recargar los datos
             $this->loadData();
 
+            // Limpiar los datos temporales
+            $this->currentTaskId = null;
+            $this->newColumnId = null;
+            $this->currentTask = null;
+
             // Forzar la actualización de la vista
             $this->dispatch('refreshKanban');
         } catch (\Exception $e) {
@@ -148,10 +179,24 @@ class KanbanBoard extends Component {
         }
     }
 
+    public function setCurrentTask($taskId, $newColumnId) {
+        $this->currentTaskId = $taskId;
+        $this->newColumnId = $newColumnId;
+
+        // Buscar la tarea actual entre las tareas cargadas
+        foreach ($this->tasks as $task) {
+            if ($task['id'] == $taskId) {
+                $this->currentTask = $task;
+                break;
+            }
+        }
+    }
+
     public function render()
     {
         return view('livewire.kanban.kanban-board', [
-            'tasksByColumn' => $this->tasksByColumn
+            'tasksByColumn' => $this->tasksByColumn,
+            'boardType' => $this->boardType
         ])->layout('layouts.app');
     }
 }

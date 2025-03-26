@@ -9,6 +9,6 @@ class Password extends Component
     public function render()
     {
         return view('livewire.settings.password')
-            ->layout('layouts.settings');
+            ->layout('layouts.settings.preferences');
     }
 }

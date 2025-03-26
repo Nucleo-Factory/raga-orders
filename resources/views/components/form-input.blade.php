@@ -1,16 +1,22 @@
-@props([
-    "label" => "Label",
-    "type" => "text",
-    "placeholder" => "Input placeholder",
-    "name" => "input",
-    "value" => "",
-])
+@props(['label' => null, 'input', 'icon' => null])
 
-<div class="flex flex-col gap-2">
-    <label for="{{ $name }}" class="text-[0.875rem] font-medium text-[#111928]">
-        {{ $label }}
-    </label>
-    <input type="{{ $type }}" id="{{ $name }}" name="{{ $name }}" value="{{ $value }}"
-        class="rounded-[0.5rem] border border-[#D1D5DB] px-3 py-2 text-[0.875rem] placeholder:text-[#6B7280]"
-        placeholder="{{ $placeholder }}">
+<div {{ $attributes->merge(['class' => 'flex flex-col']) }}>
+    @if ($label)
+        <label @if ($input->attributes->has('name')) for="{{ $input->attributes->get('name') }}" @endif
+            {{ $label->attributes->merge(['class' => 'ml-[1.125rem] text-sm font-medium text-[#565AFF]']) }}>
+            {{ $label }}
+        </label>
+    @endif
+
+    @if ($icon)
+        <div class="relative">
+            <input @if ($input->attributes->has('name')) id="{{ $input->attributes->get('name') }}" @endif
+                {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF] w-full leading-none', 'type' => 'text']) }}>
+
+            {{ $icon }}
+        </div>
+    @else
+        <input @if ($input->attributes->has('name')) id="{{ $input->attributes->get('name') }}" @endif
+            {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF] leading-none', 'type' => 'text']) }}>
+    @endif
 </div>

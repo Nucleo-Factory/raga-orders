@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class PurchaseOrder extends Model
 {
@@ -21,6 +22,7 @@ class PurchaseOrder extends Model
         'company_id',
         'order_number',
         'status',
+        'kanban_status_id',
         'total_amount',
         'notes',
 
@@ -33,6 +35,8 @@ class PurchaseOrder extends Model
         'vendor_telefono',
 
         // Ship to information
+        'ship_to_id',
+        'ship_to_nombre',
         'ship_to_direccion',
         'ship_to_codigo_postal',
         'ship_to_pais',
@@ -40,6 +44,7 @@ class PurchaseOrder extends Model
         'ship_to_telefono',
 
         // Bill to information
+        'bill_to_nombre',
         'bill_to_direccion',
         'bill_to_codigo_postal',
         'bill_to_pais',
@@ -60,24 +65,36 @@ class PurchaseOrder extends Model
         'total',
 
         // Dimensiones
-        'height_cm',
-        'width_cm',
-        'length_cm',
-        'volume_m3',
+        'length',
+        'width',
+        'height',
+        'volume',
+        'weight_kg',
+        'weight_lb',
 
         // Fechas
-        'requested_delivery_date',
-        'estimated_pickup_date',
-        'actual_pickup_date',
-        'estimated_hub_arrival',
-        'actual_hub_arrival',
-        'etd_date',
-        'atd_date',
-        'eta_date',
-        'ata_date',
+        'date_required_in_destination',
+        'date_planned_pickup',
+        'date_actual_pickup',
+        'date_estimated_hub_arrival',
+        'date_actual_hub_arrival',
+        'date_etd',
+        'date_atd',
+        'date_eta',
+        'date_ata',
+        'date_consolidation',
+        'release_date',
 
         // Costos
         'insurance_cost',
+        'ground_transport_cost_1',
+        'ground_transport_cost_2',
+        'estimated_pallet_cost',
+        'other_costs',
+        'other_expenses',
+
+        // Comentarios
+        'comments',
     ];
 
     /**
@@ -91,21 +108,25 @@ class PurchaseOrder extends Model
         'net_total' => 'decimal:2',
         'additional_cost' => 'decimal:2',
         'total' => 'decimal:2',
-        'height_cm' => 'decimal:2',
-        'width_cm' => 'decimal:2',
-        'length_cm' => 'decimal:2',
-        'volume_m3' => 'decimal:3',
+        'length' => 'decimal:2',
+        'width' => 'decimal:2',
+        'height' => 'decimal:2',
+        'volume' => 'decimal:3',
+        'weight_kg' => 'integer',
+        'weight_lb' => 'integer',
         'insurance_cost' => 'decimal:2',
         'order_date' => 'date',
-        'requested_delivery_date' => 'datetime',
-        'estimated_pickup_date' => 'datetime',
-        'actual_pickup_date' => 'datetime',
-        'estimated_hub_arrival' => 'datetime',
-        'actual_hub_arrival' => 'datetime',
-        'etd_date' => 'datetime',
-        'atd_date' => 'datetime',
-        'eta_date' => 'datetime',
-        'ata_date' => 'datetime',
+        'date_required_in_destination' => 'datetime',
+        'date_planned_pickup' => 'datetime',
+        'date_actual_pickup' => 'datetime',
+        'date_estimated_hub_arrival' => 'datetime',
+        'date_actual_hub_arrival' => 'datetime',
+        'date_etd' => 'datetime',
+        'date_atd' => 'datetime',
+        'date_eta' => 'datetime',
+        'date_ata' => 'datetime',
+        'date_consolidation' => 'datetime',
+        'release_date' => 'datetime',
     ];
 
     /**
@@ -117,12 +138,38 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * Get the vendor that owns the purchase order.
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    /**
+     * Get the ship-to that owns the purchase order.
+     */
+    public function shipTo(): BelongsTo
+    {
+        return $this->belongsTo(ShipTo::class);
+    }
+
+    /**
      * Get the products for the purchase order.
      */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'purchase_order_product')
             ->withPivot('quantity', 'unit_price')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the shipping documents associated with this purchase order.
+     */
+    public function shippingDocuments(): BelongsToMany
+    {
+        return $this->belongsToMany(ShippingDocument::class, 'purchase_order_shipping_document')
+            ->withPivot('notes')
             ->withTimestamps();
     }
 
@@ -179,5 +226,51 @@ class PurchaseOrder extends Model
             return $this->moveToKanbanStatus($prevStatus);
         }
         return null;
+    }
+
+    /**
+     * Determine if the purchase order is consolidable based on weight.
+     *
+     * Rules:
+     * - 0 to 5000 kg: Not consolidable
+     * - 5001 to 15000 kg: Consolidable
+     * - 15001+ kg: Not consolidable
+     *
+     * @return bool
+     */
+    public function isConsolidable(): bool
+    {
+        $weight = $this->weight_kg ?? 0;
+        return $weight > 5000 && $weight <= 15000;
+    }
+
+    /**
+     * Get the total weight in kg.
+     *
+     * @return float
+     */
+    public function getTotalWeightAttribute(): float
+    {
+        return $this->weight_kg ?? 0;
+    }
+
+    /**
+     * Check if a collection of orders can be consolidated together.
+     *
+     * @param \Illuminate\Support\Collection $orders
+     * @return bool
+     */
+    public static function canBeConsolidatedTogether($orders)
+    {
+        // Check if all orders are consolidable individually
+        foreach ($orders as $order) {
+            if (!$order->isConsolidable()) {
+                return false;
+            }
+        }
+
+        // Check if the total weight of all orders is within the consolidable range
+        $totalWeight = $orders->sum('weight_kg');
+        return $totalWeight > 5000 && $totalWeight <= 15000;
     }
 }

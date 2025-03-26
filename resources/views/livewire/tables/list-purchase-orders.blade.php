@@ -1,6 +1,14 @@
 <div>
     <div class="flex max-w-[1254px] items-center justify-between">
-        <x-view-title title="Órdenes de Compra" subtitle="Gestiona todas tus órdenes de compra" />
+        <x-view-title>
+            <x-slot:title>
+                Órdenes de Compra
+            </x-slot:title>
+
+            <x-slot:content>
+                Gestiona todas tus órdenes de compra
+            </x-slot:content>
+        </x-view-title>
 
         <div class="flex space-x-4">
             <a href="{{ route('purchase-orders.kanban-boards') }}" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">

@@ -1,7 +1,15 @@
 <x-app-layout>
-    <x-view-title title="Configuraciones" subtitle="Visualiza y administra las configuraciones de la plataforma" />
+    <x-view-title>
+        <x-slot:title>
+            Configuraciones
+        </x-slot:title>
 
-    <nav class="rounded-2xl bg-white px-6 py-4">
+        <x-slot:content>
+            Visualiza y administra las configuraciones de la plataforma
+        </x-slot:content>
+    </x-view-title>
+
+    <nav class="rounded-2xl bg-white px-6 py-4 text-lg">
         <ul class="flex items-center justify-between">
             <li>
                 <livewire:settings.nav-link text="Generales" :route="'settings.index'" />
@@ -13,14 +21,10 @@
                 <livewire:settings.nav-link text="Contraseña" :route="'settings.password'" />
             </li>
             <li>
-                <a href="#">
-                    Sesiones
-                </a>
+                <livewire:settings.nav-link text="Etapas" :route="'settings.stages'" />
             </li>
             <li>
-                <a href="#">
-                    Etapas
-                </a>
+                <livewire:settings.nav-link text="Kanban" :route="'settings.kanban'" />
             </li>
         </ul>
     </nav>

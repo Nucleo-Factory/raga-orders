@@ -1,15 +1,13 @@
-@props([
-    "title" => "Título",
-    "subtitle" => "Subtítulo",
-    "titleClass" => "text-[2.5rem] font-medium",
-    "subtitleClass" => "text-xl text-[#7B7A7A]",
-])
+@props(['title', 'content' => null])
 
 <div>
-    <h1 class="{{ $titleClass }}">
+    <h1 {{ $title->attributes->merge(['class' => 'text-[2.75rem] font-black leading-[3.75rem]']) }}>
         {{ $title }}
     </h1>
-    <p class="{{ $subtitleClass }}">
-        {{ $subtitle }}
-    </p>
+
+    @if ($content)
+        <p {{ $content->attributes->merge(['class' => 'text-lg']) }}>
+            {{ $content }}
+        </p>
+    @endif
 </div>

@@ -19,10 +19,27 @@ class CreateProducts extends Component {
     public $vat_rate;
     public $vat_value;
     public $delivery_date;
+    public $title;
+    public $subtitle;
+
+    public $product;
 
     // Arrays for select options
     public $qtyUnitOptions = ["kg" => "Kilogramos", "pcs" => "Piezas", "lt" => "Litros", "m" => "Metros"];
     public $vatRateOptions = ["0" => "0%", "16" => "16%", "8" => "8%"];
+
+    public function mount($product = null)
+    {
+        if ($product) {
+            $this->product = $product;
+            $this->material_id = $product->material_id;
+            $this->description = $product->description;
+            $this->legacy_material = $product->legacy_material;
+            $this->contract = $product->contract;
+            $this->order_quantity = $product->order_quantity;
+            $this->qty_unit = $product->qty_unit;
+        }
+    }
 
     public function createProduct()
     {

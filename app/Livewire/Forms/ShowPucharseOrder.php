@@ -70,6 +70,7 @@ class ShowPucharseOrder extends Component
 
     public function render()
     {
-        return view('livewire.forms.show-pucharse-order');
+        return view('livewire.forms.show-pucharse-order')
+            ->layout('layouts.app');
     }
 }
