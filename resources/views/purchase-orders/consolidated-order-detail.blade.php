@@ -1,11 +1,11 @@
 @php
-    $travelMethod = 'aereo';
+    $travelMethod = 'aéreo';
 
     // Creating a new consolidatedOrder object with fake information
     $consolidatedOrder = (object)[
         'order_number' => 'CONS-2025-0042',
         'id' => 'TRK-78945612',
-        'status' => 'En transito',
+        'status' => 'En tránsito',
         'danger_level' => 'Producto peligroso',
         'hub' => 'New Jersey',
         'lead_time' => '25/03/2025',
@@ -21,7 +21,7 @@
                 <x-view-title :title="$consolidatedOrder->order_number" titleClass="font-dm-sans text-[2.5rem] font-medium leading-none pb-1"
                     :subtitle="'ID Tracking: ' . $consolidatedOrder->id" subtitleClass="font-dm-sans font-medium" />
                 <div class="flex items-center gap-[0.375rem] rounded-md bg-[#D8D8D8] px-2 py-[0.375rem]">
-                    <span>En transito</span>
+                    <span>En tránsito</span>
                     <span>{{ $travelMethod }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 20 18"
                         fill="none">

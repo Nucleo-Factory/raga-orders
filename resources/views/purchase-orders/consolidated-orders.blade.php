@@ -21,7 +21,7 @@
                 </x-slot:icon>
 
                 <x-slot:title class="text-lg font-bold text-[#898989]">
-                    Cant. de PO en transito
+                    Cant. de PO en tránsito
                 </x-slot:title>
 
                 <x-slot:content class="text-4xl font-bold text-[#2e2e2e]">
