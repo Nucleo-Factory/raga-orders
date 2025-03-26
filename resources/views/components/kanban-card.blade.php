@@ -1,63 +1,63 @@
 @props([
-    "po" => "12345a",
-    "trackingId" => "11111",
-    "hubLocation" => "New Jersey",
-    "leadTime" => "01/01/2024",
-    "recolectaTime" => "11/11/2024",
-    "pickupTime" => "11/11/24",
-    "totalWeight" => "10 Ton",
+    'po' => '12345a',
+    'trackingId' => '11111',
+    'hubLocation' => 'New Jersey',
+    'leadTime' => '01/01/2024',
+    'recolectaTime' => '11/11/2024',
+    'pickupTime' => '11/11/24',
+    'totalWeight' => '10 Ton',
 ])
 
-<li class="kanban-card flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs min-h-[180px] relative"
-    x-data
-    x-init="
-        $el.addEventListener('click', () => {
-            window.selectedTaskId = '{{ $trackingId }}';
-            console.log('Card clicked, set ID:', window.selectedTaskId);
-            document.dispatchEvent(new CustomEvent('card-selected', { detail: { id: '{{ $trackingId }}' } }));
-        });
-    "
-    data-task-id="{{ $trackingId }}">
+<li class="kanban-card relative flex justify-between min-h-[180px] w-full gap-10 rounded-[0.625rem] border-2 border-[#E0E5FF] bg-white px-4 py-2 text-xs"
+    x-data x-init="$el.addEventListener('click', () => {
+        window.selectedTaskId = '{{ $trackingId }}';
+        console.log('Card clicked, set ID:', window.selectedTaskId);
+        document.dispatchEvent(new CustomEvent('card-selected', { detail: { id: '{{ $trackingId }}' } }));
+    });" data-task-id="{{ $trackingId }}">
 
-    <!-- Botón de ver detalles -->
-    <a href="/purchase-orders/{{ $trackingId }}/detail"
-       class="absolute px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded top-2 right-2 hover:bg-blue-200"
-       @click.stop>
-       Ver detalle
-    </a>
-
-    <div class="flex flex-col justify-between w-1/2 space-y-2">
+    <div class="flex grow flex-col space-y-[0.875rem]">
         <div class="flex gap-4">
-            <input type="checkbox" name="" id="" @click.stop>
-
-            <div class="space-y-1 font-bold">
-                <p>PO: {{ $po }}</p>
+            <div class="space-y-1 text-sm">
+                <p>
+                    <a class="text-[#190FDB] underline underline-offset-4" href="/purchase-orders/{{ $trackingId }}/detail">
+                        PO: {{ $po }}
+                    </a>
+                </p>
                 <p>ID Tracking: {{ $trackingId }}</p>
             </div>
         </div>
 
-        <p class="flex items-center gap-2 rounded-[0.375rem] bg-[#FFE5D3] p-2">
-            <span>Producto peligroso</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-                <path fill-rule="evenodd" clip-rule="evenodd"
-                    d="M3.42622 6.96833C5.85788 2.65583 7.07372 0.5 8.99955 0.5C10.9254 0.5 12.1412 2.65583 14.5729 6.96833L14.8762 7.505C16.8971 11.0883 17.9079 12.88 16.9946 14.19C16.0812 15.5 13.8212 15.5 9.30288 15.5H8.69622C4.17788 15.5 1.91788 15.5 1.00455 14.19C0.091216 12.88 1.10205 11.0883 3.12288 7.505L3.42622 6.96833ZM8.99955 4.04167C9.16531 4.04167 9.32428 4.10751 9.44149 4.22472C9.5587 4.34193 9.62455 4.50091 9.62455 4.66667V8.83333C9.62455 8.99909 9.5587 9.15806 9.44149 9.27527C9.32428 9.39248 9.16531 9.45833 8.99955 9.45833C8.83379 9.45833 8.67482 9.39248 8.55761 9.27527C8.4404 9.15806 8.37455 8.99909 8.37455 8.83333V4.66667C8.37455 4.50091 8.4404 4.34193 8.55761 4.22472C8.67482 4.10751 8.83379 4.04167 8.99955 4.04167ZM8.99955 12.1667C9.22056 12.1667 9.43252 12.0789 9.58881 11.9226C9.74509 11.7663 9.83288 11.5543 9.83288 11.3333C9.83288 11.1123 9.74509 10.9004 9.58881 10.7441C9.43252 10.5878 9.22056 10.5 8.99955 10.5C8.77854 10.5 8.56657 10.5878 8.41029 10.7441C8.25401 10.9004 8.16622 11.1123 8.16622 11.3333C8.16622 11.5543 8.25401 11.7663 8.41029 11.9226C8.56657 12.0789 8.77854 12.1667 8.99955 12.1667Z"
-                    fill="black" />
-            </svg>
-        </p>
+        <div class="flex flex-col justify-between space-y-[0.875rem]">
+            <x-label class="bg-danger">
+                <span>Producto peligroso</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M9.99979 6.50019V9.83353M9.99979 13.1669H10.0081M8.84588 2.24329L1.99181 14.0821C1.61164 14.7388 1.42156 15.0671 1.44965 15.3366C1.47416 15.5716 1.5973 15.7852 1.78843 15.9242C2.00756 16.0835 2.38695 16.0835 3.14572 16.0835H16.8539C17.6126 16.0835 17.992 16.0835 18.2111 15.9242C18.4023 15.7852 18.5254 15.5716 18.5499 15.3366C18.578 15.0671 18.3879 14.7388 18.0078 14.0821L11.1537 2.24329C10.7749 1.58899 10.5855 1.26184 10.3384 1.15196C10.1228 1.05612 9.87675 1.05612 9.6612 1.15196C9.4141 1.26184 9.22469 1.58899 8.84588 2.24329Z"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+
+            <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
+                <p class="text-base">Hub: <span>{{ $hubLocation }}</span></p>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19"
+                        fill="none">
+                        <path
+                            d="M5.66667 14.1663H12.3333M8.18141 2.30297L2.52949 6.6989C2.15168 6.99275 1.96278 7.13968 1.82669 7.32368C1.70614 7.48667 1.61633 7.67029 1.56169 7.86551C1.5 8.0859 1.5 8.32521 1.5 8.80384V14.833C1.5 15.7664 1.5 16.2331 1.68166 16.5896C1.84144 16.9032 2.09641 17.1582 2.41002 17.318C2.76654 17.4996 3.23325 17.4996 4.16667 17.4996H13.8333C14.7668 17.4996 15.2335 17.4996 15.59 17.318C15.9036 17.1582 16.1586 16.9032 16.3183 16.5896C16.5 16.2331 16.5 15.7664 16.5 14.833V8.80384C16.5 8.32521 16.5 8.0859 16.4383 7.86551C16.3837 7.67029 16.2939 7.48667 16.1733 7.32368C16.0372 7.13968 15.8483 6.99275 15.4705 6.69891L9.81859 2.30297C9.52582 2.07526 9.37943 1.9614 9.21779 1.91763C9.07516 1.87902 8.92484 1.87902 8.78221 1.91763C8.62057 1.9614 8.47418 2.07526 8.18141 2.30297Z"
+                            stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+        </div>
     </div>
 
-    <div class="flex flex-col justify-between w-1/2">
-        <div class="mb-4 flex items-center justify-between gap-2 rounded-[0.375rem] bg-[#E9E9E9] p-2">
-            <p>HUB: <span>{{ $hubLocation }}</span></p>
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-                <path
-                    d="M0.666992 13.8333V4.95833C0.666992 4.61111 0.760881 4.29861 0.948659 4.02083C1.13644 3.74306 1.38977 3.54167 1.70866 3.41667L8.37533 0.75C8.56977 0.666667 8.7781 0.625 9.00033 0.625C9.22255 0.625 9.43088 0.666667 9.62533 0.75L16.292 3.41667C16.6114 3.54167 16.865 3.74306 17.0528 4.02083C17.2406 4.29861 17.3342 4.61111 17.3337 4.95833V13.8333C17.3337 14.2917 17.1706 14.6842 16.8445 15.0108C16.5184 15.3375 16.1259 15.5006 15.667 15.5H12.3337V8.83333H5.66699V15.5H2.33366C1.87533 15.5 1.4831 15.3369 1.15699 15.0108C0.830881 14.6847 0.667548 14.2922 0.666992 13.8333ZM6.50033 15.5V13.8333H8.16699V15.5H6.50033ZM8.16699 13V11.3333H9.83366V13H8.16699ZM9.83366 15.5V13.8333H11.5003V15.5H9.83366Z"
-                    fill="black" />
-            </svg>
-        </div>
-
-        <div class="flex gap-2 mb-2">
+    <div class="flex flex-col justify-between">
+        <div class="mb-2 flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <path
                     d="M5.625 10.25C5.32663 10.25 5.04048 10.3685 4.8295 10.5795C4.61853 10.7905 4.5 11.0766 4.5 11.375C4.5 11.6734 4.61853 11.9595 4.8295 12.1705C5.04048 12.3815 5.32663 12.5 5.625 12.5C5.92337 12.5 6.20952 12.3815 6.4205 12.1705C6.63147 11.9595 6.75 11.6734 6.75 11.375C6.75 11.0766 6.63147 10.7905 6.4205 10.5795C6.20952 10.3685 5.92337 10.25 5.625 10.25ZM7.875 11.375C7.875 11.0766 7.99353 10.7905 8.2045 10.5795C8.41548 10.3685 8.70163 10.25 9 10.25H12.375C12.6734 10.25 12.9595 10.3685 13.1705 10.5795C13.3815 10.7905 13.5 11.0766 13.5 11.375C13.5 11.6734 13.3815 11.9595 13.1705 12.1705C12.9595 12.3815 12.6734 12.5 12.375 12.5H9C8.70163 12.5 8.41548 12.3815 8.2045 12.1705C7.99353 11.9595 7.875 11.6734 7.875 11.375ZM5.625 13.25C5.32663 13.25 5.04048 13.3685 4.8295 13.5795C4.61853 13.7905 4.5 14.0766 4.5 14.375C4.5 14.6734 4.61853 14.9595 4.8295 15.1705C5.04048 15.3815 5.32663 15.5 5.625 15.5H9C9.29837 15.5 9.58452 15.3815 9.79549 15.1705C10.0065 14.9595 10.125 14.6734 10.125 14.375C10.125 14.0766 10.0065 13.7905 9.79549 13.5795C9.58452 13.3685 9.29837 13.25 9 13.25H5.625Z"

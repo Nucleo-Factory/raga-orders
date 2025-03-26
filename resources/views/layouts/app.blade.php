@@ -19,7 +19,7 @@
         @livewireStyles
     </head>
 
-    <body class="bg-[#EDEDED] grid grid-cols-[auto,1fr]">
+    <body class="bg-[#F7F7F7] grid grid-cols-[auto,1fr]">
         <!-- Aqui debe ir el componente sidebar -->
         <livewire:partials.main-sidebar />
         <!-- Aqui debe ir el componente sidebar -->
