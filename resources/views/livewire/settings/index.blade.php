@@ -12,9 +12,9 @@
     ];
 @endphp
 
-<form class="space-y-6 rounded-2xl bg-white px-6 py-4">
+<form class="px-6 py-4 space-y-6 bg-white rounded-2xl">
     <div>
-        <div class="mb-6 flex flex-col">
+        <div class="flex flex-col mb-6">
             <span class="text-lg font-bold text-[#7288FF]">Apariencia</span>
             <span class="text-[#898989]">Personaliza la Apariencia</span>
         </div>

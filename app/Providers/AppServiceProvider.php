@@ -28,5 +28,6 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('forms.vendor-form', \App\Livewire\Forms\VendorForm::class);
         Livewire::component('tables.ship-to-table', \App\Livewire\Tables\ShipToTable::class);
         Livewire::component('forms.ship-to-form', \App\Livewire\Forms\ShipToForm::class);
+        Livewire::component('forms.create-purchase-order', \App\Livewire\Forms\CreatePucharseOrder::class);
     }
 }

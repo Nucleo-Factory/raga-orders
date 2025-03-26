@@ -22,6 +22,9 @@ class ShipToForm extends Component
     public $notes;
     public $isEdit = false;
 
+    public $title;
+    public $subtitle;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255',

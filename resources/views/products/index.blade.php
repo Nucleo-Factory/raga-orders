@@ -1,61 +1,79 @@
 <x-app-layout>
-    <x-view-title title="Productos" subtitle="Visualiza y administra los productos" />
+    <div class="flex items-center justify-between">
+        <x-view-title>
+            <x-slot:title>
+                Adquisición de materia
+            </x-slot:title>
 
-    <ul class="grid grid-cols-3 gap-6">
-        <li>
-            <x-card class="space-y-4">
-                <x-slot:title class="text-[1.375rem] font-medium">
-                    Cant. de PO en transito
-                </x-slot:title>
+            <x-slot:content>
+                Cree y monitoree las ordenes de adquisición de materia prima
+            </x-slot:content>
+        </x-view-title>
 
-                <x-slot:content class="text-sm">
-                    35
-                </x-slot:content>
-            </x-card>
-        </li>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('products.create') }}">
+                <x-secondary-button class="group flex items-center gap-[0.625rem]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1V15M1 8H15" stroke="#565AFF" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                    </svg>
+                    <span>Cargar nueva orden</span>
+                </x-secondary-button>
+            </a>
 
-        <li>
-            <x-card class="space-y-4">
-                <x-slot:title class="text-[1.375rem] font-medium">
-                    Cant. de PO en consolidables
-                </x-slot:title>
+            <x-primary-button wire:click="createPurchaseOrder" class="w-[209px]">
+                Cambiar de etapa
+            </x-primary-button>
+        </div>
+    </div>
 
-                <x-slot:content class="text-sm">
-                    35
-                </x-slot:content>
-            </x-card>
-        </li>
+    <div class="flex gap-4">
+        <x-search-input />
 
-        <li>
-            <x-card class="space-y-4">
-                <x-slot:title class="text-[1.375rem] font-medium">
-                    Cant. PO entregadas
-                </x-slot:title>
-
-                <x-slot:content class="text-sm">
-                    35
-                </x-slot:content>
-            </x-card>
-        </li>
-    </ul>
-
-    <x-toast class="max-w-[896px] space-y-3">
-        <x-slot:icon>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <x-primary-button class="group flex items-center gap-[0.625rem]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 22 20" fill="none">
                 <path
-                    d="M7 0.25C5.66498 0.25 4.35994 0.645881 3.2499 1.38758C2.13987 2.12928 1.27471 3.18348 0.763816 4.41689C0.252925 5.65029 0.119252 7.00749 0.379702 8.31686C0.640153 9.62623 1.28303 10.829 2.22703 11.773C3.17104 12.717 4.37377 13.3598 5.68314 13.6203C6.99251 13.8807 8.34971 13.7471 9.58312 13.2362C10.8165 12.7253 11.8707 11.8601 12.6124 10.7501C13.3541 9.64007 13.75 8.33502 13.75 7C13.748 5.21039 13.0362 3.49464 11.7708 2.2292C10.5054 0.963755 8.78961 0.251965 7 0.25ZM9.50223 6.12722L6.80223 8.82722C6.67565 8.95377 6.50399 9.02485 6.325 9.02485C6.14602 9.02485 5.97436 8.95377 5.84778 8.82722L4.49778 7.47722C4.37482 7.34992 4.30678 7.17941 4.30832 7.00243C4.30986 6.82545 4.38085 6.65615 4.506 6.531C4.63115 6.40585 4.80045 6.33486 4.97743 6.33332C5.15441 6.33178 5.32492 6.39982 5.45223 6.52277L6.325 7.39555L8.54778 5.17277C8.67508 5.04982 8.84559 4.98178 9.02257 4.98332C9.19956 4.98486 9.36885 5.05585 9.494 5.181C9.61915 5.30615 9.69014 5.47545 9.69168 5.65243C9.69322 5.82941 9.62518 5.99992 9.50223 6.12722Z"
-                    fill="#111928" />
+                    d="M1 2.6C1 2.03995 1 1.75992 1.10899 1.54601C1.20487 1.35785 1.35785 1.20487 1.54601 1.10899C1.75992 1 2.03995 1 2.6 1H19.4C19.9601 1 20.2401 1 20.454 1.10899C20.6422 1.20487 20.7951 1.35785 20.891 1.54601C21 1.75992 21 2.03995 21 2.6V3.26939C21 3.53819 21 3.67259 20.9672 3.79756C20.938 3.90831 20.8901 4.01323 20.8255 4.10776C20.7526 4.21443 20.651 4.30245 20.4479 4.4785L14.0521 10.0215C13.849 10.1975 13.7474 10.2856 13.6745 10.3922C13.6099 10.4868 13.562 10.5917 13.5328 10.7024C13.5 10.8274 13.5 10.9618 13.5 11.2306V16.4584C13.5 16.6539 13.5 16.7517 13.4685 16.8363C13.4406 16.911 13.3953 16.9779 13.3363 17.0315C13.2695 17.0922 13.1787 17.1285 12.9971 17.2012L9.59711 18.5612C9.22957 18.7082 9.0458 18.7817 8.89827 18.751C8.76927 18.7242 8.65605 18.6476 8.58325 18.5377C8.5 18.4122 8.5 18.2142 8.5 17.8184V11.2306C8.5 10.9618 8.5 10.8274 8.46715 10.7024C8.43805 10.5917 8.39014 10.4868 8.32551 10.3922C8.25258 10.2856 8.15102 10.1975 7.94789 10.0215L1.55211 4.4785C1.34898 4.30245 1.24742 4.21443 1.17449 4.10776C1.10986 4.01323 1.06195 3.90831 1.03285 3.79756C1 3.67259 1 3.53819 1 3.26939V2.6Z"
+                    stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="transition-colors duration-500 group-disabled:stroke-[#C2C2C2]" />
             </svg>
-        </x-slot:icon>
+            <span>Filtros</span>
+        </x-primary-button>
+    </div>
 
-        <x-slot:content>
-            Tienes 6 nuevas ordenes que se pueden consolidar
-        </x-slot:content>
+    @if (session('message'))
+        <div class="mb-4 rounded border border-green-400 bg-green-100 px-4 py-2 text-green-700">
+            {{ session('message') }}
+        </div>
+    @endif
 
-        <x-slot:action>
-            Ver ordenes
-        </x-slot:action>
-    </x-toast>
+    <!-- Tabs for switching between views -->
+    <div x-data="{ activeTab: 'kanban' }" class="mb-6">
+        <!-- Kanban View -->
+        <div x-show="activeTab === 'kanban'" class="mt-4">
+            @php
+                $headers = [
+                    'material_id' => 'ID',
+                    'description' => 'Descripción',
+                    'qty_unit' => 'Cantidad',
+                    'price_per_unit' => 'Precio Unitario',
+                    'net_value' => 'Valor Neto',
+                    'vat_value' => 'Valor IVA',
+                    'actions' => 'Acciones',
+                    'actions_html' => '',
+                ];
 
-    {{-- Lista --}}
+                $sortable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+                $searchable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+                $filterable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+                $filterOptions = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+            @endphp
+
+
+            <livewire:components.reusable-table :headers="$headers" :sortable="$sortable" :searchable="$searchable" :filterable="$filterable"
+                :filterOptions="$filterOptions" :actions="true" :actionsView="false" :actionsEdit="true" :actionsDelete="true"
+                :baseRoute="'products'" :model="\App\Models\Product::class" />
+        </div>
+    </div>
 </x-app-layout>

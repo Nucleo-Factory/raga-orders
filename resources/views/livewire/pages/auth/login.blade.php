@@ -66,7 +66,7 @@ $login = function () {
         </div>
 
         <div class="flex items-center justify-center mt-4">
-            <x-primary-button class="ms-3">
+            <x-primary-button class="ms-3" type="submit">
                 {{ __('Iniciar sesión') }}
             </x-primary-button>
         </div>

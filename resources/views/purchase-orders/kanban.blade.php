@@ -4,15 +4,23 @@
 
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Etapas PO" subtitle="Gestiona todas las etapas de tus órdenes de compra" />
+        <x-view-title>
+            <x-slot:title>
+                Etapas PO
+            </x-slot:title>
+
+            <x-slot:content>
+                Gestiona todas las etapas de tus órdenes de compra
+            </x-slot:content>
+        </x-view-title>
 
         <a href="{{route('purchase-orders.create')}}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
             Cargar nueva orden de compra
         </a>
     </div>
 
-    <div x-data="{ open: false }" class="relative">
-        <button x-on:click="open = ! open" class="ml-auto block rounded-[0.375rem] bg-[#DDDDDD] px-2 py-4">
+    <div x-data="{ menuOpen: false }" class="relative">
+        <button x-on:click="menuOpen = ! menuOpen" class="ml-auto block rounded-[0.375rem] bg-[#DDDDDD] px-2 py-4">
             <span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="4" viewBox="0 0 18 4" fill="none">
                     <path
@@ -22,23 +30,23 @@
             </span>
         </button>
 
-        <ul x-show="open"
+        <ul x-show="menuOpen"
             class="absolute right-0 top-full mt-[0.375rem] space-y-1 bg-white p-2 font-inter font-medium shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
             <li>
-                <button x-data="" x-on:click="$dispatch('open-modal', 'change-oc-stage'); open = false"
+                <button x-data="" x-on:click="$dispatch('open-modal', 'change-oc-stage'); menuOpen = false"
                     class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]">
                     Cambiar etapa
                 </button>
             </li>
             <li>
-                <button class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]"
-                    x-on:click="$dispatch('open-modal', 'modify-oc'); open = false">
+                <button x-on:click="$dispatch('open-modal', 'modify-oc'); menuOpen = false"
+                    class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]">
                     Editar PO
                 </button>
             </li>
             <li>
                 <button class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]"
-                    x-on:click="$dispatch('open-modal', 'delete-oc'); open = false">
+                    x-on:click="$dispatch('open-modal', 'delete-oc'); menuOpen = false">
                     Eliminar PO
                 </button>
             </li>
@@ -56,7 +64,6 @@
 
         <x-form-textarea label="Comentarios" placeholder="Ingrese su texto..." class="mb-[0.375rem]" />
 
-        {{-- TODO: añadir funcionalidad input file --}}
         <div class="mb-12">
             <button
                 class="flex w-full items-center justify-center gap-[0.625rem] rounded-[0.375rem] border border-[#E2E8F0] bg-white px-4 py-2 font-inter text-sm font-medium">
@@ -77,6 +84,33 @@
             </x-black-btn>
             <x-white-btn x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
                 Cancelar
+            </x-white-btn>
+        </div>
+    </x-modal>
+
+    <x-modal name="modify-oc" maxWidth="lg">
+        <h3 class="mb-12 text-2xl font-bold">
+            Editar Orden de Compra
+        </h3>
+
+        <p class="mb-6 text-gray-700">
+            Para editar los detalles de una orden de compra, seleccione primero la tarjeta
+            correspondiente en el tablero Kanban y luego haga clic en el botón "Ver detalle"
+            que aparece en la esquina superior derecha de cada tarjeta.
+        </p>
+
+        <p class="mb-6 text-sm text-blue-600">
+            <b>Nota:</b> Cada tarjeta tiene un botón "Ver detalle" para acceder directamente a la
+            información de la orden de compra seleccionada.
+        </p>
+
+        <div class="flex justify-center mb-8">
+            <img src="https://placehold.co/300x150?text=Ejemplo+de+tarjeta" alt="Ejemplo de tarjeta" class="rounded-md shadow-md">
+        </div>
+
+        <div class="flex gap-[1.875rem]">
+            <x-white-btn x-on:click="$dispatch('close-modal', 'modify-oc')" class="w-full">
+                Entendido
             </x-white-btn>
         </div>
     </x-modal>

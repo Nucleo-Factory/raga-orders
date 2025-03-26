@@ -1,6 +1,10 @@
-<div class="space-y-10 pb-10">
+<div class="pb-10 space-y-10">
     <div class="flex items-center justify-between">
-        <x-view-title title="Editar Rol: Administrador" />
+        <x-view-title>
+            <x-slot:title>
+                Editar Rol: Administrador
+            </x-slot:title>
+        </x-view-title>
 
         <div class="flex space-x-4">
             <x-black-btn>Guardar Cambios</x-black-btn>
@@ -10,7 +14,7 @@
     </div>
 
     <div class="space-y-8">
-        <nav class="rounded-2xl bg-white px-6 py-4">
+        <nav class="px-6 py-4 bg-white rounded-2xl">
             <ul class="flex gap-4">
                 <li class="grow">
                     <button class="w-full rounded-lg bg-[#D8D8D8] py-2.5 text-center">Lista de miembros</button>
@@ -21,7 +25,7 @@
             </ul>
         </nav>
 
-        <form class="space-y-6 px-4">
+        <form class="px-4 space-y-6">
             <div class="space-y-4 text-lg text-[#231F20]">
                 <h2>Tipo de permisos</h2>
 

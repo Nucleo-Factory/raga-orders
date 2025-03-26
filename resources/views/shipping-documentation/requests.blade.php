@@ -1,11 +1,19 @@
 <x-app-layout>
-    <x-view-title title="Solicitudes" subtitle="Visualiza y administra las opereaciones pendientes de aprobación" />
+    <x-view-title>
+        <x-slot:title>
+            Solicitudes
+        </x-slot:title>
+
+        <x-slot:content>
+            Visualiza y administra las opereaciones pendientes de aprobación
+        </x-slot:content>
+    </x-view-title>
 
     <ul class="grid grid-cols-3 gap-6">
         <li>
             <x-card class="space-y-4">
                 <x-slot:title class="text-[1.375rem] font-medium">
-                    Cant. de PO en transito
+                    Cant. de PO en tránsito
                 </x-slot:title>
 
                 <x-slot:content class="text-sm">

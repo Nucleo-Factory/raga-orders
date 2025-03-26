@@ -41,8 +41,8 @@
 }" class="w-full overflow-hidden" x-init="init()">
     <button @click="toggleDropdown()"
         class="sidebar-dropdown {{ $active ? 'bg-[#E0E5FF]' : '' }} group flex w-full items-center justify-between rounded-lg px-2 py-1 sm:px-3 sm:py-[0.625rem]">
-        <div class="sidebar-dropdown-text-container flex items-center">
-            <div class="flex h-5 w-5 items-center justify-center">
+        <div class="flex items-center sidebar-dropdown-text-container">
+            <div class="flex items-center justify-center w-5 h-5">
                 {{ $icon }}
             </div>
             <span

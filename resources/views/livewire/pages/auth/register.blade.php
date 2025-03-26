@@ -83,7 +83,7 @@ $register = function () {
                 {{ __('ya tienes cuenta?') }}
             </a>
 
-            <x-primary-button class="ms-4">
+            <x-primary-button class="ms-4" type="submit">
                 {{ __('Registrar') }}
             </x-primary-button>
         </div>
