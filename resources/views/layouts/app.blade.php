@@ -31,8 +31,8 @@
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
 
-            <main class="relative flex w-full justify-between px-4 sm:px-0">
-                <div class="w-full space-y-5 px-10">
+            <main class="relative flex justify-between w-full px-4 sm:px-0">
+                <div class="w-full px-10 space-y-5">
                     {{ $slot }}
                 </div>
             </main>

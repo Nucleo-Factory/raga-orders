@@ -2,17 +2,17 @@
     // Esta variable ya no es necesaria, usamos las columnas del Kanban directamente
 @endphp
 
-<div class="mx-auto w-full">
-    <div class="kanban-container flex w-full gap-4 overflow-x-auto pb-4" wire:poll.10s>
+<div class="w-full mx-auto">
+    <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
         @if (!$board)
-            <div class="rounded-lg bg-white p-6 shadow-md">
+            <div class="p-6 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
                 <p class="mt-2 text-gray-600">No se encontró ningún tablero Kanban para tu compañía. Contacta al
                     administrador para crear uno.</p>
             </div>
         @else
             @foreach ($columns as $column)
-                <div class="kanban-column mx-2 w-80 flex-shrink-0 rounded-lg p-3">
+                <div class="flex-shrink-0 p-3 mx-2 rounded-lg kanban-column w-80">
                     <h3 class="mb-4 border-b-2 border-[#2E2E2E] px-2 text-lg font-bold text-[#2E2E2E]">
                         {{ $column['name'] }}
                         <span class="ml-2 text-sm font-normal text-gray-600">
@@ -20,7 +20,7 @@
                         </span>
                     </h3>
 
-                    <div id="column-{{ $column['id'] }}" data-column-id="{{ $column['id'] }}" class="min-h-40 space-y-3"
+                    <div id="column-{{ $column['id'] }}" data-column-id="{{ $column['id'] }}" class="space-y-3 min-h-40"
                         x-data x-init="new Sortable($el, {
                             group: 'tasks',
                             animation: 150,
@@ -34,7 +34,7 @@
                                 const taskId = evt.item.getAttribute('data-task-id');
                                 const newColumn = evt.to.getAttribute('data-column-id');
 
-
+                                console.log(taskId, newColumn);
                                 if (evt.from.getAttribute('data-column-id') !== newColumn) {
                                     $dispatch('open-modal', 'change-oc-stage');
 
@@ -43,7 +43,7 @@
                             }
                         })">
                         @foreach ($tasksByColumn[$column['id']] as $task)
-                            <div class="task-card cursor-move" data-task-id="{{ $task['id'] }}">
+                            <div class="cursor-move task-card" data-task-id="{{ $task['id'] }}">
                                 <x-kanban-card :po="$task['po']" :trackingId="$task['id']" :hubLocation="$task['company']" :leadTime="$task['order_date'] ?? 'N/A'"
                                     :recolectaTime="$task['requested_delivery_date'] ?? 'N/A'" :pickupTime="$task['requested_delivery_date'] ?? 'N/A'" :totalWeight="number_format($task['total'] ?? 0, 2)" />
                             </div>
@@ -54,7 +54,7 @@
         @endif
     </div>
 
-    <x-modal-success show="true">
+    <x-modal-success name="success-modal" show="true">
         <div>
             @if ($currentTask)
                 <p>PO: {{ $currentTask['po'] }}</p>
@@ -63,7 +63,7 @@
     </x-modal-success>
 
     <x-modal name="change-oc-stage" maxWidth="lg">
-        <h3 class="mb-2 text-center text-lg font-bold text-light-blue">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
             ¿Cambiar la Orden de compra de etapa?
         </h3>
 
