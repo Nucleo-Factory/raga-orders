@@ -205,6 +205,12 @@
                         </li>
 
                         <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.stages') }}" :active="request()->routeIs('settings.stages')">
+                                Etapas
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.roles') }}" :active="request()->routeIs('settings.roles')">
                                 Roles
                             </x-sidebar-dropdown-item>
