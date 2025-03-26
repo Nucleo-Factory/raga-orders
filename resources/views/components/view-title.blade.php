@@ -1,7 +1,7 @@
 @props(['title', 'content' => null])
 
 <div>
-    <h1 {{ $title->attributes->merge(['class' => 'text-[3.25rem] font-black leading-[3.75rem]']) }}>
+    <h1 {{ $title->attributes->merge(['class' => 'text-[2.75rem] font-black leading-[3.75rem]']) }}>
         {{ $title }}
     </h1>
 
