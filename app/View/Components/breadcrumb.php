@@ -17,16 +17,18 @@ class breadcrumb extends Component
     public function __construct()
     {
         $this->currentPath = request()->path();
-        $this->segments = collect(explode('/', $this->currentPath))
-            ->filter()
-            ->map(function ($segment) {
-                return [
-                    'name' => ucfirst(str_replace(['-', '_'], ' ', $segment)),
-                    'url' => $segment
-                ];
-            })
-            ->values()
-            ->toArray();
+        if ($this->currentPath !== '/') {
+            $this->segments = collect(explode('/', $this->currentPath))
+                ->filter()
+                ->map(function ($segment) {
+                    return [
+                        'name' => ucfirst(str_replace(['-', '_'], ' ', $segment)),
+                        'url' => $segment
+                    ];
+                })
+                ->values()
+                ->toArray();
+        }
     }
 
     /**
