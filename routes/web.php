@@ -11,8 +11,10 @@ use App\Livewire\Settings\History;
 use App\Livewire\Settings\Roles;
 use App\Livewire\Settings\RoleEdit;
 use App\Livewire\Forms\PucharseOrderConsolidateDetail;
+use App\Livewire\Settings\ActiveSessions;
 use App\Livewire\Settings\Kanban;
 use App\Livewire\Settings\Stages;
+use App\Livewire\Settings\Users;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -151,6 +153,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/stages', Stages::class)
         ->name('settings.stages');
+
+    Route::get('settings/users', Users::class)
+        ->name('settings.users');
+
+    Route::get('settings/active-sessions', ActiveSessions::class)
+        ->name('settings.active-sessions');
 });
 
 Route::view('support', 'support.index')

@@ -9,8 +9,7 @@
         </x-slot:content>
     </x-view-title>
 
-
-    <nav class="px-6 py-4 bg-white rounded-2xl">
+    <nav class="rounded-2xl bg-white px-6 py-4 text-lg">
         <ul class="flex items-center justify-between">
             <li>
                 <livewire:settings.nav-link text="Generales" :route="'settings.index'" />

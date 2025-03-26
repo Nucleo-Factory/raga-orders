@@ -11,12 +11,12 @@
     @if ($icon)
         <div class="relative">
             <input @if ($input->attributes->has('name')) id="{{ $input->attributes->get('name') }}" @endif
-                {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF] w-full', 'type' => 'text']) }}>
+                {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF] w-full leading-none', 'type' => 'text']) }}>
 
             {{ $icon }}
         </div>
     @else
         <input @if ($input->attributes->has('name')) id="{{ $input->attributes->get('name') }}" @endif
-            {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF]', 'type' => 'text']) }}>
+            {{ $input->attributes->merge(['class' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF] leading-none', 'type' => 'text']) }}>
     @endif
 </div>

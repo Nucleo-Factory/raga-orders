@@ -3,7 +3,7 @@
     'name' => 'select',
     'options' => [],
     'optionPlaceholder' => 'Elija opción',
-    'selectClasses' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E]',
+    'selectClasses' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E] leading-[1.375rem]',
     'wireModel' => '',
 ])
 
