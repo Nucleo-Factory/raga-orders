@@ -11,8 +11,8 @@
             </div>
         @else
             @foreach($columns as $column)
-                <div class="flex-shrink-0 p-3 mx-2 bg-gray-100 rounded-lg w-80 kanban-column">
-                    <h3 class="mb-3 text-lg font-bold">
+                <div class="flex-shrink-0 p-3 mx-2 rounded-lg w-80 kanban-column">
+                    <h3 class="mb-4 text-lg font-bold text-[#2E2E2E] border-b-2 border-[#2E2E2E] px-2">
                         {{ $column['name'] }}
                         <span class="ml-2 text-sm font-normal text-gray-600">
                             ({{ count($tasksByColumn[$column['id']]) }})
@@ -146,7 +146,6 @@
         }
 
         .kanban-column {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             height: 100%;
             min-height: 600px;
         }
