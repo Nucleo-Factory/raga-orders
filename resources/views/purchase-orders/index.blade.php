@@ -129,7 +129,6 @@
         <div>
             <div x-show="activeTab === 'tab1'" x-transition class="">
                 <livewire:kanban.kanban-board />
-
             </div>
 
             <div x-show="activeTab === 'tab2'" x-transition class="space-y-[1.875rem]">

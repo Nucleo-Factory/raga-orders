@@ -250,14 +250,12 @@ th {
 
 .kanban-column {
     flex: 0 0 400px;
-    width: 400px;
-    min-width: 400px;
-    max-width: 400px;
-    background-color: #f3f4f6;
+    width: 420px;
+    min-width: 420px;
+    max-width: 420px;
     border-radius: 0.5rem;
     padding: 1rem;
     margin: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .kanban-card {
