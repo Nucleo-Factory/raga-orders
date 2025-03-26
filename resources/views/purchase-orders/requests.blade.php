@@ -4,7 +4,15 @@
 
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Solicitudes y aprobaciones" subtitle="Gestiona todas las solicitudes y aprobaciones" />
+        <x-view-title>
+            <x-slot:title>
+                Solicitudes y aprobaciones
+            </x-slot:title>
+
+            <x-slot:content>
+                Gestiona todas las solicitudes y aprobaciones
+            </x-slot:content>
+        </x-view-title>
     </div>
 
     @if (session('message'))

@@ -1,6 +1,14 @@
 <div class="space-y-10">
     <div class="flex items-center justify-between">
-        <x-view-title title="Lista de Roles" subtitle="Asigne roles y permisos a los diversos usuarios" />
+        <x-view-title>
+            <x-slot:title>
+                Lista de Roles
+            </x-slot:title>
+
+            <x-slot:content>
+                Asigne roles y permisos a los diversos usuarios
+            </x-slot:content>
+        </x-view-title>
 
         <div class="flex space-x-4">
             <a href="{{ route('settings.roles.create') }}">

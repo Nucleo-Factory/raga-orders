@@ -74,8 +74,6 @@
     </ul>
 
     {{-- Lista --}}
-    <div class="flex w-full gap-x-10 overflow-auto">
-    </div>
     <div class="space-y-[1.875rem]" x-data="{
         activeTab: 'tab1'
     }">
