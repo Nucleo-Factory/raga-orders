@@ -13,6 +13,7 @@ use App\Livewire\Settings\RoleEdit;
 use App\Livewire\Forms\PucharseOrderConsolidateDetail;
 use App\Livewire\Settings\ActiveSessions;
 use App\Livewire\Settings\Kanban;
+use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Stages;
 use App\Livewire\Settings\Users;
 
@@ -159,6 +160,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/active-sessions', ActiveSessions::class)
         ->name('settings.active-sessions');
+
+    Route::get('settings/profile', Profile::class)
+        ->name('settings.profile');
 });
 
 Route::view('support', 'support.index')
