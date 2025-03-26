@@ -6,11 +6,11 @@
     <div class="flex items-center justify-between">
         <x-view-title>
             <x-slot:title>
-                Solicitudes y aprobaciones
+                Solicitudes
             </x-slot:title>
 
             <x-slot:content>
-                Gestiona todas las solicitudes y aprobaciones
+                Visualiza y administra las operaciones pendientes de aprobación
             </x-slot:content>
         </x-view-title>
     </div>
@@ -22,28 +22,18 @@
     @endif
 
     <!-- Tabs for switching between views -->
-    <div x-data="{ activeTab: 'approval_requests' }" class="mb-6">
-        <div class="border-b border-gray-200">
-            <ul class="flex -mb-px">
-                <li class="mr-2">
-                    <button
-                        @click="activeTab = 'approval_requests'"
-                        :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'approval_requests', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'approval_requests' }"
-                        class="inline-block p-4 font-medium border-b-2"
-                    >
-                        Solicitudes de Aprobación
-                    </button>
-                </li>
-                <li class="mr-2">
-                    <button
-                        @click="activeTab = 'document_history'"
-                        :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'document_history', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'document_history' }"
-                        class="inline-block p-4 font-medium border-b-2"
-                    >
-                        Historial de aprobaciones
-                    </button>
-                </li>
-            </ul>
+    <div x-data="{ activeTab: 'approval_requests' }" class="space-y-[1.875rem]">
+        <div class="flex items-center gap-6 text-lg font-bold">
+            <button @click="activeTab = 'approval_requests'"
+                :class="activeTab === 'approval_requests' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
+                Solicitudes
+            </button>
+            <button @click="activeTab = 'document_history'"
+                :class="activeTab === 'document_history' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                class="border-b-2 py-[0.625rem]">
+                Historial
+            </button>
         </div>
 
         <!-- Approval Requests View -->
