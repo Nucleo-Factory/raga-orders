@@ -54,13 +54,21 @@
         @endif
     </div>
 
+    <x-modal-success show="true">
+        <div>
+            @if ($currentTask)
+                <p>PO: {{ $currentTask['po'] }}</p>
+            @endif
+        </div>
+    </x-modal-success>
+
     <x-modal name="change-oc-stage" maxWidth="lg">
         <h3 class="mb-2 text-center text-lg font-bold text-light-blue">
             ¿Cambiar la Orden de compra de etapa?
         </h3>
 
         @if ($currentTask)
-            <div class="mb-5 rounded-lg bg-gray-50 text-center">
+            <div class="mb-5 text-center">
                 <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
             </div>
         @endif
