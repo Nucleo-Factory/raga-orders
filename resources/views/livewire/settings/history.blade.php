@@ -1,6 +1,14 @@
 <div>
     <x-slot:header>
-        <x-view-title title="Histórico" subtitle="Visualiza y administra las operaciones generales" />
+        <x-view-title>
+            <x-slot:title>
+                Histórico
+            </x-slot:title>
+
+            <x-slot:content>
+                Visualiza y administra las operaciones generales
+            </x-slot:content>
+        </x-view-title>
     </x-slot:header>
 
     {{-- Lista --}}

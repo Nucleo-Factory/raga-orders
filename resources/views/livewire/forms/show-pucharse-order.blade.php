@@ -1,6 +1,14 @@
 <div>
     <div class="flex max-w-[1254px] items-center justify-between">
-        <x-view-title title="Detalles de Orden de compra" subtitle="Información completa de la orden de compra" />
+        <x-view-title>
+            <x-slot:title>
+                Detalles de Orden de compra
+            </x-slot:title>
+
+            <x-slot:content>
+                Información completa de la orden de compra
+            </x-slot:content>
+        </x-view-title>
 
         <div class="flex space-x-4">
             <x-black-btn onclick="window.print()">Imprimir</x-black-btn>

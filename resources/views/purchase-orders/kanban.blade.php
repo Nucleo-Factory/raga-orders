@@ -4,7 +4,15 @@
 
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Etapas PO" subtitle="Gestiona todas las etapas de tus órdenes de compra" />
+        <x-view-title>
+            <x-slot:title>
+                Etapas PO
+            </x-slot:title>
+
+            <x-slot:content>
+                Gestiona todas las etapas de tus órdenes de compra
+            </x-slot:content>
+        </x-view-title>
 
         <a href="{{route('purchase-orders.create')}}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
             Cargar nueva orden de compra

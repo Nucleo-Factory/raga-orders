@@ -1,6 +1,10 @@
 <div class="pb-10 space-y-10">
     <div class="flex items-center justify-between">
-        <x-view-title title="Editar Rol: Administrador" />
+        <x-view-title>
+            <x-slot:title>
+                Editar Rol: Administrador
+            </x-slot:title>
+        </x-view-title>
 
         <div class="flex space-x-4">
             <x-black-btn>Guardar Cambios</x-black-btn>

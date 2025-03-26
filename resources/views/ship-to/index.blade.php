@@ -4,7 +4,15 @@
     @endphp
 
     <div class="flex items-center justify-between">
-        <x-view-title title="Gestión de Direcciones de entrega" subtitle="Gestiona todas las direcciones de entrega" />
+        <x-view-title>
+            <x-slot:title>
+                Gestión de Direcciones de entrega
+            </x-slot:title>
+
+            <x-slot:content>
+                Gestiona todas las direcciones de entrega
+            </x-slot:content>
+        </x-view-title>
 
         <a href="{{ route('ship-to.create') }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
             Nueva Dirección de entrega
