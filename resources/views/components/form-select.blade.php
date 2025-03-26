@@ -1,19 +1,20 @@
 @props([
-    'label' => '',
+    'label' => false,
     'name' => 'select',
     'options' => [],
     'optionPlaceholder' => 'Elija opción',
-    'selectClasses' => 'rounded-[0.5rem] border border-[#D1D5DB] px-3 py-2 text-[0.875rem] text-[#6B7280]',
+    'selectClasses' => 'rounded-xl border-2 border-[#9AABFF] py-[0.625rem] px-3 text-lg text-[#2E2E2E]',
     'wireModel' => '',
 ])
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col">
     @if ($label)
-        <label for="{{ $name }}" class="text-[0.875rem] font-medium text-[#111928]">
+        <label for="{{ $name }}" class="ml-[1.125rem] text-sm font-medium text-[#565AFF]">
             {{ $label }}
         </label>
     @endif
-    <select id="{{ $name }}" name="{{ $name }}" class="{{ $selectClasses }}" @if($wireModel) wire:model="{{ $wireModel }}" @endif {{ $attributes }}>
+    <select id="{{ $name }}" name="{{ $name }}" class="{{ $selectClasses }}"
+        @if ($wireModel) wire:model="{{ $wireModel }}" @endif {{ $attributes }}>
         <option value="">{{ $optionPlaceholder }}</option>
         @foreach ($options as $key => $option)
             <option value="{{ $key }}">{{ $option }}</option>

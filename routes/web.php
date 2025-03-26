@@ -12,6 +12,7 @@ use App\Livewire\Settings\Roles;
 use App\Livewire\Settings\RoleEdit;
 use App\Livewire\Forms\PucharseOrderConsolidateDetail;
 use App\Livewire\Settings\Kanban;
+use App\Livewire\Settings\Stages;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -147,6 +148,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/kanban', Kanban::class)
         ->name('settings.kanban');
+
+    Route::get('settings/stages', Stages::class)
+        ->name('settings.stages');
 });
 
 Route::view('support', 'support.index')

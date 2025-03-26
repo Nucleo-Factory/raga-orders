@@ -1,5 +1,13 @@
 <x-app-layout>
-    <x-view-title title="Soporte" subtitle="Visualiza y administra los productos" />
+    <x-view-title>
+        <x-slot:title>
+            Soporte
+        </x-slot:title>
+
+        <x-slot:content>
+            Visualiza y administra los productos
+        </x-slot:content>
+    </x-view-title>
 
     <div class="relative">
         <input type="text" placeholder="Search..."

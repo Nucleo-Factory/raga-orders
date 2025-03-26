@@ -14,7 +14,7 @@ export default {
             fontFamily: {
                 inter: ['Inter', ...defaultTheme.fontFamily.sans],
                 "dm-sans": ['DM Sans', ...defaultTheme.fontFamily.sans],
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Lato', ...defaultTheme.fontFamily.sans],
             },
             boxShadow: {
                 'header': '0px 4px 30px 0px rgba(230, 229, 234, 0.75);',
@@ -23,6 +23,14 @@ export default {
             backgroundImage: {
                 'home-hero': "url('/public/img/home-bg.png')",
             },
+            colors: {
+                'dark-blue': '#1108BC',
+                'light-blue': '#565AFF',
+                'neutral-blue': '#7288FF',
+                'success': '#5DD595',
+                'danger': '#FF3459',
+                'warning': '#FEAE33'
+            }
         },
     },
 

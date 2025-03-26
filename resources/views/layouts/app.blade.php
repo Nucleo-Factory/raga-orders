@@ -10,7 +10,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,700,800|figtree:400,500,600|inter:400,500,600" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,700|inter:400,500,600|lato:300,400,700,900" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -19,7 +19,7 @@
         @livewireStyles
     </head>
 
-    <body class="bg-[#EDEDED] grid grid-cols-[auto,1fr]">
+    <body class="bg-[#F7F7F7] grid grid-cols-[auto,1fr]">
         <!-- Aqui debe ir el componente sidebar -->
         <livewire:partials.main-sidebar />
         <!-- Aqui debe ir el componente sidebar -->

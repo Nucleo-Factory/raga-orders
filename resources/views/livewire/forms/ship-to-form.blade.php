@@ -1,6 +1,14 @@
 <div>
     <div class="flex max-w-[1254px] items-center justify-between mb-10">
-        <x-view-title title="{{ $title }}" subtitle="{{ $subtitle }}" />
+        <x-view-title>
+            <x-slot:title>
+                {{ $title }}
+            </x-slot:title>
+
+            <x-slot:content>
+                {{ $subtitle }}
+            </x-slot:content>
+        </x-view-title>
     </div>
 
     <form wire:submit.prevent="saveShipTo">
