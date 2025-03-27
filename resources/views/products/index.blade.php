@@ -18,17 +18,13 @@
                             stroke-linejoin="round"
                             class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
                     </svg>
-                    <span>Cargar nueva orden</span>
+                    <span>Nuevo producto</span>
                 </x-secondary-button>
             </a>
-
-            <x-primary-button wire:click="createPurchaseOrder" class="w-[209px]">
-                Cambiar de etapa
-            </x-primary-button>
         </div>
     </div>
 
-    <div class="flex gap-4">
+    <div class="flex hidden gap-4">
         <x-search-input />
 
         <x-primary-button class="group flex items-center gap-[0.625rem]">
@@ -43,7 +39,7 @@
     </div>
 
     @if (session('message'))
-        <div class="mb-4 rounded border border-green-400 bg-green-100 px-4 py-2 text-green-700">
+        <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
             {{ session('message') }}
         </div>
     @endif

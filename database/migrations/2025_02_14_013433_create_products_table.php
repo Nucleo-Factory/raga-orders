@@ -12,23 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            // Primary key
+
             $table->id();
 
-            // Columns
-            $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->string('sku')->unique();
-            $table->integer('stock')->default(0);
-            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->decimal('weight_kg', 8, 2)->nullable();
+            $table->string('material_id')->nullable();
+            $table->string('legacy_material')->nullable();
+            $table->string('contract')->nullable();
+            $table->integer('order_quantity')->nullable();
+            $table->string('qty_unit')->nullable();
+            $table->decimal('price_per_unit', 10, 2)->nullable();
+            $table->decimal('price_per_uon', 10, 2)->nullable();
+            $table->decimal('net_value', 10, 2)->nullable();
+            $table->decimal('vat_rate', 5, 2)->nullable();
+            $table->decimal('vat_value', 10, 2)->nullable();
+            $table->date('delivery_date')->nullable();
 
-            // Timestamps
             $table->timestamps();
 
-            // Indexes
-            $table->index('name');
+            $table->index('description');
+            $table->index('material_id');
+            $table->index('delivery_date');
         });
     }
 

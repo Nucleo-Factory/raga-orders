@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Product;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class CreateProducts extends Component {
     // Product fields
@@ -38,6 +40,12 @@ class CreateProducts extends Component {
             $this->contract = $product->contract;
             $this->order_quantity = $product->order_quantity;
             $this->qty_unit = $product->qty_unit;
+            $this->price_per_unit = $product->price_per_unit;
+            $this->price_per_uon = $product->price_per_uon;
+            $this->net_value = $product->net_value;
+            $this->vat_rate = $product->vat_rate;
+            $this->vat_value = $product->vat_value;
+            $this->delivery_date = Carbon::parse($product->delivery_date)->format('Y-m-d');
         }
     }
 
@@ -61,6 +69,21 @@ class CreateProducts extends Component {
 
         // Process the form submission
         // You would save to database here
+
+        // Create product
+        $product = Product::create([
+            'material_id' => $this->material_id,
+            'description' => $this->description,
+            'legacy_material' => $this->legacy_material,
+            'contract' => $this->contract,
+            'order_quantity' => $this->order_quantity,
+            'qty_unit' => $this->qty_unit,
+            'price_per_unit' => $this->price_per_unit,
+            'price_per_uon' => $this->price_per_uon,
+            'net_value' => $this->net_value,
+            'vat_rate' => $this->vat_rate,
+            'vat_value' => $this->vat_value,
+        ]);
 
         // Reset form
         session()->flash('message', 'Producto creado exitosamente!');

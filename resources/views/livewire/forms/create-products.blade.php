@@ -1,5 +1,5 @@
 <div>
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between" wire:ignore>
         <x-view-title>
             <x-slot:title>
                 {{ $title }}
@@ -11,18 +11,14 @@
         </x-view-title>
 
         <div class="flex gap-4">
-            <x-secondary-button class="w-[209px]">
-                Cancelar
-            </x-secondary-button>
-
             <x-primary-button wire:click="createProduct" class="w-[209px]">
-                Crear nueva orden
+                Crear producto
             </x-primary-button>
         </div>
     </div>
 
     <x-form wire:submit.prevent="createProduct">
-        <div class="space-y-10 rounded-2xl bg-white p-8">
+        <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
                 <div class="w-full space-y-6">
                     <h3 class="text-lg font-bold text-neutral-blue">Datos del Producto</h3>
@@ -49,14 +45,6 @@
                         </x-form-input>
                     </div>
                 </div>
-
-                <x-form-input-file class="space-y-6">
-                    <x-slot:label class="!text-lg !font-bold">
-                        Adjunte la orden para autocompletar
-                    </x-slot:label>
-                    <x-slot:input name="autocomplete_product">
-                    </x-slot:input>
-                </x-form-input-file>
             </div>
 
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -127,7 +115,7 @@
         </div>
 
         @if (session()->has('message'))
-            <div class="mt-4 rounded-md bg-green-100 p-4 text-green-700">
+            <div class="p-4 mt-4 text-green-700 bg-green-100 rounded-md">
                 {{ session('message') }}
             </div>
         @endif
