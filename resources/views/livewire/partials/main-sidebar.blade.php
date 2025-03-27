@@ -164,6 +164,13 @@
                                 Direcciones de entrega
                             </x-sidebar-dropdown-item>
                         </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('bill-to.index') }}"
+                                :active="request()->routeIs('bill-to.index')">
+                                Direcciones de facturación
+                            </x-sidebar-dropdown-item>
+                        </li>
                     </ul>
                 </x-sidebar-dropdown>
             </li>
