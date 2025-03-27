@@ -9,6 +9,6 @@ class RoleEdit extends Component
     public function render()
     {
         return view('livewire.settings.role-edit')
-            ->layout('layouts.settings.user-management');
+            ->layout('layouts.settings.role-edit');
     }
 }
