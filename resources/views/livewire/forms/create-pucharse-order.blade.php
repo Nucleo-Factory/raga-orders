@@ -487,7 +487,7 @@
 
                     <div class="self-end h-fit" x-data="{ selectedProduct: @entangle('selectedProduct') }">
                         <x-primary-button class="border-[3px] border-[#565AFF] disabled:border-[#EDEDED]"
-                            x-bind:disabled="!selectedProduct" wire:click="addProduct">
+                             wire:click="addProduct">
                             Agregar
                         </x-primary-button>
                     </div>

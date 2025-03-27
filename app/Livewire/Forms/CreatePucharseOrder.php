@@ -447,6 +447,7 @@ class CreatePucharseOrder extends Component
     }
 
     public function createPurchaseOrder() {
+
         // Validar los datos
         $this->validate([
             'order_number' => 'required|string|max:255|unique:purchase_orders,order_number' . ($this->id ? ','.$this->id : ''),
@@ -462,7 +463,8 @@ class CreatePucharseOrder extends Component
         // Asegurar que las fechas sean null si están vacías
         $this->prepareDateFields();
 
-        // Datos para crear o actualizar
+        // Collect only the fields that match your database schema
+        // Remove fields that don't exist in the database
         $poData = [
             'company_id' => $companyId,
             'order_number' => $this->order_number,
@@ -470,32 +472,13 @@ class CreatePucharseOrder extends Component
             'notes' => $this->notes,
             'total_amount' => $this->total,
 
-            // Vendor information
+            // Vendor information - just the ID, remove other vendor fields
             'vendor_id' => $this->vendor_id,
-            'vendor_direccion' => $this->vendor_direccion,
-            'vendor_codigo_postal' => null,
-            'vendor_pais' => $this->vendor_pais,
-            'vendor_estado' => null,
-            'vendor_telefono' => $this->vendor_telefono,
 
-            // Ship to information
+            // Ship to information - just the ID, remove other ship_to fields
             'ship_to_id' => $this->ship_to_id,
-            'ship_to_nombre' => $this->ship_to_nombre,
-            'ship_to_direccion' => $this->ship_to_direccion,
-            'ship_to_codigo_postal' => null,
-            'ship_to_pais' => $this->ship_to_pais,
-            'ship_to_estado' => null,
-            'ship_to_telefono' => $this->ship_to_telefono,
 
-            // Bill to information
-            'bill_to_nombre' => $this->bill_to_nombre,
-            'bill_to_direccion' => $this->bill_to_direccion,
-            'bill_to_codigo_postal' => null,
-            'bill_to_pais' => $this->bill_to_pais,
-            'bill_to_estado' => null,
-            'bill_to_telefono' => $this->bill_to_telefono,
-
-            // Order details
+            // Order details - keep only basic fields
             'order_date' => $this->order_date,
             'currency' => $this->currency,
             'incoterms' => $this->incoterms,
@@ -575,16 +558,28 @@ class CreatePucharseOrder extends Component
             $poData['kanban_status_id'] = $recepcionStatus ? $recepcionStatus->id : null;
         }
 
+        // Filter out any fields that might not exist in the database
+        // This is safer than explicitly removing fields one by one
         if ($this->id) {
-            // Actualizar orden de compra existente
-            $purchaseOrder = \App\Models\PurchaseOrder::find($this->id);
-            $purchaseOrder->update($poData);
+            // For updates, only use existing fields
+            $existingPO = \App\Models\PurchaseOrder::find($this->id);
+            $validFields = array_keys($existingPO->getAttributes());
+            $poData = array_intersect_key($poData, array_flip($validFields));
 
-            // Limpiar productos previos y agregar los nuevos
-            $purchaseOrder->products()->detach();
+            // Actualizar orden de compra existente
+            $existingPO->update($poData);
+            $purchaseOrder = $existingPO;
         } else {
-            // Crear nueva orden de compra
-            $purchaseOrder = \App\Models\PurchaseOrder::create($poData);
+            // For creating, let's try to create with the filtered data
+            // and let any DB errors inform us what's missing
+            try {
+                $purchaseOrder = \App\Models\PurchaseOrder::create($poData);
+            } catch (\Exception $e) {
+                // Log the error for debugging
+                \Log::error('Error creating purchase order: ' . $e->getMessage());
+                session()->flash('error', 'Error al crear la orden de compra: ' . $e->getMessage());
+                return;
+            }
         }
 
         // Guardar los productos asociados a la orden de compra

@@ -15,65 +15,87 @@
         <div class="w-full max-w-[1254px] space-y-6">
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                 <!-- Información básica -->
-                <x-form-input
-                    label="Nombre *"
-                    type="text"
-                    name="name"
-                    wireModel="name"
-                    placeholder="Ingrese nombre"
-                    required
-                />
-                <x-form-input
-                    label="Email"
-                    type="email"
-                    name="email"
-                    wireModel="email"
-                    placeholder="Ingrese email"
-                />
-                <x-form-input
-                    label="Persona de contacto"
-                    type="text"
-                    name="contact_person"
-                    wireModel="contact_person"
-                    placeholder="Ingrese persona de contacto"
-                />
+                <x-form-input>
+                    <x-slot:label>
+                        Nombre *
+                    </x-slot:label>
+                    <x-slot:input name="name" placeholder="Ingrese nombre" wire:model="name" required></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('name') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        Email
+                    </x-slot:label>
+                    <x-slot:input type="email" name="email" placeholder="Ingrese email" wire:model="email"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('email') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        Persona de contacto
+                    </x-slot:label>
+                    <x-slot:input name="contact_person" placeholder="Ingrese persona de contacto" wire:model="contact_person"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('contact_person') }}
+                    </x-slot:error>
+                </x-form-input>
 
                 <!-- Dirección y contacto -->
-                <x-form-input
-                    label="Dirección"
-                    type="text"
-                    name="ship_to_direccion"
-                    wireModel="ship_to_direccion"
-                    placeholder="Ingrese dirección"
-                />
-                <x-form-input
-                    label="Código Postal"
-                    type="text"
-                    name="ship_to_codigo_postal"
-                    wireModel="ship_to_codigo_postal"
-                    placeholder="Ingrese código postal"
-                />
-                <x-form-input
-                    label="País"
-                    type="text"
-                    name="ship_to_pais"
-                    wireModel="ship_to_pais"
-                    placeholder="Ingrese país"
-                />
-                <x-form-input
-                    label="Estado/Provincia"
-                    type="text"
-                    name="ship_to_estado"
-                    wireModel="ship_to_estado"
-                    placeholder="Ingrese estado o provincia"
-                />
-                <x-form-input
-                    label="Teléfono"
-                    type="text"
-                    name="ship_to_telefono"
-                    wireModel="ship_to_telefono"
-                    placeholder="Ingrese teléfono"
-                />
+                <x-form-input>
+                    <x-slot:label>
+                        Dirección
+                    </x-slot:label>
+                    <x-slot:input name="address" placeholder="Ingrese dirección" wire:model="address"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('address') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        Código Postal
+                    </x-slot:label>
+                    <x-slot:input name="postal_code" placeholder="Ingrese código postal" wire:model="postal_code"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('postal_code') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        País
+                    </x-slot:label>
+                    <x-slot:input name="country" placeholder="Ingrese país" wire:model="country"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('country') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        Estado/Provincia
+                    </x-slot:label>
+                    <x-slot:input name="state" placeholder="Ingrese estado o provincia" wire:model="state"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('state') }}
+                    </x-slot:error>
+                </x-form-input>
+
+                <x-form-input>
+                    <x-slot:label>
+                        Teléfono
+                    </x-slot:label>
+                    <x-slot:input name="phone" placeholder="Ingrese teléfono" wire:model="phone"></x-slot:input>
+                    <x-slot:error>
+                        {{ $errors->first('phone') }}
+                    </x-slot:error>
+                </x-form-input>
+
                 <x-form-select
                     label="Estado"
                     name="status"

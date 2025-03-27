@@ -2,61 +2,72 @@
 
 namespace App\Livewire\Forms;
 
-use App\Models\ShipTo;
 use Livewire\Component;
+use App\Models\ShipTo;
 use Illuminate\Support\Facades\Auth;
 
 class ShipToForm extends Component
 {
-    public $shipTo;
-    public $ship_to_id;
+    public $shipToId;
+    public $title;
+    public $subtitle;
+    public $isEdit = false;
+
+    // Propiedades correspondientes a los campos de la tabla
+    public $company_id;
     public $name;
     public $email;
     public $contact_person;
-    public $ship_to_direccion;
-    public $ship_to_codigo_postal;
-    public $ship_to_pais;
-    public $ship_to_estado;
-    public $ship_to_telefono;
-    public $status;
+    public $address;
+    public $postal_code;
+    public $country;
+    public $state;
+    public $phone;
+    public $status = 'active';
     public $notes;
-    public $isEdit = false;
-
-    public $title;
-    public $subtitle;
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255',
         'contact_person' => 'nullable|string|max:255',
-        'ship_to_direccion' => 'nullable|string|max:255',
-        'ship_to_codigo_postal' => 'nullable|string|max:20',
-        'ship_to_pais' => 'nullable|string|max:100',
-        'ship_to_estado' => 'nullable|string|max:100',
-        'ship_to_telefono' => 'nullable|string|max:20',
+        'address' => 'nullable|string|max:255',
+        'postal_code' => 'nullable|string|max:255',
+        'country' => 'nullable|string|max:255',
+        'state' => 'nullable|string|max:255',
+        'phone' => 'nullable|string|max:255',
         'status' => 'required|in:active,inactive',
         'notes' => 'nullable|string',
     ];
 
-    public function mount($shipTo = null)
+    public function mount($id = null)
     {
-        $this->isEdit = $shipTo !== null;
+        if ($id) {
+            $this->shipToId = $shipToId;
+            $this->isEdit = true;
+            $this->title = 'Editar Dirección de Envío';
+            $this->subtitle = 'Modificar información de la dirección de envío';
 
-        if ($this->isEdit) {
-            $this->shipTo = $shipTo;
-            $this->ship_to_id = $shipTo->id;
+            $shipTo = ShipTo::findOrFail($shipToId);
+
+            $this->company_id = $shipTo->company_id;
             $this->name = $shipTo->name;
             $this->email = $shipTo->email;
             $this->contact_person = $shipTo->contact_person;
-            $this->ship_to_direccion = $shipTo->ship_to_direccion;
-            $this->ship_to_codigo_postal = $shipTo->ship_to_codigo_postal;
-            $this->ship_to_pais = $shipTo->ship_to_pais;
-            $this->ship_to_estado = $shipTo->ship_to_estado;
-            $this->ship_to_telefono = $shipTo->ship_to_telefono;
+            $this->address = $shipTo->address;
+            $this->postal_code = $shipTo->postal_code;
+            $this->country = $shipTo->country;
+            $this->state = $shipTo->state;
+            $this->phone = $shipTo->phone;
             $this->status = $shipTo->status;
             $this->notes = $shipTo->notes;
+
         } else {
-            $this->status = 'active';
+            $this->title = 'Nueva Dirección de Envío';
+            $this->subtitle = 'Crear una nueva dirección de envío';
+
+            // Inicializar con la compañía del usuario actual si es aplicable
+            // Esto depende de tu lógica de negocio específica
+            $this->company_id = Auth::user()->company_id ?? null;
         }
     }
 
@@ -64,27 +75,27 @@ class ShipToForm extends Component
     {
         $this->validate();
 
-        $shipToData = [
-            'name' => $this->name,
-            'email' => $this->email,
-            'contact_person' => $this->contact_person,
-            'ship_to_direccion' => $this->ship_to_direccion,
-            'ship_to_codigo_postal' => $this->ship_to_codigo_postal,
-            'ship_to_pais' => $this->ship_to_pais,
-            'ship_to_estado' => $this->ship_to_estado,
-            'ship_to_telefono' => $this->ship_to_telefono,
-            'status' => $this->status,
-            'notes' => $this->notes,
-        ];
-
         if ($this->isEdit) {
-            $this->shipTo->update($shipToData);
-            session()->flash('message', 'Dirección de envío actualizada correctamente.');
+            $shipTo = ShipTo::findOrFail($this->shipToId);
         } else {
-            $shipToData['company_id'] = Auth::user()->company_id;
-            ShipTo::create($shipToData);
-            session()->flash('message', 'Dirección de envío creada correctamente.');
+            $shipTo = new ShipTo();
         }
+
+        $shipTo->company_id = $this->company_id;
+        $shipTo->name = $this->name;
+        $shipTo->email = $this->email;
+        $shipTo->contact_person = $this->contact_person;
+        $shipTo->address = $this->address;
+        $shipTo->postal_code = $this->postal_code;
+        $shipTo->country = $this->country;
+        $shipTo->state = $this->state;
+        $shipTo->phone = $this->phone;
+        $shipTo->status = $this->status;
+        $shipTo->notes = $this->notes;
+
+        $shipTo->save();
+
+        session()->flash('message', $this->isEdit ? 'Dirección de envío actualizada correctamente.' : 'Dirección de envío creada correctamente.');
 
         return redirect()->route('ship-to.index');
     }
