@@ -32,9 +32,9 @@
                                 <x-slot:label>
                                     Número PO
                                 </x-slot:label>
-                                <x-slot:input name="order_number" placeholder="Ingrese número PO"
-                                    wire:model="order_number" class="pr-10">
-                                </x-slot:input>
+
+                                <x-slot:input name="order_number" placeholder="Ingrese número PO" wire:model="order_number" class="pr-10"></x-slot:input>
+
                                 <x-slot:icon>
                                     <button wire:click="generateUniqueOrderNumber"
                                         class="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700">
@@ -46,6 +46,10 @@
                                         </svg>
                                     </button>
                                 </x-slot:icon>
+
+                                <x-slot:error>
+                                    {{ $errors->first('order_number') }}
+                                </x-slot:error>
                             </x-form-input>
                         </div>
                         <x-form-input>
@@ -95,32 +99,8 @@
             <div class="w-full space-y-6">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos de facturación</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                    <x-form-input>
-                        <x-slot:label>
-                            Nombre
-                        </x-slot:label>
-                        <x-slot:input name="bill_to_nombre" placeholder="Ingrese nombre"
-                            wire:model="bill_to_nombre">
-                        </x-slot:input>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
-                            Dirección
-                        </x-slot:label>
-                        <x-slot:input name="bill_to_direccion" placeholder="Ingrese dirección"
-                            wire:model="bill_to_direccion">
-                        </x-slot:input>
-                    </x-form-input>
-                    <x-form-select label="País" name="bill_to_pais" wireModel="bill_to_pais" :options="$paisArray"
-                        optionPlaceholder="Elije país" />
-                    <x-form-input>
-                        <x-slot:label>
-                            Teléfono
-                        </x-slot:label>
-                        <x-slot:input name="bill_to_telefono" placeholder="Ingrese dirección"
-                            wire:model="bill_to_telefono">
-                        </x-slot:input>
-                    </x-form-input>
+                    <x-form-select label="Seleccionar Bill to" name="bill_to_id" wireModel="bill_to_id"
+                        :options="$billToArray" />
                 </div>
             </div>
 
@@ -309,6 +289,154 @@
                         </x-slot:label>
 
                         <x-slot:input type="date" name="release_date" wire:model="release_date">
+                        </x-slot:input>
+                    </x-form-input>
+                </div>
+            </div>
+
+            <div class="w-full space-y-6">
+                <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
+                <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                    <x-form-select label="Tipo de Material" name="material_type" wire:model="material_type" :options="['dangerous' => 'Peligroso', 'general' => 'General', 'exclusive' => 'Exclusivo', 'estibable' => 'Estibable']" />
+                    <x-form-select label="Tipo de Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
+                    <x-form-input>
+                        <x-slot:label>
+                            Modo
+                        </x-slot:label>
+                        <x-slot:input name="mode" placeholder="Ingrese modo" wire:model="mode">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            ID de Seguimiento
+                        </x-slot:label>
+                        <x-slot:input name="tracking_id" placeholder="Ingrese ID de seguimiento" wire:model="tracking_id">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Cantidad de Pallets
+                        </x-slot:label>
+                        <x-slot:input type="number" name="pallet_quantity" placeholder="0" wire:model="pallet_quantity">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Cantidad Real de Pallets
+                        </x-slot:label>
+                        <x-slot:input type="number" name="pallet_quantity_real" placeholder="0" wire:model="pallet_quantity_real">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Conocimiento de Embarque
+                        </x-slot:label>
+                        <x-slot:input type="number" name="bill_of_lading" placeholder="0" wire:model="bill_of_lading">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo Transporte Terrestre 1
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_1" placeholder="0.00" wire:model="ground_transport_cost_1">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo Transporte Terrestre 2
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_2" placeholder="0.00" wire:model="ground_transport_cost_2">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo de Nacionalización
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="cost_nationalization" placeholder="0.00" wire:model="cost_nationalization">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo OFR Estimado
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="cost_ofr_estimated" placeholder="0.00" wire:model="cost_ofr_estimated">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo OFR Real
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="cost_ofr_real" placeholder="0.00" wire:model="cost_ofr_real">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo Estimado de Pallets
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="estimated_pallet_cost" placeholder="0.00" wire:model="estimated_pallet_cost">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo Real Estimado PO
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="real_cost_estimated_po" placeholder="0.00" wire:model="real_cost_estimated_po">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Costo Real PO
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="real_cost_real_po" placeholder="0.00" wire:model="real_cost_real_po">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Otros Costos
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="other_costs" placeholder="0.00" wire:model="other_costs">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Otros Gastos
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="other_expenses" placeholder="0.00" wire:model="other_expenses">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Peso Variable Calculado
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="variable_calculare_weight" placeholder="0.00" wire:model="variable_calculare_weight">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Ahorros OFR FCL
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="savings_ofr_fcl" placeholder="0.00" wire:model="savings_ofr_fcl">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Ahorro en Recogida
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="saving_pickup" placeholder="0.00" wire:model="saving_pickup">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Ahorro Ejecutado
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="saving_executed" placeholder="0.00" wire:model="saving_executed">
+                        </x-slot:input>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Ahorro No Ejecutado
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="saving_not_executed" placeholder="0.00" wire:model="saving_not_executed">
                         </x-slot:input>
                     </x-form-input>
                 </div>

@@ -1,21 +1,21 @@
-@php
-    $etapaArray = ["e1" => "Etapa 1", "e2" => "Etapa 2"];
-@endphp
-
 <x-app-layout>
+    @php
+        $etapaArray = ["e1" => "Etapa 1", "e2" => "Etapa 2"];
+    @endphp
+
     <div class="flex items-center justify-between">
         <x-view-title>
             <x-slot:title>
-                Gestión de Proveedores
+                Gestión de Direcciones de facturación
             </x-slot:title>
 
             <x-slot:content>
-                Gestiona todos los proveedores
+                Gestiona todas las direcciones de facturación
             </x-slot:content>
         </x-view-title>
 
-        <a href="{{ route('vendors.create') }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Nuevo Proveedor
+        <a href="{{ route('bill-to.create') }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
+            Nueva Dirección de facturación
         </a>
     </div>
 
@@ -33,8 +33,9 @@
                 $headers = [
                     'name' => 'Nombre',
                     'email' => 'Email',
-                    'contact_person' => 'Contacto',
+                    'contact_person' => 'Persona de contacto',
                     'address' => 'Dirección',
+                    'country' => 'País',
                     'phone' => 'Teléfono',
                     'status' => 'Estado',
                     'actions' => 'Acciones',
@@ -58,9 +59,9 @@
                 :actionsView="false"
                 :actionsEdit="true"
                 :actionsDelete="true"
-                :model="\App\Models\Vendor::class"
+                :baseRoute="'bill-to'"
+                :model="\App\Models\BillTo::class"
             />
         </div>
     </div>
-
 </x-app-layout>

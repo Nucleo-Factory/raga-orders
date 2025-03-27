@@ -163,6 +163,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', Profile::class)
         ->name('settings.profile');
+
+    Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->name('bill-to.index');
+    Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->name('bill-to.create');
+    Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->name('bill-to.edit');
 });
 
 Route::view('support', 'support.index')

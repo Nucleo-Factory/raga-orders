@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\ShipTo;
 use App\Models\Hub;
+use App\Models\BillTo;
 use Livewire\Component;
 
 class CreatePucharseOrder extends Component
@@ -111,6 +112,32 @@ class CreatePucharseOrder extends Component
     public $planned_hub_id;
     public $actual_hub_id;
     public $hubsArray = [];
+    public $billToArray = [];
+
+    // New fields
+    public $material_type;
+    public $ensurence_type;
+    public $mode;
+    public $tracking_id;
+    public $pallet_quantity;
+    public $pallet_quantity_real;
+    public $bill_of_lading;
+    public $ground_transport_cost_1 = 0;
+    public $ground_transport_cost_2 = 0;
+    public $cost_nationalization = 0;
+    public $cost_ofr_estimated = 0;
+    public $cost_ofr_real = 0;
+    public $estimated_pallet_cost = 0;
+    public $real_cost_estimated_po = 0;
+    public $real_cost_real_po = 0;
+    public $other_costs = 0;
+    public $other_expenses = 0;
+    public $variable_calculare_weight = 0;
+    public $savings_ofr_fcl = 0;
+    public $saving_pickup = 0;
+    public $saving_executed = 0;
+    public $saving_not_executed = 0;
+    public $comments;
 
     // Watchers
     protected $listeners = [
@@ -122,6 +149,7 @@ class CreatePucharseOrder extends Component
     {
         $this->id = $id;
         $this->loadHubs();
+        $this->loadBillTo();
 
         if ($this->id) {
             $this->purchaseOrder = \App\Models\PurchaseOrder::with('products')->find($this->id);
@@ -210,7 +238,7 @@ class CreatePucharseOrder extends Component
             $this->orderProducts = [];
 
             // Generar un número de orden único
-            $this->generateUniqueOrderNumber();
+            //$this->generateUniqueOrderNumber();
         }
     }
 
@@ -218,6 +246,12 @@ class CreatePucharseOrder extends Component
     {
         $hubs = Hub::orderBy('name')->get();
         $this->hubsArray = $hubs->pluck('name', 'id')->toArray();
+    }
+
+    public function loadBillTo()
+    {
+        $billTo = BillTo::orderBy('name')->get();
+        $this->billToArray = $billTo->pluck('name', 'id')->toArray();
     }
 
     /**
@@ -414,8 +448,13 @@ class CreatePucharseOrder extends Component
 
     public function createPurchaseOrder() {
         // Validar los datos
-        $validated = $this->validate([
+        $this->validate([
             'order_number' => 'required|string|max:255|unique:purchase_orders,order_number' . ($this->id ? ','.$this->id : ''),
+            'order_date' => 'required|date',
+        ], [
+            'order_number.required' => 'El número de PO es requerido',
+            'order_number.unique' => 'El número de PO ya existe',
+            'order_date.required' => 'La fecha de PO es requerida',
         ]);
 
         $companyId = auth()->user()->company_id ?? 1;
@@ -492,16 +531,24 @@ class CreatePucharseOrder extends Component
 
             // Costos
             'insurance_cost' => $this->insurance_cost,
-            'ground_transport_cost_1' => null,
-            'ground_transport_cost_2' => null,
-            'estimated_pallet_cost' => null,
-            'other_costs' => null,
-            'other_expenses' => null,
+            'ground_transport_cost_1' => $this->ground_transport_cost_1,
+            'ground_transport_cost_2' => $this->ground_transport_cost_2,
+            'estimated_pallet_cost' => $this->estimated_pallet_cost,
+            'cost_nationalization' => $this->cost_nationalization,
+            'cost_ofr_estimated' => $this->cost_ofr_estimated,
+            'cost_ofr_real' => $this->cost_ofr_real,
+            'real_cost_estimated_po' => $this->real_cost_estimated_po,
+            'real_cost_real_po' => $this->real_cost_real_po,
+            'other_costs' => $this->other_costs,
+            'other_expenses' => $this->other_expenses,
+            'variable_calculare_weight' => $this->variable_calculare_weight,
+            'savings_ofr_fcl' => $this->savings_ofr_fcl,
+            'saving_pickup' => $this->saving_pickup,
+            'saving_executed' => $this->saving_executed,
+            'saving_not_executed' => $this->saving_not_executed,
+            'comments' => $this->comments,
             'planned_hub_id' => $this->planned_hub_id,
             'actual_hub_id' => $this->actual_hub_id,
-
-            // Comentarios
-            'comments' => null,
         ];
 
         // Si es una nueva orden, establecer el status en kanban
