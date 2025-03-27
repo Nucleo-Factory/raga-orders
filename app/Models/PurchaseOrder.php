@@ -22,57 +22,25 @@ class PurchaseOrder extends Model
         'company_id',
         'order_number',
         'status',
-        'kanban_status_id',
-        'total_amount',
         'notes',
-
-        // Vendor information
         'vendor_id',
-        'vendor_direccion',
-        'vendor_codigo_postal',
-        'vendor_pais',
-        'vendor_estado',
-        'vendor_telefono',
-
-        // Ship to information
         'ship_to_id',
-        'ship_to_nombre',
-        'ship_to_direccion',
-        'ship_to_codigo_postal',
-        'ship_to_pais',
-        'ship_to_estado',
-        'ship_to_telefono',
-
-        // Bill to information
-        'bill_to_nombre',
-        'bill_to_direccion',
-        'bill_to_codigo_postal',
-        'bill_to_pais',
-        'bill_to_estado',
-        'bill_to_telefono',
-
-        // Order details
+        'bill_to_id',
         'order_date',
         'currency',
         'incoterms',
         'payment_terms',
         'order_place',
         'email_agent',
-
-        // Totals
         'net_total',
         'additional_cost',
         'total',
-
-        // Dimensiones
         'length',
         'width',
         'height',
         'volume',
         'weight_kg',
         'weight_lb',
-
-        // Fechas
         'date_required_in_destination',
         'date_planned_pickup',
         'date_actual_pickup',
@@ -84,21 +52,34 @@ class PurchaseOrder extends Model
         'date_ata',
         'date_consolidation',
         'release_date',
-
-        // Costos
         'insurance_cost',
         'ground_transport_cost_1',
         'ground_transport_cost_2',
+        'cost_nationalization',
+        'cost_ofr_estimated',
+        'cost_ofr_real',
         'estimated_pallet_cost',
+        'real_cost_estimated_po',
+        'real_cost_real_po',
         'other_costs',
         'other_expenses',
-
-        // Comentarios
+        'variable_calculare_weight',
+        'savings_ofr_fcl',
+        'saving_pickup',
+        'saving_executed',
+        'saving_not_executed',
         'comments',
-
-        // New fields
         'planned_hub_id',
         'actual_hub_id',
+        'material_type',
+        'ensurence_type',
+        'mode',
+        'tracking_id',
+        'pallet_quantity',
+        'pallet_quantity_real',
+        'bill_of_lading',
+        'pallets',
+        'kanban_status_id',
     ];
 
     /**

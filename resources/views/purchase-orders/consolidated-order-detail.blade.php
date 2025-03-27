@@ -64,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="mb-2 flex gap-2">
+            <div class="flex gap-2 mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20"
                     fill="none">
                     <path
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <div class="flex w-fit items-center gap-10 text-sm">
+        <div class="flex items-center gap-10 text-sm w-fit">
             <ul class="flex">
                 <li>
                     <button class="px-3 py-[0.375rem]">Información General</button>

@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <x-form method="GET" action="">
+    <x-form>
         <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
                 <div class="w-full space-y-6">

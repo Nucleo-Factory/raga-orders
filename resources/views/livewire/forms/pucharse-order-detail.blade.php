@@ -3,11 +3,6 @@
 @endphp
 
 <div class="space-y-8">
-    <x-breadcrumbs :routes="[
-        ['name' => 'Inicio', 'url' => route('dashboard')],
-        ['name' => 'Categoría', 'url' => route('settings.index')],
-        ['name' => $purchaseOrder->order_number, 'url' => null]
-    ]"/>
 
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-[3.75rem]">
@@ -35,7 +30,7 @@
         <div class="flex space-x-4">
             <a href="{{ route('purchase-orders.edit', $purchaseOrder->id) }}" class="relative">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none"
-                    class="absolute left-4 top-1/2 -translate-y-1/2">
+                    class="absolute -translate-y-1/2 left-4 top-1/2">
                     <path
                         d="M1.87604 17.1159C1.92198 16.7024 1.94496 16.4957 2.00751 16.3025C2.06301 16.131 2.14143 15.9679 2.24064 15.8174C2.35246 15.6478 2.49955 15.5008 2.79373 15.2066L16 2.0003C17.1046 0.895732 18.8955 0.895734 20 2.0003C21.1046 3.10487 21.1046 4.89573 20 6.0003L6.79373 19.2066C6.49955 19.5008 6.35245 19.6479 6.18289 19.7597C6.03245 19.8589 5.86929 19.9373 5.69785 19.9928C5.5046 20.0553 5.29786 20.0783 4.88437 20.1243L1.5 20.5003L1.87604 17.1159Z"
                         stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -61,7 +56,7 @@
             </x-label>
 
             <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
-                <p class="text-base">HUB: <span>New Jersey</span></p>
+                <p class="text-base">HUB: <span>{{ $purchaseOrder->actualHub->name }}</span></p>
 
                 <x-slot:icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19"
@@ -161,18 +156,18 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col"
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                 wire:click="sortBy('material_id')">
                                 Material ID
                                 @if ($sortField === 'material_id')
                                     @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @else
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7"></path>
@@ -181,18 +176,18 @@
                                 @endif
                             </th>
                             <th scope="col"
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                 wire:click="sortBy('description')">
                                 Descripción
                                 @if ($sortField === 'description')
                                     @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @else
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7"></path>
@@ -201,18 +196,18 @@
                                 @endif
                             </th>
                             <th scope="col"
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                 wire:click="sortBy('quantity')">
                                 Cantidad
                                 @if ($sortField === 'quantity')
                                     @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @else
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7"></path>
@@ -221,18 +216,18 @@
                                 @endif
                             </th>
                             <th scope="col"
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                 wire:click="sortBy('price_per_unit')">
                                 Precio unitario
                                 @if ($sortField === 'price_per_unit')
                                     @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @else
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7"></path>
@@ -241,18 +236,18 @@
                                 @endif
                             </th>
                             <th scope="col"
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                 wire:click="sortBy('subtotal')">
                                 Subtotal
                                 @if ($sortField === 'subtotal')
                                     @if ($sortDirection === 'asc')
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @else
-                                        <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7"></path>
@@ -261,34 +256,34 @@
                                 @endif
                             </th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                 Acciones
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
+                    <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($orderProducts as $product)
                             <tr>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $product['material_id'] }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">{{ $product['description'] }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $product['quantity'] }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
                                         {{ number_format($product['price_per_unit'], 2) }}
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
                                         {{ number_format($product['subtotal'], 2) }}
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                     <a href="#" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                                 </td>
                             </tr>
@@ -302,7 +297,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="bg-gray-50">
-                            <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                            <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                 Subtotal:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
@@ -311,7 +306,7 @@
                             <td></td>
                         </tr>
                         <tr class="bg-gray-50">
-                            <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                            <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                 Costos adicionales:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
@@ -320,7 +315,7 @@
                             <td></td>
                         </tr>
                         <tr class="bg-gray-50">
-                            <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                            <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                 Seguro:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
@@ -329,7 +324,7 @@
                             <td></td>
                         </tr>
                         <tr class="bg-gray-50">
-                            <td colspan="4" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
+                            <td colspan="4" class="px-6 py-4 text-sm font-bold text-right text-gray-900">
                                 Total:
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
@@ -342,7 +337,7 @@
             </div>
 
             <div x-show="activeTab === 'tab2'" x-transition class="space-y-[1.875rem]">
-                <div class="items-centers flex justify-between">
+                <div class="flex justify-between items-centers">
                     <x-search-input class="w-64" />
 
                     <div class="flex gap-4">
@@ -378,7 +373,7 @@
             </div>
 
             <div x-show="activeTab === 'tab4'" x-transition>
-                <div class="items-centers flex justify-between">
+                <div class="flex justify-between items-centers">
                     <x-search-input class="w-64" />
 
                     <div class="flex gap-4">
