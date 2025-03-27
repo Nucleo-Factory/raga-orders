@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
             // Add the ship_to_id column after vendor_telefono
-            $table->foreignId('ship_to_id')->nullable()->after('vendor_telefono');
+            $table->foreignId('ship_to_id')->nullable();
 
             // Add foreign key constraint
             $table->foreign('ship_to_id')
