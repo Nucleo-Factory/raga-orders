@@ -16,7 +16,7 @@ use App\Livewire\Settings\Kanban;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Stages;
 use App\Livewire\Settings\Users;
-
+use App\Livewire\Settings\RoleCreate;
 Route::view('/', 'welcome')
     ->name('welcome');
 
@@ -146,7 +146,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/roles/{roleId}/edit', RoleEdit::class)
         ->name('settings.roles.edit');
 
-    Route::view('settings/roles/create', 'livewire.settings.role-create')
+    Route::get('settings/roles/create', RoleCreate::class)
         ->name('settings.roles.create');
 
     Route::get('settings/kanban', Kanban::class)

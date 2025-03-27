@@ -2,10 +2,10 @@
     <div class="flex items-center justify-between">
         <x-view-title>
             <x-slot:title>
-                Editar rol
+                {{ $title }}
             </x-slot:title>
             <x-slot:content>
-                Asigne roles y permisos a los diversos usuarios
+                {{ $subtitle }}
             </x-slot:content>
         </x-view-title>
 
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <nav class="rounded-2xl bg-white px-6 py-4 text-lg">
+    <nav class="px-6 py-4 text-lg bg-white rounded-2xl">
         <ul class="flex items-center justify-between">
             <li>
                 <livewire:settings.nav-link text="Permisos" :route="'settings.roles'" />
