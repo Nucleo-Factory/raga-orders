@@ -110,6 +110,29 @@
         </div>
     </x-modal>
 
+    <x-modal name="change-validate" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
     <style>
         .kanban-container {
             display: flex;

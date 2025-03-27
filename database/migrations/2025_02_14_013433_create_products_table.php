@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->integer('stock')->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->decimal('weight_kg', 8, 2)->nullable();
 
             // Timestamps
             $table->timestamps();

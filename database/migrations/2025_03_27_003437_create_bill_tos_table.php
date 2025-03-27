@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendors', function (Blueprint $table) {
+        Schema::create('bill_tos', function (Blueprint $table) {
             // Primary key
             $table->id();
 
             // Foreign keys
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
 
-            // Basic vendor information
+            // Basic information
             $table->string('name');
-            $table->string('vendo_code')->nullable();
             $table->string('email')->nullable();
             $table->string('contact_person')->nullable();
 
@@ -49,6 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendors');
+        Schema::dropIfExists('bill_tos');
     }
 };

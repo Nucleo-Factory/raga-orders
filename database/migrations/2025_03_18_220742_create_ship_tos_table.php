@@ -24,11 +24,11 @@ return new class extends Migration
             $table->string('contact_person')->nullable();
 
             // Addresses and contact information
-            $table->string('ship_to_direccion')->nullable();
-            $table->string('ship_to_codigo_postal')->nullable();
-            $table->string('ship_to_pais')->nullable();
-            $table->string('ship_to_estado')->nullable();
-            $table->string('ship_to_telefono')->nullable();
+            $table->string('address')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('country')->nullable();
+            $table->string('state')->nullable();
+            $table->string('phone')->nullable();
 
             // Status and notes
             $table->enum('status', ['active', 'inactive'])->default('active');

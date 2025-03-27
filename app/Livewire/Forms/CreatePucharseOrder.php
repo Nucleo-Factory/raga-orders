@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\ShipTo;
+use App\Models\Hub;
 use Livewire\Component;
 
 class CreatePucharseOrder extends Component
@@ -107,6 +108,10 @@ class CreatePucharseOrder extends Component
     public $id;
     public $purchaseOrder;
 
+    public $planned_hub_id;
+    public $actual_hub_id;
+    public $hubsArray = [];
+
     // Watchers
     protected $listeners = [
         'vendorSelected' => 'onVendorSelected',
@@ -116,6 +121,7 @@ class CreatePucharseOrder extends Component
     public function mount($id = null)
     {
         $this->id = $id;
+        $this->loadHubs();
 
         if ($this->id) {
             $this->purchaseOrder = \App\Models\PurchaseOrder::with('products')->find($this->id);
@@ -180,6 +186,9 @@ class CreatePucharseOrder extends Component
                 $this->date_consolidation = $this->purchaseOrder->date_consolidation ? $this->purchaseOrder->date_consolidation->format('Y-m-d') : null;
                 $this->release_date = $this->purchaseOrder->release_date ? $this->purchaseOrder->release_date->format('Y-m-d') : null;
 
+                $this->planned_hub_id = $order->planned_hub_id;
+                $this->actual_hub_id = $order->actual_hub_id;
+
                 // Costos
                 $this->insurance_cost = $this->purchaseOrder->insurance_cost;
 
@@ -203,6 +212,12 @@ class CreatePucharseOrder extends Component
             // Generar un número de orden único
             $this->generateUniqueOrderNumber();
         }
+    }
+
+    protected function loadHubs()
+    {
+        $hubs = Hub::orderBy('name')->get();
+        $this->hubsArray = $hubs->pluck('name', 'id')->toArray();
     }
 
     /**
@@ -482,6 +497,8 @@ class CreatePucharseOrder extends Component
             'estimated_pallet_cost' => null,
             'other_costs' => null,
             'other_expenses' => null,
+            'planned_hub_id' => $this->planned_hub_id,
+            'actual_hub_id' => $this->actual_hub_id,
 
             // Comentarios
             'comments' => null,

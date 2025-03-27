@@ -22,7 +22,7 @@
     </div>
 
     <x-form method="GET" action="">
-        <div class="space-y-10 rounded-2xl bg-white p-8">
+        <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
                 <div class="w-full space-y-6">
                     <h3 class="text-lg font-bold text-[#7288FF]">Datos generales</h3>
@@ -37,8 +37,8 @@
                                 </x-slot:input>
                                 <x-slot:icon>
                                     <button wire:click="generateUniqueOrderNumber"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        class="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20"
                                             fill="currentColor">
                                             <path fill-rule="evenodd"
                                                 d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
@@ -52,20 +52,16 @@
                             <x-slot:label>
                                 Fecha de creación
                             </x-slot:label>
-                            <x-slot:input name="order_date" placeholder="Ingrese número PO"
+                            <x-slot:input name="order_date" type="date" placeholder="Ingrese número PO"
                                 wire:model="order_date">
                             </x-slot:input>
                         </x-form-input>
                         <x-form-select label="Moneda" name="currency" wireModel="currency" :options="$currencyArray" />
                         <x-form-select label="Incoterms" name="incoterms" wireModel="incoterms" :options="$tiposIncotermArray" />
-                        <x-form-input>
-                            <x-slot:label>
-                                HUB
-                            </x-slot:label>
-                            <x-slot:input name="order_place" placeholder="Ingrese lugar de orden"
-                                wire:model="order_place">
-                            </x-slot:input>
-                        </x-form-input>
+                        <x-form-select label="HUB Planificado" name="planned_hub_id" wireModel="planned_hub_id"
+                            :options="$hubsArray" />
+                        <x-form-select label="HUB Real" name="actual_hub_id" wireModel="actual_hub_id"
+                            :options="$hubsArray" />
                     </div>
                 </div>
 
@@ -129,38 +125,27 @@
             </div>
 
             <div class="w-full space-y-6">
-                <h3 class="text-lg font-bold text-[#7288FF]">Costos</h3>
-                <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
+                <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones en centímetros</h3>
+                <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
                         <x-slot:label>
-                            Total neto
+                            Largo (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="net_total" placeholder="0.00"
-                            wire:model="net_total">
+                        <x-slot:input type="number" step="0.01" name="largo_cm" placeholder="0.00">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Costo adicional
+                            Ancho (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="additional_cost" placeholder="0.00"
-                            wire:model="additional_cost">
+                        <x-slot:input type="number" step="0.01" name="ancho_cm" placeholder="0.00">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Total
+                            Alto (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="total" placeholder="0.00"
-                            wire:model="total">
-                        </x-slot:input>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
-                            Costo de seguro
-                        </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="insurance_cost" placeholder="0.00"
-                            wire:model="insurance_cost">
+                        <x-slot:input type="number" step="0.01" name="alto_cm" placeholder="0.00">
                         </x-slot:input>
                     </x-form-input>
                 </div>
@@ -174,7 +159,7 @@
                             Largo (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="largo" placeholder="0.00"
-                            wire:model="largo">
+                            wire:model="largo" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -182,7 +167,7 @@
                             Ancho (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="ancho" placeholder="0.00"
-                            wire:model="ancho">
+                            wire:model="ancho" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -190,7 +175,7 @@
                             Alto (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="alto" placeholder="0.00"
-                            wire:model="alto">
+                            wire:model="alto" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -198,7 +183,7 @@
                             Volumen (ft³)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="volumen" placeholder="0.00"
-                            wire:model="volumen">
+                            wire:model="volumen" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -330,7 +315,7 @@
             </div>
         </div>
 
-        <div class="w-full space-y-6 rounded-2xl bg-white p-8">
+        <div class="w-full p-8 space-y-6 bg-white rounded-2xl">
             <h3 class="w-fit border-b-2 border-[#190FDB] pb-2 text-lg font-bold text-[#190FDB]">Carga / Contenido</h3>
 
             <div class="flex flex-col space-y-4">
@@ -347,10 +332,10 @@
                                 </x-slot:input>
                             </x-form-input>
                             @if (count($searchResults) > 0)
-                                <div class="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg">
-                                    <ul class="max-h-60 overflow-auto rounded-md py-1 text-base sm:text-sm">
+                                <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg">
+                                    <ul class="py-1 overflow-auto text-base rounded-md max-h-60 sm:text-sm">
                                         @foreach ($searchResults as $product)
-                                            <li class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-gray-100"
+                                            <li class="relative py-2 pl-3 cursor-pointer select-none pr-9 hover:bg-gray-100"
                                                 wire:click="selectProduct({{ $product->id }})">
                                                 <div class="flex items-center">
                                                     <span class="font-medium">{{ $product->material_id }}</span>
@@ -372,7 +357,7 @@
                         </x-slot:input>
                     </x-form-input>
 
-                    <div class="h-fit self-end" x-data="{ selectedProduct: @entangle('selectedProduct') }">
+                    <div class="self-end h-fit" x-data="{ selectedProduct: @entangle('selectedProduct') }">
                         <x-primary-button class="border-[3px] border-[#565AFF] disabled:border-[#EDEDED]"
                             x-bind:disabled="!selectedProduct" wire:click="addProduct">
                             Agregar
@@ -382,7 +367,7 @@
 
                 <!-- Producto seleccionado -->
                 @if ($selectedProduct)
-                    <div class="mt-2 rounded-md bg-gray-50 p-3">
+                    <div class="p-3 mt-2 rounded-md bg-gray-50">
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-medium">{{ $selectedProduct->material_id }}</p>
@@ -423,24 +408,24 @@
                                     Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
+                        <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($orderProducts as $index => $product)
                                 <tr>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                         {{ $product['material_id'] }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $product['description'] }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         {{ number_format($product['price_per_unit'], 2) }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         <input type="number"
                                             wire:model.live="orderProducts.{{ $index }}.quantity"
                                             wire:change="updateQuantity({{ $index }}, $event.target.value)"
                                             min="1"
-                                            class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                            class="block w-20 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         {{ number_format($product['subtotal'], 2) }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                    <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <button type="button" wire:click="removeProduct({{ $index }})"
                                             class="text-red-600 hover:text-red-900">
                                             Eliminar
@@ -449,41 +434,41 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No hay
+                                    <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">No hay
                                         productos agregados</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                     Total Neto:</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                     {{ number_format($net_total, 2) }}</td>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                     Costo Adicional:</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="additional_cost" step="0.01"
-                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </td>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                     Costo de Seguro:</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="insurance_cost" step="0.01"
-                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </td>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-right text-sm font-bold text-gray-900">TOTAL:
+                                <td colspan="4" class="px-6 py-4 text-sm font-bold text-right text-gray-900">TOTAL:
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-bold text-gray-900">
+                                <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
                                     {{ number_format($total, 2) }}
                                 </td>
                                 <td></td>
@@ -505,38 +490,84 @@
         }
 
         // Obtener referencias a los campos
-        const lengthField = findField('largo');
-        const widthField = findField('ancho');
-        const heightField = findField('alto');
+        const lengthCmField = findField('largo_cm');
+        const widthCmField = findField('ancho_cm');
+        const heightCmField = findField('alto_cm');
+        const lengthInField = findField('largo');
+        const widthInField = findField('ancho');
+        const heightInField = findField('alto');
         const volumeField = findField('volumen');
         const weightKgField = findField('peso_kg');
         const weightLbField = findField('peso_lb');
 
         console.log('Campos encontrados:', {
-            length: lengthField,
-            width: widthField,
-            height: heightField,
+            lengthCm: lengthCmField,
+            widthCm: widthCmField,
+            heightCm: heightCmField,
+            lengthIn: lengthInField,
+            widthIn: widthInField,
+            heightIn: heightInField,
             volume: volumeField,
             weightKg: weightKgField,
             weightLb: weightLbField
         });
 
-        // Función para calcular el volumen
+        // Constante de conversión: 1 cm = 0.393701 pulgadas
+        const CM_TO_INCH = 0.393701;
+
+        // Función para convertir cm a pulgadas
+        function convertCmToInch(value) {
+            return value * CM_TO_INCH;
+        }
+
+        // Función para convertir cm a pulgadas y actualizar campos
+        function updateDimensions() {
+            console.log('Actualizando dimensiones');
+
+            const lengthCm = parseFloat(lengthCmField.value) || 0;
+            const widthCm = parseFloat(widthCmField.value) || 0;
+            const heightCm = parseFloat(heightCmField.value) || 0;
+
+            // Convertir a pulgadas
+            const lengthIn = convertCmToInch(lengthCm);
+            const widthIn = convertCmToInch(widthCm);
+            const heightIn = convertCmToInch(heightCm);
+
+            // Actualizar campos de pulgadas
+            lengthInField.value = lengthIn.toFixed(2);
+            widthInField.value = widthIn.toFixed(2);
+            heightInField.value = heightIn.toFixed(2);
+
+            // Disparar eventos para que Livewire detecte los cambios
+            lengthInField.dispatchEvent(new Event('input', { bubbles: true }));
+            widthInField.dispatchEvent(new Event('input', { bubbles: true }));
+            heightInField.dispatchEvent(new Event('input', { bubbles: true }));
+
+            console.log('Dimensiones convertidas a pulgadas:', {
+                lengthIn: lengthIn.toFixed(2),
+                widthIn: widthIn.toFixed(2),
+                heightIn: heightIn.toFixed(2)
+            });
+
+            // Calcular volumen después de actualizar las dimensiones
+            calculateVolume();
+        }
+
+        // Función para calcular el volumen en pies cúbicos
         function calculateVolume() {
             console.log('Calculando volumen');
-            const length = parseFloat(lengthField.value) || 0;
-            const width = parseFloat(widthField.value) || 0;
-            const height = parseFloat(heightField.value) || 0;
+            const lengthIn = parseFloat(lengthInField.value) || 0;
+            const widthIn = parseFloat(widthInField.value) || 0;
+            const heightIn = parseFloat(heightInField.value) || 0;
 
-            if (length && width && height) {
-                const volume = (length * width * height) / 1728;
+            if (lengthIn && widthIn && heightIn) {
+                // Fórmula para convertir pulgadas cúbicas a pies cúbicos: (L × W × H) ÷ 1728
+                const volume = (lengthIn * widthIn * heightIn) / 1728;
                 volumeField.value = volume.toFixed(3);
 
                 // Disparar evento de cambio para que Livewire detecte el cambio
-                volumeField.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
-                console.log('Volumen calculado:', volume.toFixed(3));
+                volumeField.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('Volumen calculado en pies cúbicos:', volume.toFixed(3));
             }
         }
 
@@ -550,9 +581,7 @@
                 weightLbField.value = Math.round(lb);
 
                 // Disparar evento de cambio para que Livewire detecte el cambio
-                weightLbField.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
+                weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log('Peso convertido a lb:', Math.round(lb));
             }
         }
@@ -567,29 +596,28 @@
                 weightKgField.value = Math.round(kg);
 
                 // Disparar evento de cambio para que Livewire detecte el cambio
-                weightKgField.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
+                weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log('Peso convertido a kg:', Math.round(kg));
             }
         }
 
-        // Agregar event listeners
-        if (lengthField) {
-            lengthField.addEventListener('input', calculateVolume);
-            console.log('Event listener agregado a length');
+        // Agregar event listeners para los campos en cm
+        if (lengthCmField) {
+            lengthCmField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a lengthCm');
         }
 
-        if (widthField) {
-            widthField.addEventListener('input', calculateVolume);
-            console.log('Event listener agregado a width');
+        if (widthCmField) {
+            widthCmField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a widthCm');
         }
 
-        if (heightField) {
-            heightField.addEventListener('input', calculateVolume);
-            console.log('Event listener agregado a height');
+        if (heightCmField) {
+            heightCmField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a heightCm');
         }
 
+        // Mantener los event listeners para peso
         if (weightKgField) {
             weightKgField.addEventListener('input', convertKgToLb);
             console.log('Event listener agregado a weightKg');
@@ -601,7 +629,7 @@
         }
 
         // Calcular valores iniciales si ya hay datos
-        calculateVolume();
+        updateDimensions();
         convertKgToLb();
 
         console.log('Script de cálculo inicializado');

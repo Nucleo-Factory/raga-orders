@@ -95,6 +95,10 @@ class PurchaseOrder extends Model
 
         // Comentarios
         'comments',
+
+        // New fields
+        'planned_hub_id',
+        'actual_hub_id',
     ];
 
     /**
@@ -272,5 +276,21 @@ class PurchaseOrder extends Model
         // Check if the total weight of all orders is within the consolidable range
         $totalWeight = $orders->sum('weight_kg');
         return $totalWeight > 5000 && $totalWeight <= 15000;
+    }
+
+    /**
+     * Obtener el hub planificado para esta orden de compra.
+     */
+    public function plannedHub(): BelongsTo
+    {
+        return $this->belongsTo(Hub::class, 'planned_hub_id');
+    }
+
+    /**
+     * Obtener el hub real para esta orden de compra.
+     */
+    public function actualHub(): BelongsTo
+    {
+        return $this->belongsTo(Hub::class, 'actual_hub_id');
     }
 }

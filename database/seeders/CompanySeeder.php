@@ -21,15 +21,10 @@ class CompanySeeder extends Seeder
             // Limpiar datos existentes
             // No eliminamos las compañías aquí para evitar problemas con las relaciones
 
-            // Create 5 companies
-            Company::factory()
-                ->count(5)
-                ->create();
-
             // Create a main company for testing with specific data
             Company::factory()->create([
-                'name' => 'Main Test Company',
-                'address' => '123 Main Street, Test City',
+                'name' => 'Raga Orders',
+                'address' => '',
             ]);
         } finally {
             // Asegurarse de que las restricciones de clave foránea se reactiven

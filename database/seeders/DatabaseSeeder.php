@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
                 ProductSeeder::class,     // Products are independent
                 PurchaseOrderSeeder::class, // Purchase orders depend on companies and products
                 KanbanBoardSeeder::class, // Usar KanbanBoardSeeder en lugar de KanbanSeeder
+                HubSeeder::class,
             ]);
         } finally {
             // Asegurarse de que las restricciones de clave foránea se reactiven
