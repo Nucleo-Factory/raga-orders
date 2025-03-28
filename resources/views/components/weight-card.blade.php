@@ -7,8 +7,8 @@
 
     <div class="space-y-1">
         <p>Peso: <span>{{ $weight }} kg</span></p>
-        <p>Alto: <span>{{ $height }} cm</span></p>
-        <p>Ancho: <span>{{ $width }} cm</span></p>
-        <p>Largo: <span>{{ $length }} cm</span></p>
+        <p>Alto: <span>{{ $height }} in</span></p>
+        <p>Ancho: <span>{{ $width }} in</span></p>
+        <p>Largo: <span>{{ $length }} in</span></p>
     </div>
 </div>

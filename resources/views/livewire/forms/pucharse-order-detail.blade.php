@@ -12,7 +12,7 @@
                 </x-slot:title>
             </x-view-title>
 
-            <x-label class="bg-success">
+            <x-label class="hidden bg-success">
                 <span>En tránsito</span>
 
                 <span>{{ $travelMethod }}</span>
@@ -42,6 +42,7 @@
 
     <div class="flex max-w-[600px] justify-between gap-5 rounded-[0.625rem] bg-white p-4 text-xs">
         <div class="flex flex-col justify-between space-y-[0.875rem]">
+            @if ($purchaseOrder->material_type == 'dangerous')
             <x-label class="bg-danger">
                 <span>Producto peligroso</span>
 
@@ -54,7 +55,7 @@
                     </svg>
                 </x-slot:icon>
             </x-label>
-
+            @endif
             <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
                 <p class="text-base">HUB: <span>{{ $purchaseOrder->actualHub->name }}</span></p>
 
@@ -86,13 +87,13 @@
 
         <x-date-card>
             <x-slot:recolectaTime>
-                1/1/2014
+                {{ \Carbon\Carbon::parse($purchaseOrder->date_required_in_destination)->format('d/m/Y') }}
             </x-slot:recolectaTime>
             <x-slot:leadTime>
-                1/1/2014
+                {{ \Carbon\Carbon::parse($purchaseOrder->date_estimated_hub_arrival)->format('d/m/Y') }}
             </x-slot:leadTime>
             <x-slot:pickupTime>
-                1/1/2014
+                {{ \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup)->format('d/m/Y') }}
             </x-slot:pickupTime>
         </x-date-card>
     </div>

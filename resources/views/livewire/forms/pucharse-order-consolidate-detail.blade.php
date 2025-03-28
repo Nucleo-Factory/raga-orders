@@ -1,5 +1,5 @@
 <div>
-    <div class="mb-8 flex items-center justify-between">
+    <div class="flex items-center justify-between mb-8">
         <div class="flex items-start gap-[3.75rem]">
             <x-view-title>
                 <x-slot:title>
@@ -27,7 +27,7 @@
         <div class="flex space-x-4">
             <a href="#" class="relative">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none"
-                    class="absolute left-4 top-1/2 -translate-y-1/2">
+                    class="absolute -translate-y-1/2 left-4 top-1/2">
                     <path
                         d="M1.87604 17.1159C1.92198 16.7024 1.94496 16.4957 2.00751 16.3025C2.06301 16.131 2.14143 15.9679 2.24064 15.8174C2.35246 15.6478 2.49955 15.5008 2.79373 15.2066L16 2.0003C17.1046 0.895732 18.8955 0.895734 20 2.0003C21.1046 3.10487 21.1046 4.89573 20 6.0003L6.79373 19.2066C6.49955 19.5008 6.35245 19.6479 6.18289 19.7597C6.03245 19.8589 5.86929 19.9373 5.69785 19.9928C5.5046 20.0553 5.29786 20.0783 4.88437 20.1243L1.5 20.5003L1.87604 17.1159Z"
                         stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -66,7 +66,7 @@
             </x-label>
         </div>
 
-        <div class="mb-2 flex gap-2">
+        <div class="flex gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <path
                     d="M5.625 10.25C5.32663 10.25 5.04048 10.3685 4.8295 10.5795C4.61853 10.7905 4.5 11.0766 4.5 11.375C4.5 11.6734 4.61853 11.9595 4.8295 12.1705C5.04048 12.3815 5.32663 12.5 5.625 12.5C5.92337 12.5 6.20952 12.3815 6.4205 12.1705C6.63147 11.9595 6.75 11.6734 6.75 11.375C6.75 11.0766 6.63147 10.7905 6.4205 10.5795C6.20952 10.3685 5.92337 10.25 5.625 10.25ZM7.875 11.375C7.875 11.0766 7.99353 10.7905 8.2045 10.5795C8.41548 10.3685 8.70163 10.25 9 10.25H12.375C12.6734 10.25 12.9595 10.3685 13.1705 10.5795C13.3815 10.7905 13.5 11.0766 13.5 11.375C13.5 11.6734 13.3815 11.9595 13.1705 12.1705C12.9595 12.3815 12.6734 12.5 12.375 12.5H9C8.70163 12.5 8.41548 12.3815 8.2045 12.1705C7.99353 11.9595 7.875 11.6734 7.875 11.375ZM5.625 13.25C5.32663 13.25 5.04048 13.3685 4.8295 13.5795C4.61853 13.7905 4.5 14.0766 4.5 14.375C4.5 14.6734 4.61853 14.9595 4.8295 15.1705C5.04048 15.3815 5.32663 15.5 5.625 15.5H9C9.29837 15.5 9.58452 15.3815 9.79549 15.1705C10.0065 14.9595 10.125 14.6734 10.125 14.375C10.125 14.0766 10.0065 13.7905 9.79549 13.5795C9.58452 13.3685 9.29837 13.25 9 13.25H5.625Z"
@@ -164,19 +164,19 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                     wire:click="sortBy('po_number')">
                                     Número de PO
                                     @if ($sortField === 'po_number')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -186,19 +186,19 @@
                                     @endif
                                 </th>
                                 <th scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                     wire:click="sortBy('supplier')">
                                     Proveedor
                                     @if ($sortField === 'supplier')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -208,19 +208,19 @@
                                     @endif
                                 </th>
                                 <th scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                     wire:click="sortBy('items_count')">
                                     Cant. Items
                                     @if ($sortField === 'items_count')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -230,19 +230,19 @@
                                     @endif
                                 </th>
                                 <th scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                     wire:click="sortBy('total_amount')">
                                     Total
                                     @if ($sortField === 'total_amount')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -252,19 +252,19 @@
                                     @endif
                                 </th>
                                 <th scope="col"
-                                    class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                                     wire:click="sortBy('status')">
                                     Estado
                                     @if ($sortField === 'status')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="ml-1 inline-block h-4 w-4" fill="none"
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -274,35 +274,35 @@
                                     @endif
                                 </th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                     Acciones
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
+                        <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($relatedPurchaseOrders ?? [] as $order)
                                 <tr>
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $order['po_number'] }}</div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm text-gray-900">{{ $order['supplier'] }}</div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $order['items_count'] }}</div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
                                             {{ number_format($order['total_amount'], 2) }}
                                         </div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="text-{{ $order['status_color'] }}-800 bg-{{ $order['status_color'] }}-100 inline-flex rounded-full px-2 text-xs font-semibold leading-5">
                                             {{ $order['status'] }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                         <a href="{{ route('purchase-orders.show', $order['id']) }}"
                                             class="text-indigo-600 hover:text-indigo-900">Ver</a>
                                     </td>
@@ -317,7 +317,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="bg-gray-50">
-                                <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
+                                <td colspan="3" class="px-6 py-4 text-sm font-bold text-right text-gray-900">
                                     Total consolidado:
                                 </td>
                                 <td class="px-6 py-4 text-sm font-bold text-gray-900">
@@ -331,7 +331,7 @@
             </div>
 
             <div x-show="activeTab === 'tab2'" x-transition class="space-y-[1.875rem]">
-                <div class="items-centers flex justify-between">
+                <div class="flex justify-between items-centers">
                     <x-search-input class="w-64" />
 
                     <div class="flex gap-4">

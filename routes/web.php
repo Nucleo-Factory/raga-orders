@@ -124,6 +124,18 @@ Route::middleware(['auth'])->group(function () {
     // Editar una orden de compra
     Route::view('purchase-orders/{id}/edit', 'purchase-orders.edit')
         ->name('purchase-orders.edit');
+
+    // Rutas para hubs
+    Route::view('hub', 'hub.index')
+        ->name('hub.index');
+
+    Route::view('hub/create', 'hub.create')
+        ->name('hub.create');
+
+    Route::get('hub/{id}/edit', function ($id) {
+        return view('hub.edit', ['hub' => \App\Models\Hub::findOrFail($id)]);
+    })->name('hub.edit');
+
 });
 
 // Rutas para configuraciones

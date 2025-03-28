@@ -55,10 +55,6 @@
                     </x-slot:content>
                 </x-dropdown>
             </div>
-
-            <x-primary-button>
-                Consolidar PO's
-            </x-primary-button>
         </div>
 
         <!-- Contenido de las pestañas -->

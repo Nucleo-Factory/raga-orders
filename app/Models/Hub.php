@@ -18,7 +18,9 @@ class Hub extends Model
     protected $fillable = [
         'name',
         'code',
-        'country'
+        'country',
+        'documentary_cut',
+        'zarpe',
     ];
 
     /**

@@ -31,7 +31,7 @@
                 </x-slot:icon>
 
                 <x-slot:title class="text-lg font-bold text-[#898989]">
-                    Cant. de PO en consolidables
+                    Cant. de PO en consolidadas
                 </x-slot:title>
 
                 <x-slot:content class="text-4xl font-bold text-[#2e2e2e]">

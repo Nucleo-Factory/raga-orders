@@ -1,5 +1,5 @@
 <div>
-    <div class="mb-4 flex justify-between">
+    <div class="flex justify-between mb-4">
         <div class="flex items-center">
             <div class="relative">
                 <input
@@ -16,7 +16,7 @@
             </div>
             <select
                 wire:model="statusFilter"
-                class="ml-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="px-4 py-2 ml-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
                 <option value="">Todos los estados</option>
                 <option value="draft">Borrador</option>

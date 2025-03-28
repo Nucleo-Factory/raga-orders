@@ -222,8 +222,8 @@ class CreatePucharseOrder extends Component
                 $this->date_consolidation = $this->purchaseOrder->date_consolidation ? $this->purchaseOrder->date_consolidation->format('Y-m-d') : null;
                 $this->release_date = $this->purchaseOrder->release_date ? $this->purchaseOrder->release_date->format('Y-m-d') : null;
 
-                $this->planned_hub_id = $order->planned_hub_id;
-                $this->actual_hub_id = $order->actual_hub_id;
+                $this->planned_hub_id = $this->purchaseOrder->planned_hub_id;
+                $this->actual_hub_id = $this->purchaseOrder->actual_hub_id;
 
                 // Cargar productos
                 $this->orderProducts = [];

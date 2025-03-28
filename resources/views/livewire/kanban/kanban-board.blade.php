@@ -44,7 +44,7 @@
                         })">
                         @foreach ($tasksByColumn[$column['id']] as $task)
                             <div class="cursor-move task-card" data-task-id="{{ $task['id'] }}">
-                                <x-kanban-card :po="$task['po']" :trackingId="$task['id']" :hubLocation="$task['company']" :leadTime="$task['order_date'] ?? 'N/A'"
+                                <x-kanban-card :id="$task['id']" :purchaseOrder="$task" :po="$task['po']" :trackingId="$task['id']" :hubLocation="$task['company']" :leadTime="$task['order_date'] ?? 'N/A'"
                                     :recolectaTime="$task['requested_delivery_date'] ?? 'N/A'" :pickupTime="$task['requested_delivery_date'] ?? 'N/A'" :totalWeight="number_format($task['total'] ?? 0, 2)" />
                             </div>
                         @endforeach
