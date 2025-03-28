@@ -174,6 +174,7 @@ class KanbanBoard extends Component {
 
             // Forzar la actualización de la vista
             $this->dispatch('refreshKanban');
+            $this->dispatch('purchaseOrderStatusUpdated');
         } catch (\Exception $e) {
             \Log::error("Error moving task: " . $e->getMessage());
         }
