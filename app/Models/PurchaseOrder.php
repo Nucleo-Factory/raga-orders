@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class PurchaseOrder extends Model
+class PurchaseOrder extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -273,5 +275,17 @@ class PurchaseOrder extends Model
     public function actualHub(): BelongsTo
     {
         return $this->belongsTo(Hub::class, 'actual_hub_id');
+    }
+
+    // Definir la colección de medios para los archivos adjuntos
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments');
+    }
+
+    // Relación con los comentarios
+    public function comments()
+    {
+        return $this->hasMany(PurchaseOrderComment::class);
     }
 }

@@ -22,6 +22,16 @@ class KanbanBoard extends Component {
 
     public $actual_hub_id;
 
+    public $comment_stage_01;
+    public $comment_stage_02;
+    public $comment_stage_03;
+    public $comment_stage_04;
+    public $comment_stage_05;
+    public $comment_stage_06;
+    public $comment_stage_07;
+    public $comments = [];
+    public $showCommentModal = false;
+
     public function mount($boardId = null) {
         // Determinar el tipo de tablero según la ruta actual
         $currentRoute = Route::currentRouteName();
@@ -195,6 +205,25 @@ class KanbanBoard extends Component {
         }
     }
 
+    public function saveAttachment($poId) {
+        $this->validate([
+            'attachment' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        // Obtener la PO
+        $purchaseOrder = PurchaseOrder::findOrFail($poId);
+
+        // Guardar el archivo utilizando Spatie Media Library
+        $purchaseOrder->addMediaFromRequest('attachment')
+            ->toMediaCollection('attachments');
+
+        // Notificar al usuario
+        session()->flash('message', 'Archivo adjunto guardado correctamente');
+
+        // Recargar datos
+        $this->loadData();
+    }
+
     public function setActualHubId($taskId, $hubId) {
         \Log::info("Actual Hub ID updated: " . $this->actual_hub_id);
 
@@ -213,6 +242,20 @@ class KanbanBoard extends Component {
         // Forzar la actualización de la vista
         $this->dispatch('refreshKanban');
         $this->dispatch('purchaseOrderStatusUpdated');
+    }
+
+    public function setComments($taskId, $comment) {
+        try {
+            DB::table('purchase_order_comments')->insert([
+                'purchase_order_id' => $taskId,
+                'user_id' => auth()->id(),
+                'comment' => $comment,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("Error setting comments: " . $e->getMessage());
+        }
     }
 
     public function render()

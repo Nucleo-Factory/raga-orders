@@ -102,6 +102,10 @@
             <x-form-select label="HUB Planificado" name="actual_hub_id" wireModel="actual_hub_id" :options="$hubArray" />
         </div>
 
+        <div class="mb-8">
+            <x-form-textarea label="" name="comment_stage_01" wireModel="comment_stage_01" placeholder="Comentarios" />
+        </div>
+
         <div class="mb-12 space-y-2">
             <x-secondary-button class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
@@ -121,15 +125,16 @@
         </div>
 
         <div class="flex gap-[1.875rem]">
-            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'modal-hub-teorico')" class="w-full">
                 Cancelar
             </x-secondary-button>
 
             <x-primary-button
                 x-on:click="
-                    $wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value);
+                    $wire.setComments($wire.currentTaskId, document.querySelector('textarea[name=comment_stage_01]').value);
                     $wire.setActualHubId($wire.currentTaskId, document.querySelector('select[name=etapa]').value);
-                    $dispatch('close-modal', 'change-oc-stage')"
+                    $wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value);
+                    $dispatch('close-modal', 'modal-hub-teorico')"
                 class="w-full">
                 Continuar
             </x-primary-button>

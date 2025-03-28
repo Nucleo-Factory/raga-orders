@@ -11,7 +11,7 @@
 
 @php
     $purchaseOrder = App\Models\PurchaseOrder::find($id);
-    $hub =  $purchaseOrder->actualHub->name;
+    $hub =  $purchaseOrder->actualHub->name ?? 'Sin Hub';
     $leadTime = \Carbon\Carbon::parse($purchaseOrder->date_required_in_destination)->format('d/m/Y');
     $recolectaTime = \Carbon\Carbon::parse($purchaseOrder->date_estimated_hub_arrival)->format('d/m/Y');
     $pickupTime = \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup)->format('d/m/Y');
