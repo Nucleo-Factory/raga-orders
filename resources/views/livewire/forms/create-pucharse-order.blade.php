@@ -168,14 +168,6 @@
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Pallets
-                        </x-slot:label>
-                        <x-slot:input type="number" step="1" min="0" name="pallets"
-                            placeholder="0.00" wire:model="pallets">
-                        </x-slot:input>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
                             Peso (kg)
                         </x-slot:label>
                         <x-slot:input type="number" step="1" min="0" name="peso_kg"
@@ -298,7 +290,7 @@
                 <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Tipo de Material" name="material_type" wire:model="material_type" :options="['dangerous' => 'Peligroso', 'general' => 'General', 'exclusive' => 'Exclusivo', 'estibable' => 'Estibable']" />
-                    <x-form-select label="Tipo de Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
+                    <x-form-select label="Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
                     <x-form-input>
                         <x-slot:label>
                             Modo
@@ -315,7 +307,7 @@
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Cantidad de Pallets
+                            Cantidad estimada de pallets
                         </x-slot:label>
                         <x-slot:input type="number" name="pallet_quantity" placeholder="0" wire:model="pallet_quantity">
                         </x-slot:input>

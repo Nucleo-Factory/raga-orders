@@ -72,9 +72,10 @@ class CreatePucharseOrder extends Component
     public $email_agent;
 
     // Totals
-    public $net_total = 0;
-    public $additional_cost = 0;
-    public $total = 0;
+    public $net_total = 0.0;
+    public $additional_cost = 0.0;
+    public $total = 0.0;
+    public $insurance_cost = 0.0;
 
     // Dimensiones
     public $largo;
@@ -96,9 +97,6 @@ class CreatePucharseOrder extends Component
     public $date_ata;
     public $date_consolidation;
     public $release_date;
-
-    // Costos
-    public $insurance_cost = 0;
 
     // Productos
     public $orderProducts = [];
@@ -201,6 +199,7 @@ class CreatePucharseOrder extends Component
                 $this->net_total = $this->purchaseOrder->net_total;
                 $this->additional_cost = $this->purchaseOrder->additional_cost;
                 $this->total = $this->purchaseOrder->total;
+                $this->insurance_cost = $this->purchaseOrder->insurance_cost;
 
                 // Dimensiones
                 $this->largo = $this->purchaseOrder->length;
@@ -225,9 +224,6 @@ class CreatePucharseOrder extends Component
 
                 $this->planned_hub_id = $order->planned_hub_id;
                 $this->actual_hub_id = $order->actual_hub_id;
-
-                // Costos
-                $this->insurance_cost = $this->purchaseOrder->insurance_cost;
 
                 // Cargar productos
                 $this->orderProducts = [];
@@ -432,11 +428,11 @@ class CreatePucharseOrder extends Component
         // Calcular el total neto sumando los subtotales de todos los productos
         $this->net_total = 0;
         foreach ($this->orderProducts as $product) {
-            $this->net_total += $product['subtotal'];
+            $this->net_total += floatval($product['subtotal']);
         }
 
         // Calcular el total final (neto + adicionales)
-        $this->total = $this->net_total + $this->additional_cost + $this->insurance_cost;
+        $this->total = floatval($this->net_total) + floatval($this->additional_cost) + floatval($this->insurance_cost);
     }
 
     public function updatedAdditionalCost()
