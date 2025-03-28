@@ -20,6 +20,8 @@ class KanbanBoard extends Component {
     public $newColumnId;
     public $currentTask = null;
 
+    public $actual_hub_id;
+
     public function mount($boardId = null) {
         // Determinar el tipo de tablero según la ruta actual
         $currentRoute = Route::currentRouteName();
@@ -191,6 +193,26 @@ class KanbanBoard extends Component {
                 break;
             }
         }
+    }
+
+    public function setActualHubId($taskId, $hubId) {
+        \Log::info("Actual Hub ID updated: " . $this->actual_hub_id);
+
+        DB::table('purchase_orders')
+            ->where('id', $taskId)
+            ->update(['actual_hub_id' => $this->actual_hub_id]);
+
+        // Recargar los datos
+        $this->loadData();
+
+        // Limpiar los datos temporales
+        $this->currentTaskId = null;
+        $this->newColumnId = null;
+        $this->currentTask = null;
+
+        // Forzar la actualización de la vista
+        $this->dispatch('refreshKanban');
+        $this->dispatch('purchaseOrderStatusUpdated');
     }
 
     public function render()

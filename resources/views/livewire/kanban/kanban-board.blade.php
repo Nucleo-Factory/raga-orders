@@ -1,5 +1,6 @@
 @php
-    // Esta variable ya no es necesaria, usamos las columnas del Kanban directamente
+    $hubArray = App\Models\Hub::orderBy('name')->get();
+    $hubArray = $hubArray->pluck('name', 'id')->toArray();
 @endphp
 
 <div class="w-full mx-auto">
@@ -36,7 +37,26 @@
 
                                 console.log(taskId, newColumn);
                                 if (evt.from.getAttribute('data-column-id') !== newColumn) {
-                                    $dispatch('open-modal', 'change-oc-stage');
+                                    console.log(newColumn);
+                                    if(newColumn == 1) {
+                                        $dispatch('open-modal', 'modal-hub-teorico');
+                                    } else if (newColumn == 2) {
+                                        $dispatch('open-modal', 'modal-hub-teorico');
+                                    } else if (newColumn == 3) {
+                                        $dispatch('open-modal', 'modal-validacion-operativa');
+                                    } else if (newColumn == 4) {
+                                        $dispatch('open-modal', 'modal-validacion-operativa-cliente');
+                                    } else if (newColumn == 5) {
+                                        $dispatch('open-modal', 'modal-pickup');
+                                    } else if (newColumn == 6) {
+                                        $dispatch('open-modal', 'modal-en-transito');
+                                    } else if (newColumn == 7) {
+                                        $dispatch('open-modal', 'modal-llegada-a-hub');
+                                    } else if (newColumn == 8) {
+                                        $dispatch('open-modal', 'modal-consolidacion-hub-real');
+                                    } else if (newColumn == 9) {
+                                        $dispatch('open-modal', 'modal-gestion-documental');
+                                    }
 
                                     $wire.setCurrentTask(taskId, newColumn);
                                 }
@@ -62,7 +82,7 @@
         </div>
     </x-modal-success>
 
-    <x-modal name="change-oc-stage" maxWidth="lg">
+    <x-modal name="modal-hub-teorico" maxWidth="lg">
         <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
             ¿Cambiar la Orden de compra de etapa?
         </h3>
@@ -78,7 +98,9 @@
                 :value="$newColumnId" />
         </div>
 
-        <x-form-textarea label="Comentarios" placeholder="Ingrese su texto..." class="mb-[0.375rem]" />
+        <div class="mb-8">
+            <x-form-select label="HUB Planificado" name="actual_hub_id" wireModel="actual_hub_id" :options="$hubArray" />
+        </div>
 
         <div class="mb-12 space-y-2">
             <x-secondary-button class="group flex w-full items-center justify-center gap-[0.625rem]">
@@ -102,6 +124,34 @@
             <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
                 Cancelar
             </x-secondary-button>
+
+            <x-primary-button
+                x-on:click="
+                    $wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value);
+                    $wire.setActualHubId($wire.currentTaskId, document.querySelector('select[name=etapa]').value);
+                    $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-validacion-operativa" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+
             <x-primary-button
                 x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
                 class="w-full">
@@ -110,7 +160,122 @@
         </div>
     </x-modal>
 
-    <x-modal name="change-validate" maxWidth="lg">
+    <x-modal name="modal-pickup" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-en-transito" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-llegada-a-hub" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-validacion-operativa-cliente" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-consolidacion-hub-real" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar la Orden de compra de etapa?
+        </h3>
+
+        @if ($currentTask)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">PO: {{ $currentTask['po'] }}</p>
+            </div>
+        @endif
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'change-oc-stage')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button
+                x-on:click="$wire.moveTask($wire.currentTaskId, document.querySelector('select[name=etapa]').value); $dispatch('close-modal', 'change-oc-stage')"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-gestion-documental" maxWidth="lg">
         <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
             ¿Cambiar la Orden de compra de etapa?
         </h3>
