@@ -29,6 +29,7 @@ class KanbanBoard extends Component {
     public $comment_stage_05;
     public $comment_stage_06;
     public $comment_stage_07;
+    public $comment_stage_08;
     public $comments = [];
     public $showCommentModal = false;
 
@@ -245,6 +246,8 @@ class KanbanBoard extends Component {
     }
 
     public function setComments($taskId, $comment) {
+        \Log::info("Setting comments for task $taskId: " . $comment);
+
         try {
             DB::table('purchase_order_comments')->insert([
                 'purchase_order_id' => $taskId,
@@ -255,6 +258,30 @@ class KanbanBoard extends Component {
             ]);
         } catch (\Exception $e) {
             \Log::error("Error setting comments: " . $e->getMessage());
+        }
+    }
+
+    public function setPickupDate($taskId, $pickupDate) {
+        \Log::info("Setting pickup date for task $taskId: " . $pickupDate);
+
+        try {
+            DB::table('purchase_orders')
+                ->where('id', $taskId)
+                ->update(['date_actual_pickup' => $pickupDate]);
+        } catch (\Exception $e) {
+            \Log::error("Error setting pickup date: " . $e->getMessage());
+        }
+    }
+
+    public function setTrackingId($taskId, $trackingId) {
+        \Log::info("Setting tracking ID for task $taskId: " . $trackingId);
+
+        try {
+            DB::table('purchase_orders')
+                ->where('id', $taskId)
+                ->update(['tracking_id' => $trackingId]);
+        } catch (\Exception $e) {
+            \Log::error("Error setting tracking ID: " . $e->getMessage());
         }
     }
 
