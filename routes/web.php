@@ -158,7 +158,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/roles/{roleId}/edit', RoleEdit::class)
         ->name('settings.roles.edit');
 
-    Route::get('settings/roles/create', RoleCreate::class)
+    Route::get('/settings/roles/create', App\Livewire\Settings\RoleCreate::class)
+        ->middleware(['auth'])
         ->name('settings.roles.create');
 
     Route::get('settings/kanban', Kanban::class)

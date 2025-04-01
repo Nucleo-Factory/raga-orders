@@ -5,11 +5,11 @@
 ])
 
 <div class="flex items-center  {{$label ? 'gap-3' : ''}}">
-    <label class="relative inline-block cursor-pointer">
-        <input type="checkbox" class="peer sr-only" id="{{ $id }}" {{ $checked ? 'checked' : '' }}
+    <label class="relative inline-block capitalize cursor-pointer">
+        <input type="checkbox" class="sr-only peer" id="{{ $id }}" {{ $checked ? 'checked' : '' }}
             {{ $attributes }}>
 
-        <div class="peer h-6 w-12 rounded-full bg-gray-200 transition-colors duration-300 peer-checked:bg-indigo-500">
+        <div class="w-12 h-6 transition-colors duration-300 bg-gray-200 rounded-full peer peer-checked:bg-indigo-500">
         </div>
 
         <div
@@ -17,7 +17,7 @@
         </div>
     </label>
     @if ($label)
-        <label for="{{ $id }}" class="cursor-pointer w-[700px]">
+        <label for="{{ $id }}" class="cursor-pointer w-[700px] capitalize">
             {{ $label }}
         </label>
     @endif

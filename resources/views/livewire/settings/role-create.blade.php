@@ -1,6 +1,11 @@
-
 <div class="space-y-8">
-    <form class="p-8 space-y-10 bg-white rounded-2xl">
+    <form wire:submit.prevent="createRole" class="p-8 space-y-10 bg-white rounded-2xl">
+        @if (session()->has('message'))
+            <div class="p-4 text-green-700 bg-green-100 rounded-lg">
+                {{ session('message') }}
+            </div>
+        @endif
+
         <x-form-input class="w-1/4">
             <x-slot:label>
                 Nombre de rol
@@ -9,64 +14,44 @@
             </x-slot:input>
         </x-form-input>
 
-
+        <!-- Permisos básicos -->
         <div class="space-y-4 text-lg text-[#231F20]">
             <h2>Tipo de permisos</h2>
-
             <ul class="space-y-4 text-sm text-[#2B3674]">
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-1" label="Permiso de lectura" :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-2" label="Exportar datos" :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-3" label="Filtrar" :checked="false" />
-                </li>
+                @foreach(['read', 'export', 'filter'] as $permission)
+                    <li class="flex items-center gap-4">
+                        <x-toggler
+                            :id="'permission-'.$permission"
+                            :label="$permissions[$permission]"
+                            wire:model="selectedPermissions.{{ $permission }}"
+                        />
+                    </li>
+                @endforeach
             </ul>
         </div>
 
+        <!-- Permisos de operaciones -->
         <div class="space-y-4 text-lg text-[#231F20]">
             <h2>Tareas y operaciones relevantes</h2>
-
             <ul class="space-y-4 text-sm text-[#2B3674]">
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-4" label="Consultar métricas generales de operaciones"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-5" label="Agregar comentarios específicos a las órdenes (PO y CRM)"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-6" label="Adjuntar documentos relacionados con las tareas asignadas"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-7" label="Generar reportes de ahorro y costos operativos"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-8" label="Descargar datos sobre desviaciones en órdenes"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-9"
-                        label="Monitorear perfiles de usuarios para análisis de actividades" :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-10" label="Acceder a registros de notificaciones" :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-11" label="Visualizar análisis y KPIs relevantes"
-                        :checked="false" />
-                </li>
-                <li class="flex items-center gap-4">
-                    <x-toggler id="permission-12" label="Visualizar Historial de eventos y acciones del usuario"
-                        :checked="false" />
-                </li>
+                @foreach($permissions as $key => $label)
+                    @if (!in_array($key, ['read', 'export', 'filter']))
+                        <li class="flex items-center gap-4">
+                            <x-toggler
+                                :id="'permission-'.$key"
+                                :label="$label"
+                                wire:model="selectedPermissions.{{ $key }}"
+                            />
+                        </li>
+                    @endif
+                @endforeach
             </ul>
         </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                Crear Rol
+            </button>
+        </div>
     </form>
-</div>
 </div>

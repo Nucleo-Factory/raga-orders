@@ -1,4 +1,4 @@
-<div class="space-y-10 rounded-2xl bg-white p-8">
+<div class="p-8 space-y-10 bg-white rounded-2xl">
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-bold text-[#7288FF]">Lista de roles</h2>
 
@@ -17,7 +17,7 @@
 
     {{-- Lista --}}
     @if (session('message'))
-        <div class="mb-4 rounded border border-green-400 bg-green-100 px-4 py-2 text-green-700">
+        <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
             {{ session('message') }}
         </div>
     @endif
@@ -38,39 +38,11 @@
                 $searchable = ['name'];
                 $filterable = ['name'];
                 $filterOptions = ['name'];
-
-                // Datos de ejemplo hasta que se implemente el modelo de Roles
-                $rolesData = [
-                    [
-                        'id' => 1,
-                        'name' => 'Administrador',
-                        'permissions_count' => 15,
-                        'users_count' => 3,
-                    ],
-                    [
-                        'id' => 2,
-                        'name' => 'Editor',
-                        'permissions_count' => 8,
-                        'users_count' => 5,
-                    ],
-                    [
-                        'id' => 3,
-                        'name' => 'Usuario',
-                        'permissions_count' => 4,
-                        'users_count' => 12,
-                    ],
-                    [
-                        'id' => 4,
-                        'name' => 'Invitado',
-                        'permissions_count' => 2,
-                        'users_count' => 7,
-                    ],
-                ];
             @endphp
 
             <livewire:components.reusable-table :headers="$headers" :sortable="$sortable" :searchable="$searchable" :filterable="$filterable"
                 :filterOptions="$filterOptions" :actions="true" :actionsView="true" :actionsEdit="true" :actionsDelete="true"
-                :rows="$rolesData" :baseRoute="'settings.roles'" />
+                :rows="$roles" :baseRoute="'settings.roles'" />
         </div>
     </div>
 </div>
