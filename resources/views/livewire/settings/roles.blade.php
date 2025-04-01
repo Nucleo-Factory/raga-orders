@@ -41,7 +41,7 @@
             @endphp
 
             <livewire:components.reusable-table :headers="$headers" :sortable="$sortable" :searchable="$searchable" :filterable="$filterable"
-                :filterOptions="$filterOptions" :actions="true" :actionsView="true" :actionsEdit="true" :actionsDelete="true"
+                :filterOptions="$filterOptions" :actions="true" :actionsView="false" :actionsEdit="true" :actionsDelete="true"
                 :rows="$roles" :baseRoute="'settings.roles'" />
         </div>
     </div>
