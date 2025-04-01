@@ -10,7 +10,7 @@
         </x-view-title>
 
         <div class="flex items-center gap-4">
-            <x-primary-button>
+            <x-primary-button type="submit" form="roleForm">
                 Guardar rol
             </x-primary-button>
 

@@ -1,5 +1,5 @@
 <div class="space-y-8">
-    <form wire:submit.prevent="createRole" class="p-8 space-y-10 bg-white rounded-2xl">
+    <form id="roleForm" wire:submit.prevent="createRole" class="p-8 space-y-10 bg-white rounded-2xl">
         @if (session()->has('message'))
             <div class="p-4 text-green-700 bg-green-100 rounded-lg">
                 {{ session('message') }}
@@ -46,12 +46,6 @@
                     @endif
                 @endforeach
             </ul>
-        </div>
-
-        <div class="flex justify-end">
-            <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                Crear Rol
-            </button>
         </div>
     </form>
 </div>
