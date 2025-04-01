@@ -64,4 +64,27 @@ class User extends Authenticatable
     {
         return !is_null($this->company_id);
     }
+
+    public function notificationPreferences()
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    public function frequencies()
+    {
+        return $this->hasMany(UserFrequency::class);
+    }
+
+    public function setNotificationPreference($type, $channel, $enabled, $frequency = 'immediate')
+    {
+        $notificationType = NotificationType::where('key', $type)->firstOrFail();
+
+        return $this->notificationPreferences()->updateOrCreate(
+            ['notification_type_id' => $notificationType->id],
+            [
+                $channel . '_enabled' => $enabled,
+                'frequency' => $frequency
+            ]
+        );
+    }
 }
