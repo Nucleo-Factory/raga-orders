@@ -12,7 +12,13 @@
     ];
 @endphp
 
-<form class="px-6 py-4 space-y-6 bg-white rounded-2xl">
+@if (session()->has('message'))
+    <div class="p-4 text-green-700 bg-green-100 rounded-lg">
+        {{ session('message') }}
+    </div>
+@endif
+
+<form wire:submit.prevent="saveSettings" wire:ignore class="px-6 py-4 space-y-6 bg-white rounded-2xl" >
     <div>
         <div class="flex flex-col mb-6">
             <span class="text-lg font-bold text-[#7288FF]">Apariencia</span>
@@ -142,7 +148,7 @@
             <span class="text-[#898989]">Elige el idioma</span>
         </label>
 
-        <x-form-select selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="language"
+        <x-form-select wire:model="language" selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="language"
             :options="$languagesArray" />
     </div>
 
@@ -152,7 +158,7 @@
             <span class="text-[#898989]">Define tu configuración de Zona Horaria</span>
         </label>
 
-        <x-form-select selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="time-zone"
+        <x-form-select wire:model="timeZone" selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="time-zone"
             :options="$timeZonesArray" />
     </div>
 
@@ -162,7 +168,7 @@
             <span class="text-[#898989]">Define tu configuración de Formato de Fecha</span>
         </label>
 
-        <x-form-select selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="date-format"
+        <x-form-select wire:model="dateFormat" selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="date-format"
             :options="$dateFormatArray" />
     </div>
 
@@ -172,11 +178,11 @@
             <span class="text-[#898989]">Define tu configuración de Formato de Hora</span>
         </label>
 
-        <x-form-select selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="time-format"
+        <x-form-select wire:model="timeFormat" selectClasses="w-[366px] rounded-xl border-2 border-[#7288FF]" name="time-format"
             :options="$timeFormatArray" />
     </div>
 
-    <button type="submit" class="primary-btn">
+    <button type="submit" class="w-full primary-btn h-[46px] bg-[#565AFF] rounded-[6px] text-white hover:bg-[#565AFF]/80 transition-colors duration-300">
         Guardar cambios
     </button>
 </form>

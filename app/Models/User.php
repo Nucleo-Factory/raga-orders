@@ -23,6 +23,10 @@ class User extends Authenticatable
         'password',
         'company_id', // Agregamos company_id a fillable
         'email_verified_at',
+        'language',
+        'time_zone',
+        'date_format',
+        'time_format',
     ];
 
     /**
