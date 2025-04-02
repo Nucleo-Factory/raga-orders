@@ -5,16 +5,14 @@
     'disabled' => false,
 ])
 
-<div class="flex items-center  {{$label ? 'gap-3' : ''}}">
+<div class="flex items-center {{$label ? 'gap-3' : ''}}">
     <div class="inline-block">
         <label for="{{ $id }}" class="flex items-center cursor-pointer">
             <div class="relative">
-                <input type="checkbox" id="{{ $id }}" class="sr-only"
-                    {{ $checked ? 'checked' : '' }}
-                    {{ $disabled ? 'disabled' : '' }}
-                >
-                <div class="w-10 h-4 bg-gray-300 rounded-full shadow-inner transition-all {{ $checked ? 'bg-[#7288FF]' : '' }}"></div>
-                <div class="absolute w-6 h-6 bg-white rounded-full shadow -top-1 left-0 transition-all {{ $checked ? 'transform translate-x-full bg-[#7288FF] border-[#7288FF]' : 'border-gray-300' }} border-2"></div>
+                <input type="checkbox" id="{{ $id }}" class="sr-only" {{ $attributes }}>
+                <div class="w-12 h-6 rounded-full transition-all {{ $attributes->get('value') ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
+                    <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $attributes->get('value') ? 'right-1' : 'left-1' }}"></div>
+                </div>
             </div>
         </label>
     </div>

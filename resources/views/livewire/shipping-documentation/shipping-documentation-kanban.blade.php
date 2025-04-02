@@ -8,7 +8,7 @@
         @else
             @foreach($columns as $column)
                 <div class="flex-shrink-0 p-3 mx-2 bg-gray-100 rounded-lg w-80 kanban-column">
-                    <h3 class="mb-3 text-lg font-bold" style="color: {{ $column['color'] }}">
+                    <h3 class="mb-3 text-lg font-bold">
                         {{ $column['name'] }}
                         <span class="ml-2 text-sm font-normal text-gray-600">
                             ({{ count($documentsByColumn[$column['id']]) }})

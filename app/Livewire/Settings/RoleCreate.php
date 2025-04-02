@@ -54,6 +54,15 @@ class RoleCreate extends Component
         session()->flash('message', 'Rol creado exitosamente.');
     }
 
+    public function togglePermission($permission)
+    {
+        if (!isset($this->selectedPermissions[$permission])) {
+            $this->selectedPermissions[$permission] = true;
+        } else {
+            $this->selectedPermissions[$permission] = !$this->selectedPermissions[$permission];
+        }
+    }
+
     public function render()
     {
         return view('livewire.settings.role-create')
