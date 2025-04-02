@@ -9,39 +9,34 @@
     "poCount" => "3",
 ])
 
-<li class="kanban-card flex w-full gap-5 rounded-[0.625rem] border border-[#6D6D6D] bg-white px-4 py-2 text-xs min-h-[180px]">
-    <div class="flex flex-col justify-between w-1/2 space-y-2">
+<li class="kanban-card relative flex justify-between min-h-[180px] w-full gap-5 rounded-[0.625rem] border-2 border-[#E0E5FF] bg-white px-4 py-2 text-xs">
+    <div class="flex grow flex-col space-y-[0.875rem]">
         <div class="flex gap-4">
-            <a href="{{ route('purchase-orders.consolidated-order-detail', $documentId) }}" class="flex items-start p-1 text-left text-gray-500 bg-[#E5F6FF] hover:text-gray-700">
-                <span>Ver más</span>
-            </a>
-
-            <div class="space-y-1 font-bold">
-                <p>Documento: {{ $documentId }}</p>
+            <div class="space-y-1 text-sm">
+                <p>
+                    <a class="text-[#190FDB] underline underline-offset-4" href="{{ route('purchase-orders.consolidated-order-detail', $documentId) }}">
+                        Documento: {{ $documentId }}
+                    </a>
+                </p>
                 <p>ID Tracking: {{ $trackingId }}</p>
-                <p>Órdenes: <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{{ $poCount }}</span></p>
+                <p>Órdenes: <span class="bg-[#E0E5FF] text-neutral-blue px-2 py-0.5 rounded-full">{{ $poCount }}</span></p>
             </div>
         </div>
 
-        <p class="flex items-center gap-2 rounded-[0.375rem] bg-[#E5F6FF] p-2">
-            <span>Documentación de embarque</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-                <path d="M16 2H11.82C11.4 0.84 10.3 0 9 0C7.7 0 6.6 0.84 6.18 2H2C0.9 2 0 2.9 0 4V14C0 15.1 0.9 16 2 16H16C17.1 16 18 15.1 18 14V4C18 2.9 17.1 2 16 2ZM9 2C9.55 2 10 2.45 10 3C10 3.55 9.55 4 9 4C8.45 4 8 3.55 8 3C8 2.45 8.45 2 9 2ZM11 12H4V10H11V12ZM14 9H4V7H14V9Z" fill="#0369A1"/>
-            </svg>
-        </p>
+        <div class="flex flex-col justify-between space-y-[0.875rem]">
+            <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
+                <p class="text-base">Hub: <span>{{ $hubLocation }}</span></p>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
+                        <path d="M8.18141 2.30297L2.52949 6.6989C2.15168 6.99275 1.96278 7.13968 1.82669 7.32368C1.70614 7.48667 1.61633 7.67029 1.56169 7.86551C1.5 8.0859 1.5 8.32521 1.5 8.80384V14.833C1.5 15.7664 1.5 16.2331 1.68166 16.5896C1.84144 16.9032 2.09641 17.1582 2.41002 17.318C2.76654 17.4996 3.23325 17.4996 4.16667 17.4996H13.8333C14.7668 17.4996 15.2335 17.4996 15.59 17.318C15.9036 17.1582 16.1586 16.9032 16.3183 16.5896C16.5 16.2331 16.5 15.7664 16.5 14.833V8.80384C16.5 8.32521 16.5 8.0859 16.4383 7.86551C16.3837 7.67029 16.2939 7.48667 16.1733 7.32368C16.0372 7.13968 15.8483 6.99275 15.4705 6.69891L9.81859 2.30297C9.52582 2.07526 9.37943 1.9614 9.21779 1.91763C9.07516 1.87902 8.92484 1.87902 8.78221 1.91763C8.62057 1.9614 8.47418 2.07526 8.18141 2.30297Z" stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+        </div>
     </div>
 
-    <div class="flex flex-col justify-between w-1/2">
-        <div class="mb-4 flex items-center justify-between gap-2 rounded-[0.375rem] bg-[#E9E9E9] p-2">
-            <p>HUB: <span>{{ $hubLocation }}</span></p>
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-                <path
-                    d="M0.666992 13.8333V4.95833C0.666992 4.61111 0.760881 4.29861 0.948659 4.02083C1.13644 3.74306 1.38977 3.54167 1.70866 3.41667L8.37533 0.75C8.56977 0.666667 8.7781 0.625 9.00033 0.625C9.22255 0.625 9.43088 0.666667 9.62533 0.75L16.292 3.41667C16.6114 3.54167 16.865 3.74306 17.0528 4.02083C17.2406 4.29861 17.3342 4.61111 17.3337 4.95833V13.8333C17.3337 14.2917 17.1706 14.6842 16.8445 15.0108C16.5184 15.3375 16.1259 15.5006 15.667 15.5H12.3337V8.83333H5.66699V15.5H2.33366C1.87533 15.5 1.4831 15.3369 1.15699 15.0108C0.830881 14.6847 0.667548 14.2922 0.666992 13.8333ZM6.50033 15.5V13.8333H8.16699V15.5H6.50033ZM8.16699 13V11.3333H9.83366V13H8.16699ZM9.83366 15.5V13.8333H11.5003V15.5H9.83366Z"
-                    fill="black" />
-            </svg>
-        </div>
-
+    <div class="flex flex-col justify-between">
         <div class="flex gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <path

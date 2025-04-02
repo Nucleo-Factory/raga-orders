@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\ShippingDocument;
 use Livewire\Component;
 use App\Services\TrackingService;
+use Illuminate\Support\Facades\Log;
 
 class PucharseOrderConsolidateDetail extends Component {
     public $shippingDocumentId;
@@ -55,6 +56,11 @@ class PucharseOrderConsolidateDetail extends Component {
         if (!$shippingDocument) {
             return;
         }
+
+        \Log::info('Loaded shipping document:', [
+            'id' => $shippingDocument->id,
+            'tracking_id' => $shippingDocument->tracking_id
+        ]);
 
         // Store the shipping document for the view
         $this->shippingDocument = $shippingDocument;
@@ -110,9 +116,14 @@ class PucharseOrderConsolidateDetail extends Component {
     {
         $this->loadingTracking = true;
 
-        // Por ahora usamos datos de prueba
+        $trackingId = $this->shippingDocument->tracking_id ?? null;
+        Log::info('Loading tracking data for document:', [
+            'shipping_document_id' => $this->shippingDocument->id ?? null,
+            'tracking_id' => $trackingId
+        ]);
+
         $trackingService = new TrackingService();
-        $this->trackingData = $trackingService->getMockTrackingData();
+        $this->trackingData = $trackingService->getTracking($trackingId);
 
         $this->loadingTracking = false;
     }
