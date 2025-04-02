@@ -279,7 +279,7 @@
         <div class="mb-8">
             <x-form-input>
                 <x-slot:label>
-                    Ingrese fecha de pick up
+                    Ingrese ID Tracking
                 </x-slot:label>
 
                 <x-slot:input name="tracking_id" type="text" placeholder="Ingrese ID Tracking" wire:model="tracking_id" class="pr-10"></x-slot:input>

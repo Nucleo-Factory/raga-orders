@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'ship24' => [
+        'api_key' => env('SHIP24_API_KEY'),
+    ],
+
+    'porth' => [
+        'api_key' => env('PORTH_API_KEY'),
+    ],
+
 ];

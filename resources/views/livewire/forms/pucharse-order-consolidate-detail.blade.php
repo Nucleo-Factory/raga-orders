@@ -103,6 +103,120 @@
         </div>
     </div>
 
+    <div class="mb-8">
+        <h3 class="mb-6 text-lg font-bold">Estado del Envío</h3>
+
+        @if($loadingTracking)
+            <div class="flex justify-center">
+                <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-dark-blue"></div>
+            </div>
+        @else
+            <div class="relative">
+                <!-- Timeline track -->
+                <div class="absolute h-[2px] top-6 left-0 right-0 flex">
+                    <div class="w-[33%] bg-dark-blue"></div>
+                    <div class="w-[67%] bg-gray-200"></div>
+                </div>
+
+                <!-- Timeline events -->
+                <div class="relative flex justify-between">
+                    @foreach($trackingData['events'] as $index => $event)
+                        @php
+                            $isCompleted = $index <= 1; // Para este ejemplo, marcamos los dos primeros como completados
+                            $isActive = $index === 2; // El tercer elemento está activo
+                        @endphp
+                        <div class="flex flex-col items-center">
+                            <!-- Status dot and line -->
+                            <div class="relative">
+                                <!-- Active/Completed dot -->
+                                <div class="z-20 flex items-center justify-center w-12 h-12 mb-2 rounded-full transition-all duration-300
+                                    {{ $isCompleted ? 'bg-dark-blue' : ($isActive ? 'bg-dark-blue' : 'bg-gray-200') }}">
+                                    @switch($event['status'])
+                                        @case('Order Created')
+                                            <svg class="w-6 h-6 {{ $isCompleted || $isActive ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            @break
+                                        @case('Picked Up')
+                                            <svg class="w-6 h-6 {{ $isCompleted || $isActive ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                            </svg>
+                                            @break
+                                        @case('In Transit')
+                                            <svg class="w-6 h-6 {{ $isCompleted || $isActive ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                            </svg>
+                                            @break
+                                        @default
+                                            <svg class="w-6 h-6 {{ $isCompleted || $isActive ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                    @endswitch
+                                </div>
+                            </div>
+
+                            <!-- Status details -->
+                            <div class="w-32 mt-4 text-center">
+                                <p class="mb-1 text-sm font-bold {{ $isCompleted || $isActive ? 'text-dark-blue' : 'text-gray-400' }}">
+                                    {{ $event['status'] }}
+                                </p>
+                                <p class="mb-1 text-xs font-medium {{ $isCompleted || $isActive ? 'text-gray-600' : 'text-gray-400' }}">
+                                    {{ \Carbon\Carbon::parse($event['date'])->format('d/m/Y') }}
+                                    <span class="{{ $isCompleted || $isActive ? 'text-dark-blue font-bold' : 'text-gray-400' }}">
+                                        {{ \Carbon\Carbon::parse($event['date'])->format('H:i') }}
+                                    </span>
+                                </p>
+                                <p class="text-xs {{ $isCompleted || $isActive ? 'text-gray-500' : 'text-gray-400' }}">
+                                    <span class="inline-flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        {{ $event['location'] }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Estimated delivery -->
+                <div class="p-6 mt-12 bg-white border border-gray-100 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-full bg-blue-50">
+                                <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Entrega estimada</p>
+                                <p class="text-lg font-bold text-dark-blue">
+                                    {{ \Carbon\Carbon::parse($trackingData['estimated_delivery'])->format('d/m/Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-full bg-blue-50">
+                                <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Estado actual</p>
+                                <p class="text-lg font-bold text-dark-blue">{{ $trackingData['current_status'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+
     <div class="space-y-[1.875rem]" x-data="{
         activeTab: 'tab1'
     }">

@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\ShippingDocument;
 use Livewire\Component;
+use App\Services\TrackingService;
 
 class PucharseOrderConsolidateDetail extends Component {
     public $shippingDocumentId;
@@ -14,10 +15,13 @@ class PucharseOrderConsolidateDetail extends Component {
     public $shippingDocument = null;
     public $totalWeight = 0;
     public $poCount = 0;
+    public $trackingData = null;
+    public $loadingTracking = false;
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
         $this->loadRelatedPurchaseOrders();
+        $this->loadTrackingData();
     }
 
     public function sortBy($field) {
@@ -100,6 +104,17 @@ class PucharseOrderConsolidateDetail extends Component {
             $query->orderBy('status', $this->sortDirection);
         }
         return $query;
+    }
+
+    public function loadTrackingData()
+    {
+        $this->loadingTracking = true;
+
+        // Por ahora usamos datos de prueba
+        $trackingService = new TrackingService();
+        $this->trackingData = $trackingService->getMockTrackingData();
+
+        $this->loadingTracking = false;
     }
 
     public function render() {
