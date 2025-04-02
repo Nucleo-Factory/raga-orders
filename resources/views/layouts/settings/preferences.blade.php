@@ -9,7 +9,7 @@
         </x-slot:content>
     </x-view-title>
 
-    <nav class="rounded-2xl bg-white px-6 py-4 text-lg">
+    <nav class="px-6 py-4 text-lg bg-white rounded-2xl">
         <ul class="flex items-center justify-between">
             <li>
                 <livewire:settings.nav-link text="Generales" :route="'settings.index'" />
@@ -19,9 +19,6 @@
             </li>
             <li>
                 <livewire:settings.nav-link text="Contraseña" :route="'settings.password'" />
-            </li>
-            <li>
-                <livewire:settings.nav-link text="Etapas" :route="'settings.stages'" />
             </li>
             <li>
                 <livewire:settings.nav-link text="Kanban" :route="'settings.kanban'" />
