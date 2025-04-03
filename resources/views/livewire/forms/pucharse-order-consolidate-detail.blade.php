@@ -7,7 +7,7 @@
                 </x-slot:title>
 
                 <x-slot:content>
-                    Órdenes consolidadas: {{ $poCount }} {{ $shippingDocument->tracking_id }}
+                    Órdenes consolidadas: {{ $poCount }}
                 </x-slot:content>
             </x-view-title>
 

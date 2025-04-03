@@ -208,6 +208,20 @@ class CreatePucharseOrder extends Component
                 $this->volumen = $this->purchaseOrder->volume;
                 $this->peso_kg = $this->purchaseOrder->weight_kg;
                 $this->peso_lb = $this->purchaseOrder->weight_lb;
+                $this->tracking_id = $this->purchaseOrder->tracking_id;
+                $this->pallet_quantity = $this->purchaseOrder->pallet_quantity;
+                $this->pallet_quantity_real = $this->purchaseOrder->pallet_quantity_real;
+                $this->bill_of_lading = $this->purchaseOrder->bill_of_lading;
+                $this->ground_transport_cost_1 = $this->purchaseOrder->ground_transport_cost_1;
+                $this->ground_transport_cost_2 = $this->purchaseOrder->ground_transport_cost_2;
+                $this->cost_nationalization = $this->purchaseOrder->cost_nationalization;
+                $this->cost_ofr_estimated = $this->purchaseOrder->cost_ofr_estimated;
+                $this->cost_ofr_real = $this->purchaseOrder->cost_ofr_real;
+                $this->estimated_pallet_cost = $this->purchaseOrder->estimated_pallet_cost;
+                $this->real_cost_estimated_po = $this->purchaseOrder->real_cost_estimated_po;
+                $this->real_cost_real_po = $this->purchaseOrder->real_cost_real_po;
+                $this->other_costs = $this->purchaseOrder->other_costs;
+                $this->other_expenses = $this->purchaseOrder->other_expenses;
 
                 // Fechas
                 $this->date_required_in_destination = $this->purchaseOrder->date_required_in_destination ? $this->purchaseOrder->date_required_in_destination->format('Y-m-d') : null;
