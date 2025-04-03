@@ -27,8 +27,8 @@ class PucharseOrderDetail extends Component
 
     public function mount($id)
     {
-        // Cargar la orden de compra con sus productos relacionados
-        $this->purchaseOrder = PurchaseOrder::with('products')->findOrFail($id);
+        // Cargar la orden de compra con sus productos y hub relacionados
+        $this->purchaseOrder = PurchaseOrder::with(['products', 'actualHub'])->findOrFail($id);
         $this->purchaseOrderDetails = PurchaseOrder::findOrFail($id);
 
         // Cargar los productos en el formato que necesitamos

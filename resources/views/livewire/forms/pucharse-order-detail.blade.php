@@ -57,7 +57,7 @@
             </x-label>
             @endif
             <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
-                <p class="text-base">HUB: <span>{{ $purchaseOrder->actualHub->name }}</span></p>
+                <p class="text-base">HUB: <span>{{ $purchaseOrder->actualHub->name ?? 'No asignado' }}</span></p>
 
                 <x-slot:icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19"
@@ -213,7 +213,7 @@
                 </div>
             </div>
         @else
-            <div class="p-4 bg-yellow-100 rounded-lg text-yellow-800">
+            <div class="p-4 text-yellow-800 bg-yellow-100 rounded-lg">
                 <p>No se pudieron cargar los datos de seguimiento. Por favor, inténtelo de nuevo más tarde.</p>
             </div>
         @endif
@@ -479,8 +479,7 @@
                                 viewBox="0 0 21 22" fill="none">
                                 <path
                                     d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
-                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
 
                             <span>Adjuntar costos</span>
