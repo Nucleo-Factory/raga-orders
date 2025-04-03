@@ -18,17 +18,147 @@ class TrackingService
     public function getShip24Tracking($trackingNumber)
     {
         try {
-            // Esta es una implementación de ejemplo - ajusta según la documentación real de Ship24
+            // Using the correct API endpoint for Ship24
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->ship24ApiKey,
-            ])->post('https://api.ship24.com/v1/trackers', [
-                'trackingNumber' => $trackingNumber,
-            ]);
+                'Accept' => 'application/json'
+            ])->get("https://api.ship24.com/public/v1/trackers/search/{$trackingNumber}/results");
 
-            return $response->json();
+            if ($response->failed()) {
+                \Log::error('Ship24 API request failed:', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return null;
+            }
+
+            $data = $response->json();
+
+            if (!$data || !isset($data['data']['trackings'][0]['events'])) {
+                \Log::warning('Invalid or empty response from Ship24 API');
+                return null;
+            }
+
+            // Get the first tracking result
+            $tracking = $data['data']['trackings'][0];
+            $events = $tracking['events'];
+            $shipment = $tracking['shipment'];
+            $statistics = $tracking['statistics']['timestamps'] ?? [];
+
+            // Define the phases in the order they should appear
+            $phaseOrder = [
+                'info_received' => [
+                    'name' => 'Ready for pickup',
+                    'icon' => 'warehouse'
+                ],
+                'in_transit' => [
+                    'name' => 'In transit',
+                    'icon' => 'truck'
+                ],
+                'out_for_delivery' => [
+                    'name' => 'Out for delivery',
+                    'icon' => 'truck'
+                ],
+                'failed_attempt' => [
+                    'name' => 'Delivery attempt failed',
+                    'icon' => 'port'
+                ],
+                'available_for_pickup' => [
+                    'name' => 'Available for pickup',
+                    'icon' => 'port'
+                ],
+                'delivered' => [
+                    'name' => 'Delivered',
+                    'icon' => 'check'
+                ]
+            ];
+
+            // Process timeline
+            $timeline = [];
+            $currentMilestone = $shipment['statusMilestone'] ?? 'in_transit';
+
+            // Map timestamp keys to our milestone keys
+            $timestampMapping = [
+                'info_received' => 'infoReceivedDatetime',
+                'in_transit' => 'inTransitDatetime',
+                'out_for_delivery' => 'outForDeliveryDatetime',
+                'failed_attempt' => 'failedAttemptDatetime',
+                'available_for_pickup' => 'availableForPickupDatetime',
+                'delivered' => 'deliveredDatetime'
+            ];
+
+            foreach ($phaseOrder as $phaseKey => $phaseInfo) {
+                $timestampKey = $timestampMapping[$phaseKey] ?? null;
+                $date = $statistics[$timestampKey] ?? null;
+
+                $status = $this->determinePhaseStatusForShip24($phaseKey, $currentMilestone, $date);
+
+                $timeline[] = [
+                    'id' => $phaseKey,
+                    'name' => $phaseInfo['name'],
+                    'icon' => $phaseInfo['icon'],
+                    'status' => $status,
+                    'date' => $date,
+                    'is_current' => $phaseKey === $currentMilestone,
+                    'is_completed' => $date !== null
+                ];
+            }
+
+            // Find origin and destination locations
+            $origin = '';
+            $destination = '';
+
+            if (!empty($events)) {
+                // Usually the last event is the most recent (delivery location)
+                $destination = $events[0]['location'] ?? '';
+
+                // The first event is typically the origin
+                $origin = $events[count($events) - 1]['location'] ?? '';
+            }
+
+            return [
+                'timeline' => $timeline,
+                'current_phase' => $currentMilestone,
+                'estimated_delivery' => $shipment['delivery']['estimatedDeliveryDate'] ?? null,
+                'cargo' => [],  // Ship24 doesn't provide cargo info in the same way
+                'pol' => $origin,
+                'pod' => $destination,
+                'carrier' => $events[0]['courierCode'] ?? ''
+            ];
+
         } catch (\Exception $e) {
+            \Log::error('Error in getShip24Tracking:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return null;
         }
+    }
+
+    private function determinePhaseStatusForShip24($phaseKey, $currentMilestone, $date)
+    {
+        if ($date) {
+            return 'completed';
+        }
+
+        if ($phaseKey === $currentMilestone) {
+            return 'active';
+        }
+
+        // Get the position of the phases for comparison
+        $phaseOrder = [
+            'info_received' => 1,
+            'in_transit' => 2,
+            'out_for_delivery' => 3,
+            'failed_attempt' => 4,
+            'available_for_pickup' => 5,
+            'delivered' => 6
+        ];
+
+        $phaseNumber = $phaseOrder[$phaseKey] ?? 999;
+        $currentNumber = $phaseOrder[$currentMilestone] ?? 0;
+
+        return $phaseNumber < $currentNumber ? 'completed' : 'pending';
     }
 
     public function getPorthTracking($trackingNumber)
@@ -239,13 +369,22 @@ class TrackingService
             return $this->getMockTrackingData();
         }
 
-        // Intentar obtener datos reales de la API de Porth
-        \Log::info('Attempting to get Porth tracking data');
+        // Intentar obtener datos de Ship24 primero
+        \Log::info('Attempting to get Ship24 tracking data');
+        $trackingData = $this->getShip24Tracking($trackingId);
+
+        if ($trackingData) {
+            \Log::info('Successfully retrieved Ship24 tracking data');
+            return $trackingData;
+        }
+
+        // Si Ship24 falla, intentar con Porth
+        \Log::info('Ship24 API call failed, attempting to get Porth tracking data');
         $trackingData = $this->getPorthTracking($trackingId);
 
-        // Si la llamada a la API falla, devolver datos de prueba como fallback
+        // Si ambas APIs fallan, devolver datos de prueba como fallback
         if (!$trackingData) {
-            \Log::info('Porth API call failed, returning mock data');
+            \Log::info('Both API calls failed, returning mock data');
             return $this->getMockTrackingData();
         }
 

@@ -98,6 +98,128 @@
         </x-date-card>
     </div>
 
+    @if($purchaseOrder->tracking_id)
+    <div class="mb-8">
+        <h3 class="mb-6 text-lg font-bold">Estado del Envío</h3>
+
+        @if($loadingTracking)
+            <div class="flex justify-center">
+                <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-dark-blue"></div>
+            </div>
+        @elseif(isset($trackingData['timeline']) && is_array($trackingData['timeline']))
+            <div class="relative">
+                <!-- Timeline track -->
+                <div class="absolute h-[2px] top-6 left-0 right-0 flex">
+                    @php
+                        $completedPhases = isset($trackingData['timeline']) ? collect($trackingData['timeline'])->where('is_completed', true)->count() : 0;
+                        $totalPhases = isset($trackingData['timeline']) ? count($trackingData['timeline']) : 0;
+                        $completedWidth = $totalPhases > 0 ? ($completedPhases / $totalPhases) * 100 : 0;
+                    @endphp
+                    <div class="bg-dark-blue" style="width: {{ $completedWidth }}%"></div>
+                    <div class="bg-gray-200" style="width: {{ 100 - $completedWidth }}%"></div>
+                </div>
+
+                <!-- Timeline events -->
+                <div class="relative flex justify-between">
+                    @foreach($trackingData['timeline'] as $phase)
+                        <div class="flex flex-col items-center">
+                            <!-- Status dot and line -->
+                            <div class="relative">
+                                <!-- Active/Completed dot -->
+                                <div class="z-20 flex items-center justify-center w-12 h-12 mb-2 rounded-full transition-all duration-300
+                                    {{ $phase['is_completed'] ? 'bg-dark-blue' : ($phase['is_current'] ? 'bg-dark-blue' : 'bg-gray-200') }}">
+                                    @switch($phase['icon'])
+                                        @case('warehouse')
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                            </svg>
+                                            @break
+                                        @case('truck')
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 18.5h6M3 17h1m0 0v-4m0 4H2m2-4h8m11 4h-1m0 0v-4m0 4h1m-2-4h-7m-2-3V4a1 1 0 00-1-1H5a1 1 0 00-1 1v6m12 0h3.5a1 1 0 011 1v3M4 10h12"></path>
+                                            </svg>
+                                            @break
+                                        @case('port')
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v2a2 2 0 002 2h8a2 2 0 002-2v-2M18 9l-6-6-6 6m6-6v10"></path>
+                                            </svg>
+                                            @break
+                                        @case('ship')
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3m18 0V9c0-1.66-4.03-3-9-3s-9 1.34-9 3v3m18 0v3c0 1.66-4.03 3-9 3s-9-1.34-9-3v-3"></path>
+                                            </svg>
+                                            @break
+                                        @case('check')
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            @break
+                                        @default
+                                            <svg class="w-6 h-6 {{ $phase['is_completed'] || $phase['is_current'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                    @endswitch
+                                </div>
+                            </div>
+
+                            <!-- Status details -->
+                            <div class="w-32 mt-4 text-center">
+                                <p class="mb-1 text-sm font-bold {{ $phase['is_completed'] || $phase['is_current'] ? 'text-dark-blue' : 'text-gray-400' }}">
+                                    {{ $phase['name'] }}
+                                </p>
+                                @if(isset($phase['date']) && $phase['date'])
+                                    <p class="mb-1 text-xs font-medium {{ $phase['is_completed'] || $phase['is_current'] ? 'text-gray-600' : 'text-gray-400' }}">
+                                        {{ \Carbon\Carbon::parse($phase['date'])->format('d/m/Y') }}
+                                        <span class="{{ $phase['is_completed'] || $phase['is_current'] ? 'text-dark-blue font-bold' : 'text-gray-400' }}">
+                                            {{ \Carbon\Carbon::parse($phase['date'])->format('H:i') }}
+                                        </span>
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Estimated delivery -->
+                <div class="p-6 mt-12 bg-white border border-gray-100 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-full bg-blue-50">
+                                <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Entrega estimada</p>
+                                <p class="text-lg font-bold text-dark-blue">
+                                    {{ isset($trackingData['estimated_delivery']) ? \Carbon\Carbon::parse($trackingData['estimated_delivery'])->format('d/m/Y') : 'No disponible' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-full bg-blue-50">
+                                <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Estado actual</p>
+                                <p class="text-lg font-bold text-dark-blue">{{ $trackingData['current_phase'] ?? 'No disponible' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="p-4 bg-yellow-100 rounded-lg text-yellow-800">
+                <p>No se pudieron cargar los datos de seguimiento. Por favor, inténtelo de nuevo más tarde.</p>
+            </div>
+        @endif
+    </div>
+    @endif
+
     <div class="space-y-[1.875rem]" x-data="{
         activeTab: 'tab1'
     }">

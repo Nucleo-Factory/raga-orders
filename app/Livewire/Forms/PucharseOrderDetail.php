@@ -4,6 +4,8 @@ namespace App\Livewire\Forms;
 
 use App\Models\PurchaseOrder;
 use Livewire\Component;
+use Illuminate\Support\Facades\Log;
+use App\Services\TrackingService;
 
 class PucharseOrderDetail extends Component
 {
@@ -14,6 +16,9 @@ class PucharseOrderDetail extends Component
     public $additional_cost = 0;
     public $insurance_cost = 0;
     public $total = 0;
+    public $loadingTracking = false;
+    public $trackingData = [];
+    public $shippingDocument;
 
     // Search and sorting variables
     public $search = '';
@@ -31,6 +36,11 @@ class PucharseOrderDetail extends Component
 
         // Cargar los totales
         $this->loadTotals();
+
+        // If this purchase order has a tracking ID, load the tracking data
+        if ($this->purchaseOrder->tracking_id) {
+            $this->loadTrackingData();
+        }
     }
 
     protected function loadOrderProducts()
@@ -103,6 +113,25 @@ class PucharseOrderDetail extends Component
                 : strcmp($fieldB, $fieldA);
         });
     }
+
+    public function loadTrackingData()
+    {
+        $this->loadingTracking = true;
+
+        // Get the tracking ID from the purchase order directly
+        $trackingId = $this->purchaseOrder->tracking_id ?? null;
+
+        Log::info('Loading tracking data for purchase order:', [
+            'purchase_order_id' => $this->purchaseOrder->id ?? null,
+            'tracking_id' => $trackingId
+        ]);
+
+        $trackingService = new TrackingService();
+        $this->trackingData = $trackingService->getTracking($trackingId);
+
+        $this->loadingTracking = false;
+    }
+
 
     public function render()
     {
