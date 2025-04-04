@@ -151,16 +151,18 @@ class PucharseOrderConsolidateDetail extends Component {
             'shipping_document_id' => $this->shippingDocument->id
         ]);
 
-        // Load comments through the relationship
-        // Assuming your ShippingDocument model has a 'comments' relationship
+        // Load comments from the shipping_document_comments table
         $this->comments = $this->shippingDocument->comments()
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($comment) {
+                // Log the comment to see what fields are available
+                Log::info('Comment data:', ['comment' => $comment->toArray()]);
+
                 return [
                     'id' => $comment->id,
-                    'content' => $comment->content,
+                    'content' => $comment->comment ?? $comment->content ?? '', // Try both possible field names
                     'created_at' => $comment->created_at,
                     'user' => [
                         'id' => $comment->user->id ?? null,
@@ -235,7 +237,7 @@ class PucharseOrderConsolidateDetail extends Component {
 
             // Create a new comment through the relationship
             $comment = $this->shippingDocument->comments()->create([
-                'content' => $this->newComment,
+                'comment' => $this->newComment,
                 'user_id' => auth()->id(),
             ]);
 

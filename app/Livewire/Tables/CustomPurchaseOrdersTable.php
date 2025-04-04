@@ -124,11 +124,6 @@ class CustomPurchaseOrdersTable extends Component
             // Set the release date from the modal input
             $shippingDocument->release_date = $this->release_date;
 
-            // Guardar el comentario si existe
-            if ($this->comment_release) {
-                $shippingDocument->notes = $this->comment_release;
-            }
-
             // Set estimated dates based on the first order's dates
             $firstOrder = $selectedOrders->first();
             if ($firstOrder->date_required_in_destination) {
@@ -148,6 +143,16 @@ class CustomPurchaseOrdersTable extends Component
 
             // Save the shipping document
             $shippingDocument->save();
+
+            // Guardar el comentario en la tabla shipping_document_comments si existe
+            if (!empty($this->comment_release)) {
+                // Asumiendo que tienes un modelo ShippingDocumentComment
+                $comment = new \App\Models\ShippingDocumentComment();
+                $comment->shipping_document_id = $shippingDocument->id;
+                $comment->user_id = auth()->id() ?: 1;
+                $comment->comment = $this->comment_release;
+                $comment->save();
+            }
 
             // Guardar el archivo adjunto si existe
             if ($this->file) {
