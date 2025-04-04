@@ -37,6 +37,7 @@
                                     if (evt.from.getAttribute('data-column-id') !== newColumn) {
                                         $dispatch('open-modal', 'modal-document-move');
                                         $wire.setCurrentDocument(documentId, newColumn);
+                                        window.dispatchEvent(new CustomEvent('column-changed', { detail: newColumn }));
                                     }
                                 }
                             })
@@ -75,9 +76,98 @@
             </div>
         @endif
 
-        <div class="mb-8">
-            <x-form-select label="" name="etapa_documento" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+        <div class="mb-4">
+            <x-form-select
+                label=""
+                name="etapa_documento"
+                :options="collect($columns)->pluck('name', 'id')->toArray()"
+                optionPlaceholder="Seleccionar etapa"
+                :value="$newColumnId"
+                wire:model="newColumnId" />
+
+            <div class="mt-4">
+                <!-- Campo para la primera columna (Coordinación de salida - zarpe) -->
+                <div class="{{ $newColumnId == $columns[1]['id'] ? '' : 'hidden' }}">
+                    <x-form-input class="mb-4">
+                        <x-slot:label>
+                            Ingrese fecha de release
+                        </x-slot:label>
+
+                        <x-slot:input name="release_date" type="date" placeholder="Ingrese fecha de release" wire:model="release_date" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('release_date') }}
+                        </x-slot:error>
+                    </x-form-input>
+                </div>
+
+                <!-- Campos para la segunda columna (En tránsito - seguimiento) -->
+                <div class="{{ $newColumnId == $columns[2]['id'] ? '' : 'hidden' }}">
+                    <x-form-input class="mb-4">
+                        <x-slot:label>
+                            Ingrese ID tracking
+                        </x-slot:label>
+
+                        <x-slot:input name="tracking_id" placeholder="Ingrese ID tracking" wire:model="tracking_id" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('tracking_id') }}
+                        </x-slot:error>
+                    </x-form-input>
+
+                    <x-form-input class="mb-4">
+                        <x-slot:label>
+                            Ingrese código booking
+                        </x-slot:label>
+
+                        <x-slot:input name="booking_code" placeholder="Ingrese código booking" wire:model="booking_code" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('booking_code') }}
+                        </x-slot:error>
+                    </x-form-input>
+
+                    <x-form-input class="mb-4">
+                        <x-slot:label>
+                            Ingrese Contenedor
+                        </x-slot:label>
+
+                        <x-slot:input name="container_number" placeholder="Ingrese Contenedor" wire:model="container_number" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('container_number') }}
+                        </x-slot:error>
+                    </x-form-input>
+
+
+                    <x-form-input>
+                        <x-slot:label>
+                            Ingrese MBL
+                        </x-slot:label>
+
+                        <x-slot:input name="mbl_number" placeholder="Ingrese MBL" wire:model="mbl_number" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('mbl_number') }}
+                        </x-slot:error>
+                    </x-form-input>
+                </div>
+
+                <div class="{{ $newColumnId == $columns[4]['id'] ? '' : 'hidden' }}">
+                    <x-form-input class="mb-4">
+                        <x-slot:label>
+                            Ingrese fecha de instrucción
+                        </x-slot:label>
+
+                        <x-slot:input name="instruction_date" type="date" placeholder="Ingrese fecha de instrucción" wire:model="instruction_date" class="pr-10"></x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('release_date') }}
+                        </x-slot:error>
+                    </x-form-input>
+                </div>
+
+            </div>
         </div>
 
         <div class="mb-8">
