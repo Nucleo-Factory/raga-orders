@@ -481,7 +481,148 @@
             </div>
 
             <div x-show="activeTab === 'tab3'" x-transition>
-                {{-- Añadir tabla --}}
+                <div class="overflow-hidden bg-white rounded-lg shadow">
+                    <!-- Comments section -->
+                    <div class="p-6">
+                        <h3 class="mb-4 text-lg font-bold">Comentarios</h3>
+
+                        <div class="mb-8 space-y-6">
+                            @forelse($comments as $comment)
+                                <div class="flex items-start p-4 space-x-4 rounded-lg bg-gray-50">
+                                    <div class="flex-shrink-0">
+                                        <div class="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
+                                            <span class="font-bold text-indigo-800">{{ $comment['user']['initial'] }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between">
+                                            <p class="text-sm font-medium text-gray-900">
+                                                {{ $comment['user']['name'] }}
+                                            </p>
+                                            <p class="text-sm text-gray-500">
+                                                {{ isset($comment['created_at']) ? \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') : 'N/A' }}
+                                            </p>
+                                        </div>
+                                        <p class="mt-1 text-sm text-gray-700">{{ $comment['content'] }}</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="py-4 text-center text-gray-500">
+                                    No hay comentarios para este documento
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <!-- Comment form -->
+                        <form wire:submit.prevent="addComment" class="mt-6">
+                            <div class="flex">
+                                <div class="flex-1">
+                                    <textarea wire:model.defer="newComment" rows="3" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Añadir un comentario..."></textarea>
+                                    @error('newComment') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="flex-shrink-0 ml-3">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-dark-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Comentar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Files section -->
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold">Documentos adjuntos</h3>
+                            <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-dark-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Subir archivo
+                            </button>
+                            <input id="file-upload" wire:model="uploadFile" type="file" class="hidden">
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Nombre del archivo
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Tipo
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Fecha de subida
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Subido por
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($attachedFiles as $file)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-gray-100 rounded-md">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">
+                                                            {{ $file['name'] }}
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ $file['size_formatted'] }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ $file['type'] }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    {{ isset($file['created_at']) ? \Carbon\Carbon::parse($file['created_at'])->format('d/m/Y') : 'N/A' }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ isset($file['created_at']) ? \Carbon\Carbon::parse($file['created_at'])->format('H:i') : '' }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                                                {{ $file['user']['name'] }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                                <div class="flex space-x-3">
+                                                    <a href="{{ $file['url'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                                        Ver
+                                                    </a>
+                                                    <a href="{{ $file['url'] }}" download class="text-indigo-600 hover:text-indigo-900">
+                                                        Descargar
+                                                    </a>
+                                                    <button wire:click="deleteFile({{ $file['id'] }})" class="text-red-600 hover:text-red-900">
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                                No hay archivos adjuntos para este documento
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -6,8 +6,12 @@ use App\Models\ShippingDocument;
 use Livewire\Component;
 use App\Services\TrackingService;
 use Illuminate\Support\Facades\Log;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class PucharseOrderConsolidateDetail extends Component {
+    use WithFileUploads;
+
     public $shippingDocumentId;
     public $relatedPurchaseOrders = [];
     public $totalConsolidated = 0;
@@ -18,11 +22,17 @@ class PucharseOrderConsolidateDetail extends Component {
     public $poCount = 0;
     public $trackingData = null;
     public $loadingTracking = false;
+    public $comments = [];
+    public $attachedFiles = [];
+    public $newComment = '';
+    public $uploadFile;
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
         $this->loadRelatedPurchaseOrders();
         $this->loadTrackingData();
+        $this->loadComments();
+        $this->loadAttachedFiles();
     }
 
     public function sortBy($field) {
@@ -126,6 +136,232 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->trackingData = $trackingService->getTracking($trackingId);
 
         $this->loadingTracking = false;
+    }
+
+    /**
+     * Load comments related to the shipping document
+     */
+    public function loadComments()
+    {
+        if (!$this->shippingDocument) {
+            return;
+        }
+
+        Log::info('Loading comments for document:', [
+            'shipping_document_id' => $this->shippingDocument->id
+        ]);
+
+        // Load comments through the relationship
+        // Assuming your ShippingDocument model has a 'comments' relationship
+        $this->comments = $this->shippingDocument->comments()
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($comment) {
+                return [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'created_at' => $comment->created_at,
+                    'user' => [
+                        'id' => $comment->user->id ?? null,
+                        'name' => $comment->user->name ?? 'Usuario',
+                        'avatar' => $comment->user->profile_photo_url ?? null,
+                        'initial' => substr($comment->user->name ?? 'U', 0, 1),
+                    ]
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Load files attached to the shipping document
+     */
+    public function loadAttachedFiles()
+    {
+        if (!$this->shippingDocument) {
+            return;
+        }
+
+        Log::info('Loading attached files for document:', [
+            'shipping_document_id' => $this->shippingDocument->id
+        ]);
+
+        // Load files using Spatie Media Library
+        $this->attachedFiles = $this->shippingDocument->getMedia('shipping_documents')
+            ->map(function($media) {
+                return [
+                    'id' => $media->id,
+                    'name' => $media->file_name,
+                    'path' => $media->getPath(),
+                    'url' => $media->getUrl(),
+                    'type' => $this->getFileTypeFromName($media->file_name),
+                    'size' => $media->size,
+                    'size_formatted' => $this->formatFileSize($media->size),
+                    'created_at' => $media->created_at,
+                    'user' => [
+                        'id' => $media->getCustomProperty('uploaded_by') ?? null,
+                        'name' => $this->getUserNameById($media->getCustomProperty('uploaded_by')) ?? 'Usuario del sistema',
+                    ],
+                    'custom_properties' => $media->custom_properties
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get a username by user ID
+     */
+    private function getUserNameById($userId)
+    {
+        if (!$userId) return 'Usuario del sistema';
+
+        $user = \App\Models\User::find($userId);
+        return $user ? $user->name : 'Usuario del sistema';
+    }
+
+    /**
+     * Add a new comment to the shipping document
+     */
+    public function addComment()
+    {
+        $this->validate([
+            'newComment' => 'required|string|min:3|max:500',
+        ]);
+
+        try {
+            if (!$this->shippingDocument) {
+                throw new \Exception('No shipping document loaded');
+            }
+
+            // Create a new comment through the relationship
+            $comment = $this->shippingDocument->comments()->create([
+                'content' => $this->newComment,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Clear the input field
+            $this->newComment = '';
+
+            // Refresh the comments list
+            $this->loadComments();
+        } catch (\Exception $e) {
+            Log::error('Error adding comment: ' . $e->getMessage());
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'error',
+                'message' => 'Error al añadir el comentario'
+            ]);
+        }
+    }
+
+    /**
+     * Get a user-friendly file type based on the file extension
+     */
+    private function getFileTypeFromName($fileName)
+    {
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+        return match(strtolower($extension)) {
+            'pdf' => 'Documento PDF',
+            'jpg', 'jpeg', 'png', 'gif' => 'Imagen',
+            'doc', 'docx' => 'Documento Word',
+            'xls', 'xlsx' => 'Hoja de cálculo',
+            'ppt', 'pptx' => 'Presentación',
+            'zip', 'rar' => 'Archivo comprimido',
+            default => 'Documento'
+        };
+    }
+
+    /**
+     * Format file size in a user-friendly format
+     */
+    private function formatFileSize($size)
+    {
+        if (!$size) return '0 KB';
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $size = max($size, 0);
+        $pow = floor(($size ? log($size) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $size /= (1 << (10 * $pow));
+
+        return round($size, 2) . ' ' . $units[$pow];
+    }
+
+    /**
+     * Process file upload
+     */
+    public function updatedUploadFile()
+    {
+        $this->validate([
+            'uploadFile' => 'file|max:10240', // 10MB max
+        ]);
+
+        try {
+            if (!$this->shippingDocument) {
+                throw new \Exception('No shipping document loaded');
+            }
+
+            // Add file to media library
+            $media = $this->shippingDocument->addMedia($this->uploadFile->getRealPath())
+                ->usingName($this->uploadFile->getClientOriginalName())
+                ->withCustomProperties([
+                    'stage' => 'attachment',
+                    'comment' => null,
+                    'uploaded_by' => auth()->id() ?: 'system'
+                ])
+                ->toMediaCollection('shipping_documents');
+
+            // Reset the file upload field
+            $this->uploadFile = null;
+
+            // Refresh the files list
+            $this->loadAttachedFiles();
+
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'success',
+                'message' => 'Archivo subido exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error uploading file: ' . $e->getMessage());
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'error',
+                'message' => 'Error al subir el archivo: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Delete a file
+     */
+    public function deleteFile($mediaId)
+    {
+        try {
+            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($mediaId);
+
+            // Ensure the media belongs to the current shipping document
+            if ($media->model_id != $this->shippingDocument->id) {
+                throw new \Exception('The file does not belong to this shipping document');
+            }
+
+            // Delete the media
+            $media->delete();
+
+            // Refresh the files list
+            $this->loadAttachedFiles();
+
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'success',
+                'message' => 'Archivo eliminado exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting file: ' . $e->getMessage());
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'error',
+                'message' => 'Error al eliminar el archivo'
+            ]);
+        }
     }
 
     public function render() {

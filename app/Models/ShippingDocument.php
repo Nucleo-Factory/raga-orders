@@ -96,4 +96,12 @@ class ShippingDocument extends Model implements HasMedia
         $this->addMediaCollection('shipping_documents')
             ->useDisk('public');
     }
+
+    /**
+     * Get the files attached to the shipping document
+     */
+    public function files()
+    {
+        return $this->media()->where('collection_name', 'shipping_documents');
+    }
 }
