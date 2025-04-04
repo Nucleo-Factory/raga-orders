@@ -11,9 +11,14 @@
         </x-view-title>
 
         <div class="space-x-4">
-            <x-secondary-button class="w-[209px]">
-                Cancelar
-            </x-secondary-button>
+            @if($id)
+                <a href="{{ route('purchase-orders.index') }}">
+                    <x-secondary-button class="w-[209px]">
+                        Cancelar
+                    </x-secondary-button>
+                </a>
+            @endif
+
             @if($id)
                 <x-primary-button wire:click="updatePurchaseOrder({{ $id }})" class="w-[209px]">
                     Actualizar Orden

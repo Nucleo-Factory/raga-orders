@@ -21,7 +21,7 @@
                 <livewire:settings.nav-link text="Contraseña" :route="'settings.password'" />
             </li>
             <li>
-                <livewire:settings.nav-link text="Kanban" :route="'settings.kanban'" />
+                <livewire:settings.nav-link text="Etapas" :route="'settings.kanban'" />
             </li>
         </ul>
     </nav>

@@ -36,7 +36,7 @@
 
             <div class="flex gap-2 px-3 py-2">
                 <button
-                    class="h-6 w-6 bg-white border border-[#E4E7EC] rounded-[0.25rem] flex items-center justify-center">
+                    class="h-6 w-6 bg-white border border-[#E4E7EC] rounded-[0.25rem] flex items-center justify-center hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"
                         fill="none">
                         <path fill-rule="evenodd" clip-rule="evenodd"

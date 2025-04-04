@@ -1,7 +1,7 @@
 <sidebar
     class="main-sidebar grid h-full grid-rows-[auto_1fr_auto] rounded-br-[1.25rem] rounded-tr-[1.25rem] bg-white font-inter text-[0.875rem] transition-none">
     <div class="relative flex items-center justify-center border-b border-[#D2D2D2] bg-[#f7f7f7] px-6 py-6">
-        <a href="/">
+        <a href="{{ route('dashboard') }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="32" viewBox="0 0 28 32" fill="none">
                 <path
                     d="M25.7333 26.863C26.2287 26.3401 26.6871 25.7854 27.1085 25.2029C26.0507 21.9229 24.2271 18.9064 21.7187 16.3642C24.2784 13.6085 26.1205 10.3743 27.1683 6.87932C26.744 6.28435 26.2799 5.7185 25.7803 5.18732C24.9033 8.85286 23.0996 12.248 20.4802 15.1008C16.6664 10.9457 14.578 5.64083 14.5723 0.0239373C14.0427 -0.00380042 13.506 -0.00796108 12.965 0.0142291C12.8953 0.0170029 12.8269 0.0239373 12.7586 0.028098C12.7515 5.6436 10.6645 10.9471 6.85065 15.1008C4.23408 12.2535 2.4318 8.86534 1.55486 5.20673C1.05375 5.74069 0.592507 6.30792 0.168274 6.9029C1.21747 10.3895 3.05818 13.6154 5.6107 16.3642C3.10801 18.8995 1.28865 21.909 0.229489 25.1793C0.649451 25.7632 1.10785 26.3179 1.60326 26.8408C2.49728 23.4069 4.28248 20.2434 6.85065 17.6235C10.6588 21.5096 12.7529 26.5842 12.7586 31.975C13.2967 32.0042 13.842 32.0083 14.3915 31.9847C14.4527 31.982 14.5125 31.9764 14.5737 31.9723C14.5808 26.5828 16.6735 21.5082 20.4816 17.6221C23.0555 20.2475 24.8421 23.4193 25.7347 26.8616L25.7333 26.863ZM13.664 25.7951C12.6404 22.2862 10.7456 19.059 8.08776 16.3642C10.7485 13.4989 12.6419 10.1163 13.664 6.46048C14.6861 10.1163 16.5795 13.4989 19.2417 16.3642C16.5824 19.059 14.689 22.2862 13.664 25.7951Z"
@@ -66,7 +66,7 @@
             </div>
         </a>
 
-        <span class="text-[0.625rem] font-medium uppercase">Main</span>
+        <span class="text-[0.625rem] font-medium uppercase hidden">Main</span>
 
         <ul class="w-full space-y-2">
             <li>
@@ -150,27 +150,6 @@
                                 Solicitudes y aprobaciones
                             </x-sidebar-dropdown-item>
                         </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('vendors.index') }}"
-                                :active="request()->routeIs('vendors.index')">
-                                Proveedores
-                            </x-sidebar-dropdown-item>
-                        </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('ship-to.index') }}"
-                                :active="request()->routeIs('ship-to.index')">
-                                Direcciones de entrega
-                            </x-sidebar-dropdown-item>
-                        </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('bill-to.index') }}"
-                                :active="request()->routeIs('bill-to.index')">
-                                Direcciones de facturación
-                            </x-sidebar-dropdown-item>
-                        </li>
                     </ul>
                 </x-sidebar-dropdown>
             </li>
@@ -226,6 +205,27 @@
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.history') }}" :active="request()->routeIs('settings.history')">
                                 Log Histórico
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('vendors.index') }}"
+                                :active="request()->routeIs('vendors.index')">
+                                Proveedores
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('ship-to.index') }}"
+                                :active="request()->routeIs('ship-to.index')">
+                                Direcciones de entrega
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('bill-to.index') }}"
+                                :active="request()->routeIs('bill-to.index')">
+                                Direcciones de facturación
                             </x-sidebar-dropdown-item>
                         </li>
                     </ul>

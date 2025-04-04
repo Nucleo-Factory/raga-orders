@@ -197,7 +197,7 @@
                 Información general
             </button>
             <button @click="activeTab = 'tab2'"
-                :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue hidden' : 'border-transparent hidden'"
                 class="border-b-2 py-[0.625rem]">
                 Comparación de costos
             </button>
@@ -212,7 +212,7 @@
                 Histórico
             </button>
 
-            <x-dropdown alignmentClasses="rounded-[1.25rem]"
+            {{--<x-dropdown alignmentClasses="rounded-[1.25rem]"
                 contentClasses="rounded-[1.25rem] shadow-lg px-[1.125rem] py-[0.625rem] bg-white">
                 <x-slot:trigger>
                     <button class="rounded-[0.375rem] px-2 py-4 transition-colors duration-500 hover:bg-[#DDDDDD]">
@@ -235,7 +235,7 @@
                         </li>
                     </ul>
                 </x-slot:content>
-            </x-dropdown>
+            </x-dropdown>--}}
         </div>
 
         <!-- Contenido de las pestañas -->

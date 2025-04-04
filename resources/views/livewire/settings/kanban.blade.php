@@ -152,9 +152,6 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Posición</th>
                                         <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nombre</th>
-                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Color</th>
-                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Es Default</th>
-                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Es Final</th>
                                         <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Acciones</th>
                                     </tr>
                                 </thead>
@@ -163,34 +160,6 @@
                                         <tr>
                                             <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{{ $stage->position }}</td>
                                             <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{{ $stage->name }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="w-6 h-6 mr-2 rounded-full" style="background-color: {{ $stage->color }}"></div>
-                                                    <span>{{ $stage->color }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                                                @if($stage->is_default)
-                                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                @else
-                                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                                                @if($stage->is_final)
-                                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                @else
-                                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                @endif
-                                            </td>
                                             <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                 <button wire:click="startEditStage({{ $stage->id }})" class="text-blue-600 hover:text-blue-900">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
