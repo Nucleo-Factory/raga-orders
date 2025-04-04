@@ -1,5 +1,5 @@
 <div>
-    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
         {{ $this->table }}
     </div>
 </div>

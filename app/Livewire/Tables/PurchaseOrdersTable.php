@@ -49,7 +49,7 @@ class PurchaseOrdersTable extends DataTableComponent
 
                     $class = $statusClasses[$value] ?? 'bg-gray-100 text-gray-800';
 
-                    return '<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 '.$class.'">'.
+                    return '<span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full '.$class.'">'.
                         ucfirst($value).
                     '</span>';
                 })->html(),

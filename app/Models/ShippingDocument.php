@@ -23,6 +23,7 @@ class ShippingDocument extends Model
         'hub_location',
         'total_weight_kg',
         'notes',
+        'release_date',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class ShippingDocument extends Model
         'estimated_arrival_date' => 'date',
         'actual_departure_date' => 'date',
         'actual_arrival_date' => 'date',
+        'release_date' => 'date',
     ];
 
     /**

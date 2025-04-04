@@ -20,6 +20,7 @@ class CustomPurchaseOrdersTable extends Component
     public $consolidableFilter = '';
     public $selected = [];
     public $selectAll = false;
+    public $release_date = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -74,6 +75,11 @@ class CustomPurchaseOrdersTable extends Component
 
     public function createShippingDocument()
     {
+        if (empty($this->release_date)) {
+            session()->flash('error', 'La fecha de release es obligatoria.');
+            return;
+        }
+
         if (count($this->selected) === 0) {
             session()->flash('error', 'No hay órdenes seleccionadas para crear el documento de embarque.');
             return;
@@ -110,6 +116,9 @@ class CustomPurchaseOrdersTable extends Component
             $shippingDocument->document_number = 'DOC-' . date('YmdHis') . '-' . rand(1000, 9999);
             $shippingDocument->status = 'draft';
             $shippingDocument->creation_date = now();
+
+            // Set the release date from the modal input
+            $shippingDocument->release_date = $this->release_date;
 
             // Set estimated dates based on the first order's dates
             $firstOrder = $selectedOrders->first();
@@ -153,6 +162,9 @@ class CustomPurchaseOrdersTable extends Component
             $this->selected = [];
             $this->selectAll = false;
 
+            // Reset the release date after successful creation
+            $this->release_date = '';
+
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
             \DB::rollBack();
@@ -160,6 +172,55 @@ class CustomPurchaseOrdersTable extends Component
             // Show error message
             session()->flash('error', 'Error al crear el documento de embarque: ' . $e->getMessage());
         }
+    }
+
+    public function openReleaseModal()
+    {
+        if (count($this->selected) === 0) {
+            session()->flash('error', 'No hay órdenes seleccionadas para crear el documento de embarque.');
+            return;
+        }
+
+        // Get the selected purchase orders
+        $selectedOrders = PurchaseOrder::whereIn('id', $this->selected)->get();
+
+        // Check if all selected orders can be consolidated together
+        if (!PurchaseOrder::canBeConsolidatedTogether($selectedOrders)) {
+            // If not, check which orders are not consolidable individually
+            $nonConsolidableOrders = $selectedOrders->filter(function($order) {
+                return !$order->isConsolidable();
+            });
+
+            if ($nonConsolidableOrders->count() > 0) {
+                $orderNumbers = $nonConsolidableOrders->pluck('order_number')->join(', ');
+                session()->flash('error', "Las siguientes órdenes no son consolidables individualmente: {$orderNumbers}");
+            } else {
+                // If all orders are consolidable individually, then the total weight is outside the range
+                $totalWeight = $selectedOrders->sum('weight_kg');
+                session()->flash('error', "El peso total de las órdenes seleccionadas ({$totalWeight} kg) está fuera del rango permitido para consolidación (5001-15000 kg).");
+            }
+            return;
+        }
+
+        // Open the modal
+        $this->dispatch('open-modal', 'modal-hub-teorico');
+    }
+
+    public function addReleaseDate()
+    {
+        // Validate release date
+        $this->validate([
+            'release_date' => 'required|date',
+        ], [
+            'release_date.required' => 'La fecha de release es obligatoria.',
+            'release_date.date' => 'La fecha de release debe ser una fecha válida.',
+        ]);
+
+        // Close the modal
+        $this->dispatch('close-modal', 'modal-hub-teorico');
+
+        // Proceed with shipping document creation
+        $this->createShippingDocument();
     }
 
     private function getPurchaseOrdersQuery()
