@@ -35,7 +35,8 @@
                                     const newColumn = evt.to.getAttribute('data-column-id');
 
                                     if (evt.from.getAttribute('data-column-id') !== newColumn) {
-                                        $wire.moveDocument(documentId, newColumn);
+                                        $dispatch('open-modal', 'modal-document-move');
+                                        $wire.setCurrentDocument(documentId, newColumn);
                                     }
                                 }
                             })
@@ -44,8 +45,7 @@
                         @foreach($documentsByColumn[$column['id']] as $document)
                             <div
                                 class="cursor-move document-card"
-                                data-document-id="{{ $document['id'] }}"
-                            >
+                                data-document-id="{{ $document['id'] }}">
                                 <x-shipping-documentation-card
                                     :documentId="$document['document_number']"
                                     :trackingId="$document['document_id']"
@@ -63,6 +63,67 @@
             @endforeach
         @endif
     </div>
+
+    <x-modal name="modal-document-move" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            ¿Cambiar el documento de etapa?
+        </h3>
+
+        @if ($currentDocument)
+            <div class="mb-5 text-center">
+                <p class="text-[#171717] underline underline-offset-4">Documento: {{ $currentDocument['document_number'] }}</p>
+            </div>
+        @endif
+
+        <div class="mb-8">
+            <x-form-select label="" name="etapa_documento" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
+                :value="$newColumnId" />
+        </div>
+
+        <div class="mb-8">
+            <x-form-textarea label="" name="comentario_documento" wireModel="comment" placeholder="Comentarios" />
+        </div>
+
+        <div class="mb-12 space-y-2">
+            <x-secondary-button class="group flex w-full items-center justify-center gap-[0.625rem]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
+                    fill="none">
+                    <path
+                        d="M19.1525 9.89897L10.1369 18.9146C8.08662 20.9648 4.7625 20.9648 2.71225 18.9146C0.661997 16.8643 0.661998 13.5402 2.71225 11.49L11.7279 2.47435C13.0947 1.10751 15.3108 1.10751 16.6776 2.47434C18.0444 3.84118 18.0444 6.05726 16.6776 7.42409L8.01555 16.0862C7.33213 16.7696 6.22409 16.7696 5.54068 16.0862C4.85726 15.4027 4.85726 14.2947 5.54068 13.6113L13.1421 6.00988"
+                        stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                </svg>
+
+                <span>Adjuntar documentación...</span>
+            </x-secondary-button>
+            <div class="flex flex-col text-sm text-[#A5A3A3]">
+                <span>Tipo de formato .xls .xlsx .pdf</span>
+                <span>Tamaño máximo 5MB</span>
+            </div>
+        </div>
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button x-on:click="$dispatch('close-modal', 'modal-document-move')" class="w-full">
+                Cancelar
+            </x-secondary-button>
+
+            <x-primary-button
+                x-on:click="
+                    const commentText = document.querySelector('textarea[name=comentario_documento]').value || '';
+                    const columnId = document.querySelector('select[name=etapa_documento]').value;
+                    console.log('Moving to column:', columnId); // Para depuración
+                    if (columnId) {
+                        $wire.setComments($wire.currentDocumentId, commentText);
+                        $wire.moveDocument($wire.currentDocumentId, columnId);
+                        $dispatch('close-modal', 'modal-document-move');
+                    } else {
+                        alert('Por favor selecciona una etapa.');
+                    }"
+                class="w-full">
+                Continuar
+            </x-primary-button>
+        </div>
+    </x-modal>
 
     <style>
         .kanban-container {

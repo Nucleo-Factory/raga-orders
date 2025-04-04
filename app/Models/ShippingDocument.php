@@ -67,4 +67,20 @@ class ShippingDocument extends Model
         $this->total_weight_kg = $this->calculateTotalWeight();
         $this->save();
     }
+
+    /**
+     * Relación con el estado de Kanban
+     */
+    public function kanbanStatus()
+    {
+        return $this->belongsTo(KanbanStatus::class);
+    }
+
+    /**
+     * Relación con los comentarios del documento
+     */
+    public function comments()
+    {
+        return $this->hasMany(ShippingDocumentComment::class);
+    }
 }
