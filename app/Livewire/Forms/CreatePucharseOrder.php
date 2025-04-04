@@ -690,6 +690,73 @@ class CreatePucharseOrder extends Component
         }
     }
 
+    public function updatePurchaseOrder($id) {
+            $poData = [
+                'order_number' => $this->order_number,
+                'status' => $this->id ? $this->status : 'draft',
+                'notes' => $this->notes,
+                'vendor_id' => $this->vendor_id,
+                'ship_to_id' => $this->ship_to_id,
+                'bill_to_id' => $this->bill_to_id,
+                'order_date' => $this->order_date,
+                'currency' => $this->currency,
+                'incoterms' => $this->incoterms,
+                'payment_terms' => $this->payment_terms,
+                'net_total' => $this->net_total,
+                'additional_cost' => $this->additional_cost,
+                'total' => $this->total,
+                'insurance_cost' => $this->insurance_cost,
+                'length' => $this->largo,
+                'width' => $this->ancho,
+                'height' => $this->alto,
+                'volume' => $this->volumen,
+                'weight_kg' => $this->peso_kg,
+                'weight_lb' => $this->peso_lb,
+                'planned_hub_id' => $this->planned_hub_id,
+                'actual_hub_id' => $this->actual_hub_id,
+                // Fechas
+                'date_required_in_destination' => $this->date_required_in_destination,
+                'date_planned_pickup' => $this->date_planned_pickup,
+                'date_actual_pickup' => $this->date_actual_pickup,
+                'date_estimated_hub_arrival' => $this->date_estimated_hub_arrival,
+                'date_actual_hub_arrival' => $this->date_actual_hub_arrival,
+                'date_etd' => $this->date_etd,
+                'date_atd' => $this->date_atd,
+                'date_eta' => $this->date_eta,
+                'date_ata' => $this->date_ata,
+                'date_consolidation' => $this->date_consolidation,
+                'release_date' => $this->release_date,
+                // Otros campos
+                'material_type' => $this->material_type,
+                'ensurence_type' => $this->ensurence_type,
+                'mode' => $this->mode,
+                'tracking_id' => $this->tracking_id,
+                'pallet_quantity' => $this->pallet_quantity,
+                'pallet_quantity_real' => $this->pallet_quantity_real,
+                'bill_of_lading' => $this->bill_of_lading,
+                'ground_transport_cost_1' => $this->ground_transport_cost_1,
+                'ground_transport_cost_2' => $this->ground_transport_cost_2,
+                'cost_nationalization' => $this->cost_nationalization,
+                'cost_ofr_estimated' => $this->cost_ofr_estimated,
+                'cost_ofr_real' => $this->cost_ofr_real,
+                'estimated_pallet_cost' => $this->estimated_pallet_cost,
+                'real_cost_estimated_po' => $this->real_cost_estimated_po,
+                'real_cost_real_po' => $this->real_cost_real_po,
+                'other_costs' => $this->other_costs,
+                'other_expenses' => $this->other_expenses,
+                'variable_calculare_weight' => $this->variable_calculare_weight,
+                'savings_ofr_fcl' => $this->savings_ofr_fcl,
+                'saving_pickup' => $this->saving_pickup,
+                'saving_executed' => $this->saving_executed,
+                'saving_not_executed' => $this->saving_not_executed,
+                'comments' => $this->comments,
+            ];
+
+            $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
+            $purchaseOrder->update($poData);
+            return redirect()->route('purchase-orders.detail', $id);
+    }
+
     public function render() {
         // Cargar los vendors y ship tos desde la base de datos
         $companyId = auth()->user()->company_id ?? 1;

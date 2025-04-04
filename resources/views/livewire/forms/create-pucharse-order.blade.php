@@ -14,10 +14,15 @@
             <x-secondary-button class="w-[209px]">
                 Cancelar
             </x-secondary-button>
-
-            <x-primary-button wire:click="createPurchaseOrder" class="w-[209px]">
-                {{ isset($id) ? 'Actualizar Orden' : 'Crear nueva Orden' }}
-            </x-primary-button>
+            @if($id)
+                <x-primary-button wire:click="updatePurchaseOrder({{ $id }})" class="w-[209px]">
+                    Actualizar Orden
+                </x-primary-button>
+            @else
+                <x-primary-button wire:click="createPurchaseOrder" class="w-[209px]">
+                    Crear nueva Orden
+                </x-primary-button>
+            @endif
         </div>
     </div>
 
