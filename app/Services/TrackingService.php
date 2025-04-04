@@ -22,7 +22,9 @@ class TrackingService
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->ship24ApiKey,
                 'Accept' => 'application/json'
-            ])->get("https://api.ship24.com/public/v1/trackers/search/{$trackingNumber}/results");
+            ])->post("https://api.ship24.com/public/v1/tracking/search", [
+                'trackingNumber' => $trackingNumber
+            ]);
 
             if ($response->failed()) {
                 \Log::error('Ship24 API request failed:', [
@@ -34,96 +36,18 @@ class TrackingService
 
             $data = $response->json();
 
-            if (!$data || !isset($data['data']['trackings'][0]['events'])) {
+            if (!$data || !isset($data['data']['trackings'][0])) {
                 \Log::warning('Invalid or empty response from Ship24 API');
                 return null;
             }
 
-            // Get the first tracking result
+            // Simplemente devuelve los datos tal como vienen de la API
             $tracking = $data['data']['trackings'][0];
-            $events = $tracking['events'];
-            $shipment = $tracking['shipment'];
-            $statistics = $tracking['statistics']['timestamps'] ?? [];
-
-            // Define the phases in the order they should appear
-            $phaseOrder = [
-                'info_received' => [
-                    'name' => 'Ready for pickup',
-                    'icon' => 'warehouse'
-                ],
-                'in_transit' => [
-                    'name' => 'In transit',
-                    'icon' => 'truck'
-                ],
-                'out_for_delivery' => [
-                    'name' => 'Out for delivery',
-                    'icon' => 'truck'
-                ],
-                'failed_attempt' => [
-                    'name' => 'Delivery attempt failed',
-                    'icon' => 'port'
-                ],
-                'available_for_pickup' => [
-                    'name' => 'Available for pickup',
-                    'icon' => 'port'
-                ],
-                'delivered' => [
-                    'name' => 'Delivered',
-                    'icon' => 'check'
-                ]
-            ];
-
-            // Process timeline
-            $timeline = [];
-            $currentMilestone = $shipment['statusMilestone'] ?? 'in_transit';
-
-            // Map timestamp keys to our milestone keys
-            $timestampMapping = [
-                'info_received' => 'infoReceivedDatetime',
-                'in_transit' => 'inTransitDatetime',
-                'out_for_delivery' => 'outForDeliveryDatetime',
-                'failed_attempt' => 'failedAttemptDatetime',
-                'available_for_pickup' => 'availableForPickupDatetime',
-                'delivered' => 'deliveredDatetime'
-            ];
-
-            foreach ($phaseOrder as $phaseKey => $phaseInfo) {
-                $timestampKey = $timestampMapping[$phaseKey] ?? null;
-                $date = $statistics[$timestampKey] ?? null;
-
-                $status = $this->determinePhaseStatusForShip24($phaseKey, $currentMilestone, $date);
-
-                $timeline[] = [
-                    'id' => $phaseKey,
-                    'name' => $phaseInfo['name'],
-                    'icon' => $phaseInfo['icon'],
-                    'status' => $status,
-                    'date' => $date,
-                    'is_current' => $phaseKey === $currentMilestone,
-                    'is_completed' => $date !== null
-                ];
-            }
-
-            // Find origin and destination locations
-            $origin = '';
-            $destination = '';
-
-            if (!empty($events)) {
-                // Usually the last event is the most recent (delivery location)
-                $destination = $events[0]['location'] ?? '';
-
-                // The first event is typically the origin
-                $origin = $events[count($events) - 1]['location'] ?? '';
-            }
 
             return [
-                'timeline' => $timeline,
-                'current_phase' => $currentMilestone,
-                'estimated_delivery' => $shipment['delivery']['estimatedDeliveryDate'] ?? null,
-                'cargo' => [],  // Ship24 doesn't provide cargo info in the same way
-                'pol' => $origin,
-                'pod' => $destination,
-                'carrier' => $events[0]['courierCode'] ?? ''
+                'raw_data' => $tracking,
+                'current_phase' => $tracking['shipment']['statusMilestone'] ?? null,
+                'estimated_delivery' => $tracking['shipment']['delivery']['estimatedDeliveryDate'] ?? null,
             ];
 
         } catch (\Exception $e) {

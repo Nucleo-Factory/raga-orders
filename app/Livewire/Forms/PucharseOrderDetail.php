@@ -118,16 +118,29 @@ class PucharseOrderDetail extends Component
     {
         $this->loadingTracking = true;
 
-        // Get the tracking ID from the purchase order directly
-        $trackingId = $this->purchaseOrder->tracking_id ?? null;
+        try {
+            // Get the tracking ID from the purchase order directly
+            $trackingId = $this->purchaseOrder->tracking_id ?? null;
 
-        Log::info('Loading tracking data for purchase order:', [
-            'purchase_order_id' => $this->purchaseOrder->id ?? null,
-            'tracking_id' => $trackingId
-        ]);
+            Log::info('Loading tracking data for purchase order:', [
+                'purchase_order_id' => $this->purchaseOrder->id ?? null,
+                'tracking_id' => $trackingId
+            ]);
 
-        $trackingService = new TrackingService();
-        $this->trackingData = $trackingService->getTracking($trackingId);
+            $trackingService = new TrackingService();
+            $this->trackingData = $trackingService->getTracking($trackingId);
+
+            Log::info('Tracking data loaded successfully', [
+                'has_timeline' => isset($this->trackingData['timeline']),
+                'milestone' => $this->trackingData['current_phase'] ?? 'none'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error loading tracking data', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->trackingData = [];
+        }
 
         $this->loadingTracking = false;
     }
