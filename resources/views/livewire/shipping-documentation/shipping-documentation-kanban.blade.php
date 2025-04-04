@@ -18,8 +18,8 @@
                     <div
                         id="column-{{ $column['id'] }}"
                         data-column-id="{{ $column['id'] }}"
-                         class="space-y-3 min-h-40"
-                        x-data
+                        class="space-y-3 min-h-40"
+                        x-data="{ isModalOpen: false }"
                         x-init="
                             new Sortable($el, {
                                 group: 'documents',
@@ -31,13 +31,21 @@
                                 fallbackClass: 'sortable-fallback',
                                 fallbackOnBody: true,
                                 onEnd: function(evt) {
+                                    if (isModalOpen) return;
+
                                     const documentId = evt.item.getAttribute('data-document-id');
                                     const newColumn = evt.to.getAttribute('data-column-id');
 
                                     if (evt.from.getAttribute('data-column-id') !== newColumn) {
-                                        $dispatch('open-modal', 'modal-document-move');
-                                        $wire.setCurrentDocument(documentId, newColumn);
-                                        window.dispatchEvent(new CustomEvent('column-changed', { detail: newColumn }));
+                                        isModalOpen = true;
+                                        $wire.setCurrentDocument(documentId, newColumn)
+                                            .then(() => {
+                                                $dispatch('open-modal', 'modal-document-move');
+                                            });
+
+                                        setTimeout(() => {
+                                            isModalOpen = false;
+                                        }, 1000);
                                     }
                                 }
                             })
@@ -83,10 +91,10 @@
                 :options="collect($columns)->pluck('name', 'id')->toArray()"
                 optionPlaceholder="Seleccionar etapa"
                 :value="$newColumnId"
-                wire:model="newColumnId" />
+                wire:model.live="newColumnId" />
 
             <div class="mt-4">
-                <!-- Campo para la primera columna (Coordinación de salida - zarpe) -->
+                <!-- Campo para la columna 1 -->
                 <div class="{{ $newColumnId == $columns[1]['id'] ? '' : 'hidden' }}">
                     <x-form-input class="mb-4">
                         <x-slot:label>
@@ -101,7 +109,7 @@
                     </x-form-input>
                 </div>
 
-                <!-- Campos para la segunda columna (En tránsito - seguimiento) -->
+                <!-- Campos para la columna 2 -->
                 <div class="{{ $newColumnId == $columns[2]['id'] ? '' : 'hidden' }}">
                     <x-form-input class="mb-4">
                         <x-slot:label>
@@ -153,7 +161,8 @@
                     </x-form-input>
                 </div>
 
-                <div class="{{ $newColumnId == $columns[4]['id'] ? '' : 'hidden' }}">
+                <!-- Campo para la columna "Digitaciones" (ID 14) -->
+                <div class="{{ $newColumnId == 14 ? '' : 'hidden' }}">
                     <x-form-input class="mb-4">
                         <x-slot:label>
                             Ingrese fecha de instrucción
@@ -162,11 +171,10 @@
                         <x-slot:input name="instruction_date" type="date" placeholder="Ingrese fecha de instrucción" wire:model="instruction_date" class="pr-10"></x-slot:input>
 
                         <x-slot:error>
-                            {{ $errors->first('release_date') }}
+                            {{ $errors->first('instruction_date') }}
                         </x-slot:error>
                     </x-form-input>
                 </div>
-
             </div>
         </div>
 
@@ -198,17 +206,8 @@
             </x-secondary-button>
 
             <x-primary-button
-                x-on:click="
-                    const commentText = document.querySelector('textarea[name=comentario_documento]').value || '';
-                    const columnId = document.querySelector('select[name=etapa_documento]').value;
-                    console.log('Moving to column:', columnId); // Para depuración
-                    if (columnId) {
-                        $wire.setComments($wire.currentDocumentId, commentText);
-                        $wire.moveDocument($wire.currentDocumentId, columnId);
-                        $dispatch('close-modal', 'modal-document-move');
-                    } else {
-                        alert('Por favor selecciona una etapa.');
-                    }"
+                wire:click="moveDocument('{{ $currentDocumentId }}', '{{ $newColumnId }}')"
+                x-on:click="$dispatch('close-modal', 'modal-document-move')"
                 class="w-full">
                 Continuar
             </x-primary-button>

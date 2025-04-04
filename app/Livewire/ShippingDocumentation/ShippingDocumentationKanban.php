@@ -24,6 +24,13 @@ class ShippingDocumentationKanban extends Component
     public $comment;
     // Variables para el HUB
     public $actual_hub_id;
+    // Añadir estas propiedades para los campos del formulario
+    public $tracking_id;
+    public $booking_code;
+    public $container_number;
+    public $mbl_number;
+    public $release_date;
+    public $instruction_date;
 
     public function mount($boardId = null)
     {
@@ -87,57 +94,42 @@ class ShippingDocumentationKanban extends Component
         $shippingDocs = ShippingDocument::with(['purchaseOrders', 'company'])
             ->get();
 
-        // ALTERNATIVA: Buscar asociaciones en la tabla pivot si existe
-        $kanbanAssociations = [];
-        try {
-            if (Schema::hasTable('kanban_shipping_document')) {
-                $associations = DB::table('kanban_shipping_document')->get();
-                foreach ($associations as $assoc) {
-                    $kanbanAssociations[$assoc->shipping_document_id] = $assoc->kanban_status_id;
+        $this->documents = $shippingDocs->map(function ($doc) {
+            // Intentar extraer kanban_status_id de las notas
+            $kanbanStatusId = null;
+
+            if ($doc->notes && strpos($doc->notes, 'KANBAN_STATUS_ID:') !== false) {
+                preg_match('/KANBAN_STATUS_ID:(\d+)/', $doc->notes, $matches);
+                if (isset($matches[1])) {
+                    $kanbanStatusId = $matches[1];
+                    \Log::info("Extracted kanban_status_id from notes: $kanbanStatusId for document ID: {$doc->id}");
                 }
             }
-        } catch (\Exception $e) {
-            \Log::error("Error fetching from pivot table: " . $e->getMessage());
-        }
 
-        $this->documents = $shippingDocs->map(function ($doc) use ($kanbanAssociations) {
-            // Intentar obtener el kanban_status_id de la tabla pivot
-            $kanbanStatusId = $kanbanAssociations[$doc->id] ?? null;
-
-            // Si no existe en la tabla pivot, mapearlo según el estado actual
+            // Si no se encontró en las notas, mapear según el estado
             if (!$kanbanStatusId) {
                 // Map the status from shipping document to kanban status
+                $kanbanStatus = null;
+
                 switch ($doc->status) {
                     case 'draft':
-                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%borrador%')
-                            ->orWhere('name', 'like', '%draft%')
-                            ->orWhere('name', 'like', '%gestion documental%')
+                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%gestion documental%')
                             ->first();
                         break;
                     case 'pending':
-                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%pendiente%')
-                            ->orWhere('name', 'like', '%pending%')
-                            ->orWhere('name', 'like', '%coordinación de salida%')
-                            ->orWhere('name', 'like', '%zarpe%')
+                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%coordinación de salida%')
                             ->first();
                         break;
                     case 'approved':
-                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%aprobado%')
-                            ->orWhere('name', 'like', '%approved%')
-                            ->orWhere('name', 'like', '%notificación de arribo%')
+                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%notificación de arribo%')
                             ->first();
                         break;
                     case 'in_transit':
                         $kanbanStatus = $this->board->statuses()->where('name', 'like', '%tránsito%')
-                            ->orWhere('name', 'like', '%transit%')
-                            ->orWhere('name', 'like', '%seguimiento%')
                             ->first();
                         break;
                     case 'delivered':
-                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%entregado%')
-                            ->orWhere('name', 'like', '%delivered%')
-                            ->orWhere('name', 'like', '%liberación%')
-                            ->orWhere('name', 'like', '%entrega%')
+                        $kanbanStatus = $this->board->statuses()->where('name', 'like', '%liberación%')
                             ->first();
                         break;
                     default:
@@ -150,25 +142,6 @@ class ShippingDocumentationKanban extends Component
                 if (!$kanbanStatusId) {
                     $defaultStatus = $this->board->defaultStatus();
                     $kanbanStatusId = $defaultStatus ? $defaultStatus->id : null;
-                }
-
-                // Guardar la asociación en la tabla pivot si existe
-                if ($kanbanStatusId) {
-                    try {
-                        if (Schema::hasTable('kanban_shipping_document')) {
-                            DB::table('kanban_shipping_document')
-                                ->updateOrInsert(
-                                    ['shipping_document_id' => $doc->id],
-                                    [
-                                        'kanban_status_id' => $kanbanStatusId,
-                                        'updated_at' => now(),
-                                        'created_at' => now()
-                                    ]
-                                );
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error("Error saving to pivot table: " . $e->getMessage());
-                    }
                 }
             }
 
@@ -191,6 +164,7 @@ class ShippingDocumentationKanban extends Component
 
     protected function organizeDocumentsByColumn()
     {
+        \Log::info("organizeDocumentsByColumn: Starting method");
         $this->documentsByColumn = [];
 
         // Initialize empty arrays for each column
@@ -201,17 +175,26 @@ class ShippingDocumentationKanban extends Component
         // Organize documents by column
         foreach ($this->documents as $document) {
             $statusId = $document['kanban_status_id'];
+            \Log::info("organizeDocumentsByColumn: Document {$document['id']} has kanban_status_id: $statusId");
 
             // If the document has a valid status ID and the status exists in our columns
             if ($statusId && isset($this->documentsByColumn[$statusId])) {
                 $this->documentsByColumn[$statusId][] = $document;
+                \Log::info("organizeDocumentsByColumn: Added document to column $statusId");
             } else {
                 // If the document doesn't have a valid status, put it in the first column
                 if (!empty($this->columns)) {
                     $firstColumnId = $this->columns[0]['id'];
                     $this->documentsByColumn[$firstColumnId][] = $document;
+                    \Log::info("organizeDocumentsByColumn: Document has invalid status, added to first column ($firstColumnId)");
                 }
             }
+        }
+
+        // Log column counts for debugging
+        foreach ($this->columns as $column) {
+            $count = count($this->documentsByColumn[$column['id']]);
+            \Log::info("organizeDocumentsByColumn: Column {$column['id']} ({$column['name']}) has $count documents");
         }
     }
 
@@ -250,8 +233,6 @@ class ShippingDocumentationKanban extends Component
 
         // Map the kanban status back to a shipping document status
         $newStatus = 'draft'; // Default
-
-        // Map based on the kanban status name - utilizando nombres exactos de tus columnas
         $statusName = strtolower($kanbanStatus->name);
 
         if (str_contains($statusName, 'gestion documental')) {
@@ -264,51 +245,53 @@ class ShippingDocumentationKanban extends Component
             $newStatus = 'delivered';
         } elseif (str_contains($statusName, 'notificación de arribo') || str_contains($statusName, 'notificacion de arribo')) {
             $newStatus = 'approved';
+        } elseif (str_contains($statusName, 'digitaciones')) {
+            $newStatus = 'approved'; // O podrías usar otro estado apropiado
+        } elseif (str_contains($statusName, 'transito interno destino')) {
+            $newStatus = 'in_transit';
+        } elseif (str_contains($statusName, 'archivado')) {
+            $newStatus = 'delivered';
         }
 
         // Log para verificar el mapeo
         \Log::info("Mapping status from '$statusName' to '$newStatus'");
 
-        // Update the shipping document status (solo actualizamos el status, no el kanban_status_id)
-        $oldStatus = $shippingDoc->status;
-        $shippingDoc->status = $newStatus;
-        $result = $shippingDoc->save();
-
-        \Log::info("Document status updated from $oldStatus to $newStatus. Result: " . ($result ? 'success' : 'failed'));
-
-        // ALTERNATIVA: Almacenar la relación en una tabla pivot si existe
+        // Guardar la información del kanban en el campo notes
         try {
-            // Si existe una tabla pivot (similar a como funciona KanbanBoard)
-            if (Schema::hasTable('kanban_shipping_document')) {
-                // Eliminar cualquier entrada existente
-                DB::table('kanban_shipping_document')
-                    ->where('shipping_document_id', $shippingDocId)
-                    ->delete();
+            $shippingDoc->status = $newStatus;
 
-                // Crear nueva entrada
-                DB::table('kanban_shipping_document')->insert([
-                    'shipping_document_id' => $shippingDocId,
-                    'kanban_status_id' => $newColumnId,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+            // Almacenar el kanban_status_id en las notas
+            $notes = $shippingDoc->notes ?? '';
+            $kanbanInfo = "KANBAN_STATUS_ID:" . $newColumnId;
 
-                \Log::info("Document association with kanban status stored in pivot table");
+            // Eliminar cualquier información anterior del kanban
+            if (strpos($notes, 'KANBAN_STATUS_ID:') !== false) {
+                $notes = preg_replace('/KANBAN_STATUS_ID:\d+/', $kanbanInfo, $notes);
+            } else {
+                // Añadir al principio o al final de las notas
+                $notes = $notes ? ($notes . "\n" . $kanbanInfo) : $kanbanInfo;
             }
+
+            $shippingDoc->notes = $notes;
+            $result = $shippingDoc->save();
+
+            \Log::info("Document updated with new status and kanban info in notes. Result: " . ($result ? 'success' : 'failed'));
         } catch (\Exception $e) {
-            \Log::error("Error updating pivot table: " . $e->getMessage());
+            \Log::error("Error updating document: " . $e->getMessage());
         }
 
-        // Temporal: Guardar la asociación en memoria para esta sesión
+        // Actualizar en memoria para esta sesión
         foreach ($this->documents as &$document) {
-            if ($document['id'] == 'DOC-' . $shippingDocId) {
+            if ($document['id'] === 'DOC-' . $shippingDocId) {
                 $document['kanban_status_id'] = $newColumnId;
+                $document['status'] = $newStatus;
+                \Log::info("Updated document in memory: ID={$document['id']}, kanban_status_id=$newColumnId");
                 break;
             }
         }
 
-        // Reload the data
-        $this->loadData();
+        // Reorganizar los documentos por columna
+        $this->organizeDocumentsByColumn();
 
         // Reset current document data
         $this->currentDocumentId = null;
