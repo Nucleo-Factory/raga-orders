@@ -293,23 +293,19 @@ class TrackingService
             return $this->getMockTrackingData();
         }
 
-        // Intentar obtener datos de Ship24 primero
-        \Log::info('Attempting to get Ship24 tracking data');
-        $trackingData = $this->getShip24Tracking($trackingId);
-
-        if ($trackingData) {
-            \Log::info('Successfully retrieved Ship24 tracking data');
-            return $trackingData;
-        }
-
-        // Si Ship24 falla, intentar con Porth
-        \Log::info('Ship24 API call failed, attempting to get Porth tracking data');
+        // Para shipping documents, usar Porth
+        \Log::info('Attempting to get Porth tracking data for shipping document');
         $trackingData = $this->getPorthTracking($trackingId);
 
-        // Si ambas APIs fallan, devolver datos de prueba como fallback
+        // Si Porth falla, devolver datos de prueba como fallback
         if (!$trackingData) {
-            \Log::info('Both API calls failed, returning mock data');
+            \Log::info('Porth API call failed, returning mock data');
             return $this->getMockTrackingData();
+        }
+
+        // Asegurarnos de que siempre exista la clave 'timeline'
+        if (!isset($trackingData['timeline'])) {
+            $trackingData['timeline'] = [];
         }
 
         \Log::info('Successfully retrieved Porth tracking data');
