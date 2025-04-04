@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class ShippingDocument extends Model
+class ShippingDocument extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'company_id',
@@ -84,5 +86,14 @@ class ShippingDocument extends Model
     public function comments()
     {
         return $this->hasMany(ShippingDocumentComment::class);
+    }
+
+    /**
+     * Registrar las colecciones de medios para este modelo
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('shipping_documents')
+            ->useDisk('public');
     }
 }

@@ -295,17 +295,45 @@
         </div>
 
         <div class="mb-12 space-y-2">
-            <x-secondary-button class="group flex w-full items-center justify-center gap-[0.625rem]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
-                    fill="none">
-                    <path
-                        d="M19.1525 9.89897L10.1369 18.9146C8.08662 20.9648 4.7625 20.9648 2.71225 18.9146C0.661997 16.8643 0.661998 13.5402 2.71225 11.49L11.7279 2.47435C13.0947 1.10751 15.3108 1.10751 16.6776 2.47434C18.0444 3.84118 18.0444 6.05726 16.6776 7.42409L8.01555 16.0862C7.33213 16.7696 6.22409 16.7696 5.54068 16.0862C4.85726 15.4027 4.85726 14.2947 5.54068 13.6113L13.1421 6.00988"
-                        stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
-                </svg>
+            <label class="block mb-2 text-sm font-medium text-gray-700">
+                Adjuntar documentación (opcional)
+            </label>
 
-                <span>Adjuntar documentación...</span>
-            </x-secondary-button>
+            <div class="flex items-center justify-center w-full">
+                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="mb-1 text-sm text-gray-500">
+                            <span class="font-semibold">Haz clic para subir</span> o arrastra y suelta
+                        </p>
+                        <p class="text-xs text-gray-500">XLS, XLSX, PDF (máx. 5MB)</p>
+                    </div>
+                    <input id="dropzone-file" wire:model="file" type="file" class="hidden" />
+                </label>
+            </div>
+
+            @error('file')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+
+            @if($file)
+                <div class="flex items-center justify-between p-2 mt-2 bg-gray-100 rounded-md">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-700 truncate">{{ $file->getClientOriginalName() }}</span>
+                    </div>
+                    <button type="button" wire:click="$set('file', null)" class="text-red-500 hover:text-red-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            @endif
+
             <div class="flex flex-col text-sm text-[#A5A3A3]">
                 <span>Tipo de formato .xls .xlsx .pdf</span>
                 <span>Tamaño máximo 5MB</span>

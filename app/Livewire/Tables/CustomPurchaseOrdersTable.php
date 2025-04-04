@@ -5,10 +5,12 @@ namespace App\Livewire\Tables;
 use App\Models\PurchaseOrder;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 
 class CustomPurchaseOrdersTable extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'tailwind';
 
@@ -21,6 +23,8 @@ class CustomPurchaseOrdersTable extends Component
     public $selected = [];
     public $selectAll = false;
     public $release_date = '';
+    public $comment_release = '';
+    public $file = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -120,6 +124,11 @@ class CustomPurchaseOrdersTable extends Component
             // Set the release date from the modal input
             $shippingDocument->release_date = $this->release_date;
 
+            // Guardar el comentario si existe
+            if ($this->comment_release) {
+                $shippingDocument->notes = $this->comment_release;
+            }
+
             // Set estimated dates based on the first order's dates
             $firstOrder = $selectedOrders->first();
             if ($firstOrder->date_required_in_destination) {
@@ -139,6 +148,19 @@ class CustomPurchaseOrdersTable extends Component
 
             // Save the shipping document
             $shippingDocument->save();
+
+            // Guardar el archivo adjunto si existe
+            if ($this->file) {
+                // Usar Media Library en lugar del enfoque anterior
+                $shippingDocument->addMedia($this->file->getRealPath())
+                    ->usingName($this->file->getClientOriginalName())
+                    ->withCustomProperties([
+                        'stage' => 'creation',
+                        'comment' => $this->comment_release ?: null,
+                        'uploaded_by' => auth()->id() ?: 'system'
+                    ])
+                    ->toMediaCollection('shipping_documents');
+            }
 
             // Associate purchase orders with the shipping document
             foreach ($selectedOrders as $order) {
@@ -162,8 +184,10 @@ class CustomPurchaseOrdersTable extends Component
             $this->selected = [];
             $this->selectAll = false;
 
-            // Reset the release date after successful creation
+            // Reset the release date and other fields after successful creation
             $this->release_date = '';
+            $this->comment_release = '';
+            $this->file = null;
 
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
@@ -211,9 +235,13 @@ class CustomPurchaseOrdersTable extends Component
         // Validate release date
         $this->validate([
             'release_date' => 'required|date',
+            'file' => 'nullable|file|max:5120|mimes:xls,xlsx,pdf', // Validar archivo: máx 5MB, formatos permitidos
         ], [
             'release_date.required' => 'La fecha de release es obligatoria.',
             'release_date.date' => 'La fecha de release debe ser una fecha válida.',
+            'file.file' => 'El archivo adjunto debe ser un archivo válido.',
+            'file.max' => 'El archivo adjunto no debe exceder 5MB.',
+            'file.mimes' => 'El archivo adjunto debe ser de tipo: xls, xlsx, pdf.',
         ]);
 
         // Close the modal
