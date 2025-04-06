@@ -639,8 +639,7 @@ class CreatePucharseOrder extends Component
 
             \DB::commit();
 
-            session()->flash('message', 'Orden guardada exitosamente. ID: ' . $purchaseOrder->id);
-            return redirect()->route('purchase-orders.index');
+            $this->dispatch('open-modal', 'modal-purchase-order-created');
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Error en createPurchaseOrder: ' . $e->getMessage());
@@ -755,6 +754,11 @@ class CreatePucharseOrder extends Component
             $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
             $purchaseOrder->update($poData);
             return redirect()->route('purchase-orders.detail', $id);
+    }
+
+    public function closeModal() {
+        $this->dispatch('close-modal', 'modal-purchase-order-created');
+        return redirect()->route('purchase-orders.index');
     }
 
     public function render() {

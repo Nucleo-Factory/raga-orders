@@ -58,17 +58,7 @@ class CreateProducts extends Component {
             'legacy_material' => 'nullable|string|max:100',
             'contract' => 'nullable|string|max:100',
             'order_quantity' => 'required|numeric|min:0',
-            'qty_unit' => 'required',
-            'price_per_unit' => 'required|numeric|min:0',
-            'price_per_uon' => 'required|numeric|min:0',
-            'net_value' => 'required|numeric|min:0',
-            'vat_rate' => 'required',
-            'vat_value' => 'required|numeric|min:0',
-            'delivery_date' => 'required|date',
         ]);
-
-        // Process the form submission
-        // You would save to database here
 
         // Create product
         $product = Product::create([
@@ -83,11 +73,14 @@ class CreateProducts extends Component {
             'net_value' => $this->net_value,
             'vat_rate' => $this->vat_rate,
             'vat_value' => $this->vat_value,
+            'delivery_date' => $this->delivery_date,
         ]);
 
         // Reset form
-        session()->flash('message', 'Producto creado exitosamente!');
         $this->reset();
+
+        // Dispatch event to open modal
+        $this->dispatch('open-modal', 'modal-product-created');
     }
 
     // Calculate net value when price or quantity changes

@@ -609,6 +609,20 @@
             </div>
         </div>
     </x-form>
+
+    <x-modal-success name="modal-purchase-order-created">
+        <x-slot:title>
+            Orden de compra creada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La orden de compra ha sido creada correctamente con el número de orden: {{ $order_number }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 </div>
 
 <script>

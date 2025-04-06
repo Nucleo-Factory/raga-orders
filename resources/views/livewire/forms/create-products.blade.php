@@ -120,4 +120,18 @@
             </div>
         @endif
     </x-form>
+
+    <x-modal-success name="modal-product-created">
+        <x-slot:title>
+            Producto creado correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            El producto ha sido creado correctamente
+        </x-slot:description>
+
+        <x-primary-button wire:click="$dispatch('close-modal', 'modal-product-created')" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 </div>

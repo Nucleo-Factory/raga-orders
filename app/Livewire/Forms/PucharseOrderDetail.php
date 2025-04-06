@@ -6,9 +6,12 @@ use App\Models\PurchaseOrder;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Services\TrackingService;
+use Livewire\WithFileUploads;
 
 class PucharseOrderDetail extends Component
 {
+    use WithFileUploads;
+
     public $purchaseOrder;
     public $purchaseOrderDetails;
     public $orderProducts = [];
@@ -19,11 +22,19 @@ class PucharseOrderDetail extends Component
     public $loadingTracking = false;
     public $trackingData = [];
     public $shippingDocument;
+    public $comments = [];
+    public $attachments = [];
+    public $commentSortField = 'created_at';
+    public $commentSortDirection = 'desc';
 
     // Search and sorting variables
     public $search = '';
     public $sortField = 'material_id';
     public $sortDirection = 'asc';
+
+    public $newFile;
+    public $newComment = '';
+    public $fileSelected = false;
 
     public function mount($id)
     {
@@ -41,6 +52,9 @@ class PucharseOrderDetail extends Component
         if ($this->purchaseOrder->tracking_id) {
             $this->loadTrackingData();
         }
+
+        // Cargar los comentarios y archivos adjuntos
+        $this->loadCommentsAndAttachments();
     }
 
     protected function loadOrderProducts()
@@ -145,6 +159,164 @@ class PucharseOrderDetail extends Component
         $this->loadingTracking = false;
     }
 
+    protected function loadCommentsAndAttachments()
+    {
+        // Carga de comentarios desde la relación en el modelo
+        $this->comments = $this->purchaseOrder->comments()
+            ->latest()
+            ->get()
+            ->map(function($comment) {
+                return [
+                    'id' => $comment->id,
+                    'user_name' => $comment->user->name ?? 'Usuario',  // Asumiendo que hay una relación user en el comentario
+                    'comment' => $comment->comment,
+                    'created_at' => $comment->created_at,
+                    'type' => 'comment'
+                ];
+            })
+            ->toArray();
+
+        // Carga de archivos adjuntos usando Spatie Media Library
+        $this->attachments = $this->purchaseOrder->getMedia('attachments')
+            ->map(function($media) {
+                return [
+                    'id' => $media->id,
+                    'user_name' => $media->custom_properties['uploaded_by'] ?? 'Usuario',  // Asumiendo que guardas quién subió el archivo
+                    'filename' => $media->file_name,
+                    'file_type' => strtoupper($media->extension),
+                    'file_size' => $this->formatBytes($media->size),
+                    'created_at' => $media->created_at,
+                    'url' => $media->getUrl(),
+                    'type' => 'attachment'
+                ];
+            })
+            ->toArray();
+    }
+
+    // Función auxiliar para formatear bytes en unidades legibles
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
+    // Método para buscar en comentarios y archivos
+    public function getFilteredCommentsAndAttachments()
+    {
+        $search = strtolower($this->search);
+
+        $filteredComments = empty($search) ? $this->comments : array_filter($this->comments, function($comment) use ($search) {
+            return str_contains(strtolower($comment['user_name']), $search) ||
+                   str_contains(strtolower($comment['comment']), $search);
+        });
+
+        $filteredAttachments = empty($search) ? $this->attachments : array_filter($this->attachments, function($attachment) use ($search) {
+            return str_contains(strtolower($attachment['user_name']), $search) ||
+                   str_contains(strtolower($attachment['filename']), $search);
+        });
+
+        return [
+            'comments' => array_values($filteredComments),
+            'attachments' => array_values($filteredAttachments)
+        ];
+    }
+
+    public function sortComments($field)
+    {
+        if ($this->commentSortField === $field) {
+            $this->commentSortDirection = $this->commentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->commentSortField = $field;
+            $this->commentSortDirection = 'asc';
+        }
+
+        // Ordenar los comentarios y archivos
+        $this->sortCommentsAndAttachments();
+    }
+
+    protected function sortCommentsAndAttachments()
+    {
+        $allItems = array_merge($this->comments, $this->attachments);
+
+        usort($allItems, function ($a, $b) {
+            $fieldA = $a[$this->commentSortField] ?? '';
+            $fieldB = $b[$this->commentSortField] ?? '';
+
+            return $this->commentSortDirection === 'asc'
+                ? strcmp($fieldA, $fieldB)
+                : strcmp($fieldB, $fieldA);
+        });
+
+        // Separar de nuevo los elementos ordenados
+        $this->comments = array_filter($allItems, function($item) {
+            return $item['type'] === 'comment';
+        });
+
+        $this->attachments = array_filter($allItems, function($item) {
+            return $item['type'] === 'attachment';
+        });
+    }
+
+    public function addComment()
+    {
+        $this->validate([
+            'newComment' => 'required|string|min:3',
+        ]);
+
+        try {
+            // Crear el comentario en la base de datos
+            $this->purchaseOrder->comments()->create([
+                'user_id' => auth()->id() ?? 1,
+                'comment' => $this->newComment,
+            ]);
+
+            session()->flash('message', 'Comentario añadido correctamente');
+
+            // Recargar comentarios
+            $this->loadCommentsAndAttachments();
+
+            // Limpiar el campo
+            $this->newComment = '';
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al añadir comentario: ' . $e->getMessage());
+        }
+    }
+
+    public function uploadFile()
+    {
+        $this->validate([
+            'newFile' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        try {
+            // Subir el archivo usando Spatie Media Library
+            $this->purchaseOrder
+                ->addMedia($this->newFile->getRealPath())
+                ->usingName(pathinfo($this->newFile->getClientOriginalName(), PATHINFO_FILENAME))
+                ->usingFileName($this->newFile->getClientOriginalName())
+                ->withCustomProperties([
+                    'uploaded_by' => auth()->user()->name ?? 'Usuario',
+                ])
+                ->toMediaCollection('attachments');
+
+            session()->flash('message', 'Archivo subido correctamente');
+
+            // Recargar archivos
+            $this->loadCommentsAndAttachments();
+
+            // Limpiar el campo
+            $this->newFile = null;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al subir archivo: ' . $e->getMessage());
+        }
+    }
 
     public function render()
     {
@@ -159,8 +331,13 @@ class PucharseOrderDetail extends Component
             });
         }
 
+        // Get filtered comments and attachments
+        $filteredItems = $this->getFilteredCommentsAndAttachments();
+
         return view('livewire.forms.pucharse-order-detail', [
-            'orderProducts' => $filteredProducts
+            'orderProducts' => $filteredProducts,
+            'filteredComments' => $filteredItems['comments'],
+            'filteredAttachments' => $filteredItems['attachments']
         ])->layout('layouts.app');
     }
 }
