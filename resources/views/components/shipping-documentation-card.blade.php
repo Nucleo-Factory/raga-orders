@@ -9,6 +9,42 @@
     "poCount" => "3",
 ])
 
+@php
+    try {
+        // Buscar el documento de envío por su número
+        $shippingDoc = App\Models\ShippingDocument::where('document_number', $documentId)->first();
+
+        // Verificar si se encontró el documento y si tiene órdenes de compra
+        if ($shippingDoc) {
+            // Cargar las órdenes de compra si no están ya cargadas
+            if (!$shippingDoc->relationLoaded('purchaseOrders')) {
+                $shippingDoc->load('purchaseOrders');
+            }
+
+            // Verificar si hay órdenes de compra
+            if ($shippingDoc->purchaseOrders->isNotEmpty()) {
+                // Obtener la primera orden de compra
+                $firstPO = $shippingDoc->purchaseOrders->first();
+
+                // Obtener el actual_hub_id de la primera PO
+                $hubId = $firstPO->actual_hub_id;
+
+                // Si hay un hub_id válido, buscar el hub en la tabla hubs
+                if ($hubId) {
+                    $hub = App\Models\Hub::find($hubId);
+
+                    // Si se encuentra el hub, obtener su nombre
+                    if ($hub) {
+                        $hubLocation = $hub->name;
+                    }
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        // Si ocurre un error, mantenemos el valor por defecto de hubLocation
+    }
+@endphp
+
 <li class="kanban-card relative flex justify-between min-h-[180px] w-full gap-5 rounded-[0.625rem] border-2 border-[#E0E5FF] bg-white px-4 py-2 text-xs">
     <div class="flex grow flex-col space-y-[0.875rem]">
         <div class="flex gap-4">

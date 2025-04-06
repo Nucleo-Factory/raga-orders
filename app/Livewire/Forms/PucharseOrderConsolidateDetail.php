@@ -26,6 +26,7 @@ class PucharseOrderConsolidateDetail extends Component {
     public $attachedFiles = [];
     public $newComment = '';
     public $uploadFile;
+    public $hubLocation = null;
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -33,6 +34,11 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->loadTrackingData();
         $this->loadComments();
         $this->loadAttachedFiles();
+        $this->loadHubLocation();
+    }
+
+    public function loadHubLocation() {
+        $this->hubLocation = $this->shippingDocument->purchaseOrders->first()->actualHub->name;
     }
 
     public function sortBy($field) {

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\ShippingDocumentComment;
 use Livewire\WithFileUploads;
+use App\Services\TrackingService;
 
 class ShippingDocumentationKanban extends Component
 {
@@ -32,10 +33,12 @@ class ShippingDocumentationKanban extends Component
     public $booking_code;
     public $container_number;
     public $mbl_number;
+    public $hbl_number;
     public $release_date;
     public $instruction_date;
     public $comentario_documento;
     public $file = null;
+
 
     public function mount($boardId = null)
     {
@@ -446,6 +449,34 @@ class ShippingDocumentationKanban extends Component
                 return;
             }
 
+            // Validar el tracking cuando estamos moviendo a la columna 2 y hay datos ingresados
+            if ($this->newColumnId == $this->columns[1]['id'] &&
+                (!empty($this->tracking_id) || !empty($this->booking_code) || !empty($this->container_number) || !empty($this->mbl_number))) {
+
+                $trackingValid = $this->validateTracking();
+
+                \Log::info("Tracking validation result: " . ($trackingValid ? 'success' : 'failed'));
+
+                if($trackingValid) {
+                    $shippingDoc->tracking_id = $this->tracking_id;
+                    $shippingDoc->booking_code = $this->booking_code;
+                    $shippingDoc->container_number = $this->container_number;
+                    $shippingDoc->mbl_number = $this->mbl_number;
+                    $shippingDoc->hbl_number = $this->hbl_number;
+                    $shippingDoc->save();
+                }
+
+                if (!$trackingValid) {
+                    \Log::error("Tracking validation failed: ID not found in tracking systems");
+                    return;
+                }
+            }
+
+            if(!empty($this->instruction_date)) {
+                $shippingDoc->instruction_date = $this->instruction_date;
+                $shippingDoc->save();
+            }
+
             // 1. Save comment if exists
             if (!empty($this->comment)) {
                 // Usar el modelo ShippingDocumentComment
@@ -488,10 +519,47 @@ class ShippingDocumentationKanban extends Component
 
         } catch (\Exception $e) {
             \Log::error("Error in saveAndMoveDocument: " . $e->getMessage());
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'error',
+                'message' => 'Error al actualizar el documento: ' . $e->getMessage()
+            ]);
         }
 
         // Reset all form fields
         $this->resetFormFields();
+    }
+
+    /**
+     * Valida que el tracking_id, booking_code o container_number sea válido en la API de Porth
+     * @return bool
+     */
+    private function validateTracking()
+    {
+        try {
+            // Determinar qué ID vamos a validar, en orden de prioridad
+            $trackingToValidate = $this->tracking_id ?: ($this->booking_code ?: $this->container_number);
+
+            if (empty($trackingToValidate)) {
+                return true; // Si no hay nada que validar, consideramos que es válido
+            }
+
+            // Usar el servicio de tracking para validar
+            $trackingService = new TrackingService();
+
+            // Primero intentamos con Porth porque es para shipping documents
+            $porthResult = $trackingService->getPorthTracking($trackingToValidate);
+
+            if ($porthResult) {
+                \Log::info("Tracking validation successful with Porth API");
+                return true;
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Error validating tracking:", [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     // Add this new method to reset all form fields

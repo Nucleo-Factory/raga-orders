@@ -26,6 +26,10 @@ class ShippingDocument extends Model implements HasMedia
         'total_weight_kg',
         'notes',
         'release_date',
+        'booking_code',
+        'container_number',
+        'mbl_number',
+        'hbl_number',
     ];
 
     protected $casts = [

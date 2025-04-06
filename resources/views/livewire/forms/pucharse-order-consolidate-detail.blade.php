@@ -53,7 +53,7 @@
             </x-label>
 
             <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
-                <p class="text-base">HUB: <span>{{ $shippingDocument->hub_location ?? 'No especificado' }}</span></p>
+                <p class="text-base">HUB: <span>{{ $hubLocation ?? 'No especificado' }}</span></p>
 
                 <x-slot:icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19"
