@@ -10,9 +10,12 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\ShippingDocumentComment;
+use Livewire\WithFileUploads;
 
 class ShippingDocumentationKanban extends Component
 {
+    use WithFileUploads;
+
     public $boardId;
     public $board;
     public $columns = [];
@@ -31,6 +34,8 @@ class ShippingDocumentationKanban extends Component
     public $mbl_number;
     public $release_date;
     public $instruction_date;
+    public $comentario_documento;
+    public $file = null;
 
     public function mount($boardId = null)
     {
@@ -292,11 +297,6 @@ class ShippingDocumentationKanban extends Component
 
         // Reorganizar los documentos por columna
         $this->organizeDocumentsByColumn();
-
-        // Reset current document data
-        $this->currentDocumentId = null;
-        $this->newColumnId = null;
-        $this->currentDocument = null;
     }
 
     public function setCurrentDocument($documentId, $newColumnId)
@@ -349,9 +349,166 @@ class ShippingDocumentationKanban extends Component
                 $doc->save();
                 \Log::info("Comment also saved to shipping document notes field");
             }
+
+            // Reset the comment in the component after saving
+            $this->comment = '';
+
         } catch (\Exception $e) {
             \Log::error("Error saving comment: " . $e->getMessage());
         }
+    }
+
+    public function addDataToDocument($documentId) {
+        \Log::info("addDataToDocument: Processing document $documentId");
+
+        // Extract the document ID from the document ID string
+        $shippingDocId = str_replace('DOC-', '', $documentId);
+
+        // Find the shipping document
+        $shippingDoc = ShippingDocument::find($shippingDocId);
+
+        if (!$shippingDoc) {
+            \Log::error("Shipping document not found: $shippingDocId");
+            return;
+        }
+
+        try {
+            // Update shipping document fields based on column ID
+            $this->updateDocumentFields($shippingDoc);
+
+            // Save the document
+            $shippingDoc->save();
+
+            // Process file upload if a file exists
+            if ($this->file) {
+                // Add file to media library
+                $media = $shippingDoc->addMedia($this->file->getRealPath())
+                    ->usingName($this->file->getClientOriginalName())
+                    ->withCustomProperties([
+                        'stage' => 'attachment',
+                        'comment' => $this->comment ?? null,
+                        'uploaded_by' => auth()->id() ?: 'system'
+                    ])
+                    ->toMediaCollection('shipping_documents');
+
+                \Log::info("File uploaded with ID: " . $media->id);
+
+                // Reset the file upload field
+                $this->file = null;
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Error adding data to document: " . $e->getMessage());
+        }
+    }
+
+    // Helper method to update document fields based on column
+    private function updateDocumentFields($shippingDoc)
+    {
+        // Check which column we're updating for and apply specific field updates
+        if ($this->newColumnId == $this->columns[0]['id'] && $this->release_date) {
+            $shippingDoc->release_date = $this->release_date;
+        } elseif ($this->newColumnId == $this->columns[1]['id']) {
+            // Update fields for column 2
+            if ($this->tracking_id) {
+                $shippingDoc->tracking_id = $this->tracking_id;
+            }
+            if ($this->booking_code) {
+                $shippingDoc->booking_code = $this->booking_code;
+            }
+            if ($this->container_number) {
+                $shippingDoc->container_number = $this->container_number;
+            }
+            if ($this->mbl_number) {
+                $shippingDoc->mbl_number = $this->mbl_number;
+            }
+        } elseif ($this->newColumnId == 14 && $this->instruction_date) { // Column "Digitaciones" (ID 14)
+            $shippingDoc->instruction_date = $this->instruction_date;
+        }
+
+        return $shippingDoc;
+    }
+
+    // First, add a method that handles everything in one go
+    public function saveAndMoveDocument()
+    {
+        \Log::info("saveAndMoveDocument: Starting with documentId={$this->currentDocumentId}, newColumnId={$this->newColumnId}");
+
+        try {
+            // Extract the document ID from the document ID string
+            $shippingDocId = str_replace('DOC-', '', $this->currentDocumentId);
+
+            // Find the shipping document
+            $shippingDoc = ShippingDocument::find($shippingDocId);
+
+            if (!$shippingDoc) {
+                \Log::error("Shipping document not found: $shippingDocId");
+                return;
+            }
+
+            // 1. Save comment if exists
+            if (!empty($this->comment)) {
+                // Usar el modelo ShippingDocumentComment
+                $commentModel = new ShippingDocumentComment();
+                $commentModel->shipping_document_id = $shippingDocId;
+                $commentModel->user_id = auth()->id();
+                $commentModel->comment = $this->comment;
+                $commentModel->save();
+
+                \Log::info("Comment saved with ID: " . $commentModel->id);
+
+                // También podemos actualizar el campo notes del documento si existe
+                if (Schema::hasColumn('shipping_documents', 'notes')) {
+                    $oldNotes = $shippingDoc->notes ?? '';
+                    $shippingDoc->notes = ($oldNotes ? $oldNotes . "\n" : '') . $this->comment;
+                    \Log::info("Comment also added to shipping document notes field");
+                }
+            }
+
+            // 2. Update document fields
+            $this->updateDocumentFields($shippingDoc);
+
+            // 3. Process file upload if a file exists
+            if ($this->file) {
+                // Add file to media library
+                $media = $shippingDoc->addMedia($this->file->getRealPath())
+                    ->usingName($this->file->getClientOriginalName())
+                    ->withCustomProperties([
+                        'stage' => 'attachment',
+                        'comment' => $this->comment ?? null,
+                        'uploaded_by' => auth()->id() ?: 'system'
+                    ])
+                    ->toMediaCollection('shipping_documents');
+
+                \Log::info("File uploaded with ID: " . $media->id);
+            }
+
+            // 4. Move document to new column (this includes saving the document)
+            $this->moveDocument($this->currentDocumentId, $this->newColumnId);
+
+        } catch (\Exception $e) {
+            \Log::error("Error in saveAndMoveDocument: " . $e->getMessage());
+        }
+
+        // Reset all form fields
+        $this->resetFormFields();
+    }
+
+    // Add this new method to reset all form fields
+    private function resetFormFields()
+    {
+        $this->currentDocumentId = null;
+        $this->newColumnId = null;
+        $this->currentDocument = null;
+        $this->comment = '';
+        $this->tracking_id = null;
+        $this->booking_code = null;
+        $this->container_number = null;
+        $this->mbl_number = null;
+        $this->release_date = null;
+        $this->instruction_date = null;
+        $this->comentario_documento = null;
+        $this->file = null;
     }
 
     public function render()
