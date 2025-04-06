@@ -186,4 +186,7 @@ Route::view('support', 'support.index')
     ->middleware(['auth'])
     ->name('support.index');
 
+Route::view('auth/login', 'layouts.auth')
+    ->name('login');
+
 require __DIR__ . '/auth.php';
