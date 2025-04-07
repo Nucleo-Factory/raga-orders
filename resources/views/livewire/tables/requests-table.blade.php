@@ -41,7 +41,7 @@
                     <tr>
                         @foreach($headers as $key => $label)
                             @if($key != 'actions_html')
-                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                <th class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase">
                                     {{ $label }}
                                 </th>
                             @endif

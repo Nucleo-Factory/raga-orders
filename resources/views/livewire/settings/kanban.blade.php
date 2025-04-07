@@ -2,40 +2,15 @@
     <!-- Tableros Kanban -->
     <div>
         <!-- Tabla de tableros kanban -->
-        <div class="flex justify-between mb-4">
-            <!-- Búsqueda y filtros -->
-            <div class="flex items-center">
-                <div class="relative">
-                    <input
-                        type="text"
-                        wire:model.debounce.300ms="search"
-                        placeholder="Buscar..."
-                        class="w-64 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Filtro por tipo -->
-                <select
-                    wire:model="filter"
-                    class="px-4 py-2 ml-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="">Todos los tipos</option>
-                    <option value="po_stages">Etapas PO</option>
-                    <option value="shipping_documentation">Documentación de embarque</option>
-                </select>
-            </div>
+        <div class="flex items-center justify-between mb-6">
+            <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
         </div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-[#E0E5FF]">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('name')">
+                        <th scope="col" class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('name')">
                             Nombre
                             @if($sortField === 'name')
                                 @if($sortDirection === 'asc')
@@ -49,10 +24,10 @@
                                 @endif
                             @endif
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase">
                             Descripción
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('type')">
+                        <th scope="col" class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('type')">
                             Tipo
                             @if($sortField === 'type')
                                 @if($sortDirection === 'asc')
@@ -66,7 +41,7 @@
                                 @endif
                             @endif
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('stages_count')">
+                        <th scope="col" class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('stages_count')">
                             Número de etapas
                             @if($sortField === 'stages_count')
                                 @if($sortDirection === 'asc')
@@ -80,7 +55,7 @@
                                 @endif
                             @endif
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-6 text-xs font-bold tracking-wider text-left text-black uppercase">
                             Acciones
                         </th>
                     </tr>

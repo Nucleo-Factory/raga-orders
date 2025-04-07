@@ -1,22 +1,32 @@
 <x-app-layout>
-    <x-view-title>
-        <x-slot:title>
-            Órdenes de Compra
-        </x-slot:title>
 
-        <x-slot:content>
-            Visualiza y administra las órdenes de compra
-        </x-slot:content>
-    </x-view-title>
+    <div class="flex items-center justify-between">
+        <x-view-title>
+            <x-slot:title>
+                Órdenes de Compra
+            </x-slot:title>
+
+            <x-slot:content>
+                Visualiza y administra las órdenes de compra
+            </x-slot:content>
+        </x-view-title>
+
+        <a href="{{ route('purchase-orders.create') }}">
+            <x-primary-button>
+                Nueva orden de compra
+            </x-primary-button>
+        </a>
+    </div>
 
     <livewire:ui.counter-po />
 
-    {{-- Lista --}}
-    <div class="space-y-[1.875rem]" x-data="{
-        activeTab: 'tab1'
-    }">
+    <div class="flex items-center justify-between mb-6">
+        <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
+    </div>
+
+    <div class="" x-data="{activeTab: 'tab1'}">
         <!-- Selector de pestañas -->
-        <div class="flex items-center justify-between gap-6 text-lg font-bold">
+        <div class="flex items-center justify-between gap-6 mb-3 text-lg font-bold">
             <div class="flex items-center gap-6">
                 <button @click="activeTab = 'tab1'"
                     :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
