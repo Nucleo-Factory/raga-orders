@@ -14,7 +14,7 @@
 
         <div class="flex items-center gap-2">
 
-            <a href="{{ route('purchase-orders.create') }}">
+            <a href="{{ route('shipping-documentation.create') }}">
                 <x-secondary-button>
                     Crear nuevo consolidado
                 </x-secondary-button>
