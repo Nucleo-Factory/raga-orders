@@ -101,7 +101,7 @@
                 </x-form-input>
                 <x-form-input>
                     <x-slot:label>
-                        Price per UON
+                        Delivery Date
                     </x-slot:label>
                     <x-slot:input type="date" name="delivery_date" wire:model="delivery_date">
                     </x-slot:input>
