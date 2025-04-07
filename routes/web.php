@@ -17,6 +17,8 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Stages;
 use App\Livewire\Settings\Users;
 use App\Livewire\Settings\RoleCreate;
+use App\Livewire\Settings\UserCreate;
+
 Route::view('/', 'welcome')
     ->name('welcome');
 
@@ -170,6 +172,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/users', Users::class)
         ->name('settings.users');
+
+    Route::get('settings/users/create', UserCreate::class)
+        ->name('settings.users.create');
+
+    Route::get('settings/users/{id}/edit', UserCreate::class)
+        ->name('settings.users.edit');
 
     Route::get('settings/active-sessions', ActiveSessions::class)
         ->name('settings.active-sessions');

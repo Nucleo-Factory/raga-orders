@@ -1,9 +1,9 @@
-<div class="space-y-10 rounded-2xl bg-white p-8">
+<div class="p-8 space-y-10 bg-white rounded-2xl">
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-bold text-[#7288FF]">Team</h2>
 
         <div class="flex space-x-4">
-            <a href="{{ route('settings.roles.create') }}">
+            <a href="{{ route('settings.users.create') }}">
                 <x-primary-button class="flex items-center gap-[0.625rem]">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <path d="M8 1V15M1 8H15" stroke="#F7F7F7" stroke-width="2" stroke-linecap="round"
@@ -15,5 +15,53 @@
         </div>
     </div>
 
-    {{-- Lista --}}
+    @if (session()->has('message'))
+        <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-lg">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-[#E0E5FF]">
+            <tr>
+                @foreach($headers as $key => $label)
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        {{ $label }}
+                    </th>
+                @endforeach
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-200">
+            @foreach($users as $user)
+                <tr>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                        {{ $user->name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {{ $user->email }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {{ $user->roles->first()?->name ?? 'Sin rol' }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {{ $user->created_at->format('d/m/Y') }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        <div class="flex space-x-2">
+                            <a href="{{ route('settings.users.edit', $user) }}"
+                               class="text-blue-600 hover:text-blue-900">
+                                Editar
+                            </a>
+                            <button wire:click="deleteUser({{ $user->id }})"
+                                    class="text-red-600 hover:text-red-900"
+                                    onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                Eliminar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
