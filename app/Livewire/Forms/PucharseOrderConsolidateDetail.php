@@ -23,10 +23,12 @@ class PucharseOrderConsolidateDetail extends Component {
     public $trackingData = null;
     public $loadingTracking = false;
     public $comments = [];
-    public $attachedFiles = [];
+    public $attachments = [];
     public $newComment = '';
     public $uploadFile;
     public $hubLocation = null;
+    public $commentSortField = 'created_at';
+    public $commentSortDirection = 'desc';
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -35,6 +37,10 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->loadComments();
         $this->loadAttachedFiles();
         $this->loadHubLocation();
+
+        // Establecer valores por defecto para variable de ordenamiento
+        $this->commentSortField = 'created_at';
+        $this->commentSortDirection = 'desc';
     }
 
     public function loadHubLocation() {
@@ -163,19 +169,12 @@ class PucharseOrderConsolidateDetail extends Component {
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($comment) {
-                // Log the comment to see what fields are available
-                Log::info('Comment data:', ['comment' => $comment->toArray()]);
-
                 return [
                     'id' => $comment->id,
-                    'content' => $comment->comment ?? $comment->content ?? '', // Try both possible field names
+                    'user_name' => $comment->user->name ?? 'Usuario', // Formato esperado por la tabla
+                    'content' => $comment->comment ?? $comment->content ?? '', // Contenido del comentario
                     'created_at' => $comment->created_at,
-                    'user' => [
-                        'id' => $comment->user->id ?? null,
-                        'name' => $comment->user->name ?? 'Usuario',
-                        'avatar' => $comment->user->profile_photo_url ?? null,
-                        'initial' => substr($comment->user->name ?? 'U', 0, 1),
-                    ]
+                    'type' => 'comment' // Necesario para identificar el tipo en la tabla
                 ];
             })
             ->toArray();
@@ -195,22 +194,17 @@ class PucharseOrderConsolidateDetail extends Component {
         ]);
 
         // Load files using Spatie Media Library
-        $this->attachedFiles = $this->shippingDocument->getMedia('shipping_documents')
+        $this->attachments = $this->shippingDocument->getMedia('shipping_documents')
             ->map(function($media) {
                 return [
                     'id' => $media->id,
-                    'name' => $media->file_name,
-                    'path' => $media->getPath(),
-                    'url' => $media->getUrl(),
-                    'type' => $this->getFileTypeFromName($media->file_name),
-                    'size' => $media->size,
-                    'size_formatted' => $this->formatFileSize($media->size),
+                    'user_name' => $this->getUserNameById($media->getCustomProperty('uploaded_by')) ?? 'Usuario',
+                    'filename' => $media->file_name,
+                    'file_type' => strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)),
+                    'file_size' => $this->formatFileSize($media->size),
                     'created_at' => $media->created_at,
-                    'user' => [
-                        'id' => $media->getCustomProperty('uploaded_by') ?? null,
-                        'name' => $this->getUserNameById($media->getCustomProperty('uploaded_by')) ?? 'Usuario del sistema',
-                    ],
-                    'custom_properties' => $media->custom_properties
+                    'url' => $media->getUrl(),
+                    'type' => 'attachment' // Necesario para identificar el tipo en la tabla
                 ];
             })
             ->toArray();
@@ -223,8 +217,112 @@ class PucharseOrderConsolidateDetail extends Component {
     {
         if (!$userId) return 'Usuario del sistema';
 
-        $user = \App\Models\User::find($userId);
-        return $user ? $user->name : 'Usuario del sistema';
+        // Verificar si el valor es un número (ID) o un texto (nombre)
+        if (is_numeric($userId)) {
+            // Es un ID, buscamos el usuario por ID
+            $user = \App\Models\User::find($userId);
+            return $user ? $user->name : 'Usuario del sistema';
+        } else {
+            // Es un nombre, lo devolvemos directamente
+            return $userId;
+        }
+    }
+
+    /**
+     * Sort comments and attachments
+     */
+    public function sortComments($field)
+    {
+        if ($this->commentSortField === $field) {
+            $this->commentSortDirection = $this->commentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->commentSortField = $field;
+            $this->commentSortDirection = 'asc';
+        }
+
+        // Recargar con orden actualizado
+        $this->sortCommentsAndAttachments();
+    }
+
+    protected function sortCommentsAndAttachments()
+    {
+        $allItems = array_merge($this->comments, $this->attachments);
+
+        usort($allItems, function ($a, $b) {
+            $fieldA = $a[$this->commentSortField] ?? '';
+            $fieldB = $b[$this->commentSortField] ?? '';
+
+            if ($this->commentSortField === 'created_at') {
+                $timeA = strtotime($fieldA);
+                $timeB = strtotime($fieldB);
+                return $this->commentSortDirection === 'asc'
+                    ? $timeA - $timeB
+                    : $timeB - $timeA;
+            }
+
+            return $this->commentSortDirection === 'asc'
+                ? strcmp($fieldA, $fieldB)
+                : strcmp($fieldB, $fieldA);
+        });
+
+        // Separar de nuevo los elementos ordenados
+        $this->comments = array_values(array_filter($allItems, function($item) {
+            return $item['type'] === 'comment';
+        }));
+
+        $this->attachments = array_values(array_filter($allItems, function($item) {
+            return $item['type'] === 'attachment';
+        }));
+    }
+
+    /**
+     * Process file upload
+     */
+    public function uploadFileAction()
+    {
+        // Eliminar el dd para permitir que la función se ejecute
+        // dd($this->uploadFile);
+
+        // Añadir log inmediatamente al entrar en el método
+        Log::info('uploadFileAction method called', [
+            'has_file' => $this->uploadFile ? 'yes' : 'no',
+        ]);
+
+        $this->validate([
+            'uploadFile' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        try {
+            if (!$this->shippingDocument) {
+                throw new \Exception('No shipping document loaded');
+            }
+
+            Log::info('Attempting to upload file', [
+                'file_name' => $this->uploadFile->getClientOriginalName(),
+                'file_size' => $this->uploadFile->getSize()
+            ]);
+
+            // Add file to media library - AQUÍ ESTÁ EL CAMBIO
+            $media = $this->shippingDocument->addMedia($this->uploadFile->getRealPath())
+                ->usingName($this->uploadFile->getClientOriginalName())
+                ->withCustomProperties([
+                    'uploaded_by' => auth()->id() ?? null, // Usar auth()->id() en lugar del nombre
+                ])
+                ->toMediaCollection('shipping_documents');
+
+            // Reset the file upload field
+            $this->uploadFile = null;
+
+            // Refresh the files list
+            $this->loadAttachedFiles();
+
+            session()->flash('message', 'Archivo subido exitosamente');
+        } catch (\Exception $e) {
+            Log::error('Error uploading file: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+            session()->flash('error', 'Error al subir el archivo: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -252,12 +350,11 @@ class PucharseOrderConsolidateDetail extends Component {
 
             // Refresh the comments list
             $this->loadComments();
+
+            session()->flash('message', 'Comentario añadido correctamente');
         } catch (\Exception $e) {
             Log::error('Error adding comment: ' . $e->getMessage());
-            $this->dispatchBrowserEvent('notify', [
-                'type' => 'error',
-                'message' => 'Error al añadir el comentario'
-            ]);
+            session()->flash('error', 'Error al añadir el comentario: ' . $e->getMessage());
         }
     }
 
@@ -298,49 +395,6 @@ class PucharseOrderConsolidateDetail extends Component {
     }
 
     /**
-     * Process file upload
-     */
-    public function updatedUploadFile()
-    {
-        $this->validate([
-            'uploadFile' => 'file|max:10240', // 10MB max
-        ]);
-
-        try {
-            if (!$this->shippingDocument) {
-                throw new \Exception('No shipping document loaded');
-            }
-
-            // Add file to media library
-            $media = $this->shippingDocument->addMedia($this->uploadFile->getRealPath())
-                ->usingName($this->uploadFile->getClientOriginalName())
-                ->withCustomProperties([
-                    'stage' => 'attachment',
-                    'comment' => null,
-                    'uploaded_by' => auth()->id() ?: 'system'
-                ])
-                ->toMediaCollection('shipping_documents');
-
-            // Reset the file upload field
-            $this->uploadFile = null;
-
-            // Refresh the files list
-            $this->loadAttachedFiles();
-
-            $this->dispatchBrowserEvent('notify', [
-                'type' => 'success',
-                'message' => 'Archivo subido exitosamente'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error uploading file: ' . $e->getMessage());
-            $this->dispatchBrowserEvent('notify', [
-                'type' => 'error',
-                'message' => 'Error al subir el archivo: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
      * Delete a file
      */
     public function deleteFile($mediaId)
@@ -370,6 +424,16 @@ class PucharseOrderConsolidateDetail extends Component {
                 'message' => 'Error al eliminar el archivo'
             ]);
         }
+    }
+
+    public function updatedUploadFile()
+    {
+        Log::info('updatedUploadFile triggered', [
+            'has_file' => $this->uploadFile ? 'yes' : 'no'
+        ]);
+
+        // Este método se ejecuta automáticamente cuando se selecciona un archivo
+        // Puedes poner aquí parte de la lógica para verificar que está funcionando
     }
 
     public function render() {
