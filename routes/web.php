@@ -18,6 +18,7 @@ use App\Livewire\Settings\Stages;
 use App\Livewire\Settings\Users;
 use App\Livewire\Settings\RoleCreate;
 use App\Livewire\Settings\UserCreate;
+use App\Livewire\Settings\Sessions;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -184,6 +185,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', Profile::class)
         ->name('settings.profile');
+
+    Route::get('settings/sessions', Sessions::class)
+        ->name('settings.sessions');
 
     Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->name('bill-to.index');
     Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->name('bill-to.create');

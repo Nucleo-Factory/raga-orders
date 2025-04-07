@@ -197,6 +197,18 @@
                         </li>
 
                         <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.users') }}" :active="request()->routeIs('settings.users')">
+                                Usuarios
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.sessions') }}" :active="request()->routeIs('settings.sessions')">
+                                Sesiones
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.roles') }}" :active="request()->routeIs('settings.roles')">
                                 Roles
                             </x-sidebar-dropdown-item>
