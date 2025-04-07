@@ -206,7 +206,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                            <a href="/purchase-orders/{{ $order->id }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                            <a href="/purchase-orders/{{ $order->id }}/detail" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                             <a href="/purchase-orders/{{ $order->id }}/edit" class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
                         </td>
                     </tr>

@@ -44,7 +44,7 @@ class PucharseOrderConsolidateDetail extends Component {
     }
 
     public function loadHubLocation() {
-        $this->hubLocation = $this->shippingDocument->purchaseOrders->first()->actualHub->name;
+        $this->hubLocation = $this->shippingDocument->purchaseOrders->first()->actualHub->name ?? 'N/A';
     }
 
     public function sortBy($field) {
