@@ -27,6 +27,8 @@
                 'rejected' => 'Rechazado'
             ]
         ];
+
+        $lastPo = App\Models\PurchaseOrder::orderBy('id', 'desc')->first();
     @endphp
 
     <div class="mt-8 space-y-4">
@@ -52,7 +54,9 @@
                 <tbody class="divide-y divide-gray-200">
                     <!-- Documento 3: Conocimiento de embarque pendiente -->
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">PO-2023-0003</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <a href="{{ route('purchase-orders.detail', $lastPo->id) }}" class="text-indigo-600 hover:text-indigo-900">PO-2023-0003</a>
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Conocimiento de Embarque</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Textiles Modernos S.A.</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -78,7 +82,9 @@
 
                     <!-- Documento 4: Factura aprobada -->
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">PO-2023-0004</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <a href="{{ route('purchase-orders.detail', $lastPo->id) }}" class="text-indigo-600 hover:text-indigo-900">PO-2023-0004</a>
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Factura</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Químicos Especiales S.A.</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -104,7 +110,9 @@
 
                     <!-- Documento 5: Lista de empaque rechazada -->
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">PO-2023-0005</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <a href="{{ route('purchase-orders.detail', $lastPo->id) }}" class="text-indigo-600 hover:text-indigo-900">PO-2023-0005</a>
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Lista de Empaque</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Maquinaria Industrial S.A.</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -130,7 +138,9 @@
 
                     <!-- Documento 6: Otro tipo de documento pendiente -->
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">PO-2023-0006</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <a href="{{ route('purchase-orders.detail', $lastPo->id) }}" class="text-indigo-600 hover:text-indigo-900">PO-2023-0006</a>
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Otro</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Productos Médicos S.A.</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -156,7 +166,9 @@
 
                     <!-- Documento 7: Certificado de origen pendiente -->
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">PO-2023-0007</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                            <a href="{{ route('purchase-orders.detail', $lastPo->id) }}" class="text-indigo-600 hover:text-indigo-900">PO-2023-0007</a>
+                        </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Otro</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Equipos Agrícolas S.A.</td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
