@@ -22,27 +22,12 @@
                     </a>
                 </div>
 
-                <livewire:ui.counter-po />
-
-                <!-- Pestañas para cambiar entre vista de tabla y tarjetas -->
-                <div x-data="{
-                    currentView: 'table'
-                }" x-on:change-view.window="currentView = $event.detail.view"
-                    class="flex items-center gap-6 mt-5 mb-[1.875rem]">
-                    <button x-data @click="$dispatch('change-view', {view: 'table'})"
-                        :class="currentView === 'table' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
-                        class="border-b-2 py-[0.625rem]">
-                        Vista de Tabla
-                    </button>
-                    <button x-data @click="$dispatch('change-view', {view: 'cards'})"
-                        :class="currentView === 'cards' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
-                        class="border-b-2 py-[0.625rem]">
-                        Vista de Tarjetas
-                    </button>
+                <div class="mb-10">
+                    <livewire:ui.counter-po />
                 </div>
 
                 <!-- Contenedor para las vistas -->
-                <div x-data="{ currentView: 'table' }" x-on:change-view.window="currentView = $event.detail.view">
+                <div class="mt-8 mb-[1.875rem]" x-data="{ currentView: 'table' }" x-on:change-view.window="currentView = $event.detail.view">
                     <!-- Vista de tabla -->
                     <div x-show="currentView === 'table'">
                         <livewire:tables.custom-purchase-orders-table />

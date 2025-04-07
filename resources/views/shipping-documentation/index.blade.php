@@ -22,6 +22,10 @@
         </a>
     </div>
 
+    <div class="mb-10">
+        <livewire:ui.counter-po />
+    </div>
+
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'table' }" class="mb-6">
         <div class="border-b border-gray-200">

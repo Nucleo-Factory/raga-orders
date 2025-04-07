@@ -76,9 +76,9 @@
 
     <div class="overflow-x-auto bg-white rounded-lg shadow">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-[#E0E5FF]">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center">
                             <input
                                 type="checkbox"
@@ -87,7 +87,7 @@
                             >
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_number')">
                             <span>Número de Orden</span>
                             @if ($sortField === 'order_number')
@@ -101,7 +101,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('vendor_id')">
                             <span>Vendor</span>
                             @if ($sortField === 'vendor_id')
@@ -115,7 +115,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('status')">
                             <span>Estado</span>
                             @if ($sortField === 'status')
@@ -129,7 +129,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_date')">
                             <span>Fecha de Orden</span>
                             @if ($sortField === 'order_date')
@@ -143,7 +143,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('total')">
                             <span>Total</span>
                             @if ($sortField === 'total')
@@ -157,7 +157,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <span>Consolidable?</span>
                     </th>
                     <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
