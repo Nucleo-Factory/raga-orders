@@ -41,9 +41,9 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-[#E0E5FF]">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('document_number')">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('document_number')">
                         Documento
                         @if ($sortField === 'document_number')
                             @if ($sortDirection === 'asc')
@@ -57,10 +57,10 @@
                             @endif
                         @endif
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         Órdenes de Compra
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('weight_kg')">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('weight_kg')">
                         Peso Total
                         @if ($sortField === 'weight_kg')
                             @if ($sortDirection === 'asc')
@@ -74,7 +74,7 @@
                             @endif
                         @endif
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('creation_date')">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('creation_date')">
                         Fecha de Creación
                         @if ($sortField === 'creation_date')
                             @if ($sortDirection === 'asc')
@@ -88,7 +88,7 @@
                             @endif
                         @endif
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer" wire:click="sortBy('status')">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">
                         Estado
                         @if ($sortField === 'status')
                             @if ($sortDirection === 'asc')
@@ -102,7 +102,7 @@
                             @endif
                         @endif
                     </th>
-                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         Acciones
                     </th>
                 </tr>

@@ -1,25 +1,4 @@
 <div>
-    <div class="flex max-w-[1254px] items-center justify-between">
-        <x-view-title>
-            <x-slot:title>
-                Órdenes de Compra
-            </x-slot:title>
-
-            <x-slot:content>
-                Gestiona todas tus órdenes de compra
-            </x-slot:content>
-        </x-view-title>
-
-        <div class="flex space-x-4">
-            <a href="{{ route('purchase-orders.kanban-boards') }}" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Ver Tableros Kanban
-            </a>
-            <a href="{{ route('new-purchase-order') }}">
-                <x-black-btn>Nueva Orden</x-black-btn>
-            </a>
-        </div>
-    </div>
-
     <div class="mt-8 space-y-4">
         <!-- Filtros -->
         <div class="flex items-center justify-between">
@@ -63,9 +42,9 @@
         <!-- Tabla -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-[#E0E5FF]">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_number')">
                                 <span>Número de Orden</span>
                                 @if ($sortField === 'order_number')
@@ -79,7 +58,7 @@
                                 @endif
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('vendor_id')">
                                 <span>Vendor</span>
                                 @if ($sortField === 'vendor_id')
@@ -93,7 +72,7 @@
                                 @endif
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('status')">
                                 <span>Estado</span>
                                 @if ($sortField === 'status')
@@ -107,7 +86,7 @@
                                 @endif
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_date')">
                                 <span>Fecha de Orden</span>
                                 @if ($sortField === 'order_date')
@@ -121,7 +100,7 @@
                                 @endif
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('total')">
                                 <span>Total</span>
                                 @if ($sortField === 'total')
@@ -167,7 +146,7 @@
                                 {{ $order->total ? number_format($order->total, 2) : 'N/A' }}
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <a href="{{ route('purchase-orders.show', $order->id) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                                <a href="{{ route('purchase-orders.detail', $order->id) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                                 <a href="{{ route('purchase-orders.edit', $order->id) }}" class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
                             </td>
                         </tr>
