@@ -11,11 +11,21 @@
             </x-slot:content>
         </x-view-title>
 
-        <a href="{{ route('purchase-orders.create') }}">
-            <x-primary-button>
-                Nueva orden de compra
-            </x-primary-button>
-        </a>
+
+        <div class="flex items-center gap-2">
+
+            <a href="{{ route('purchase-orders.create') }}">
+                <x-secondary-button>
+                    Crear nuevo consolidado
+                </x-secondary-button>
+            </a>
+
+            <a href="{{ route('purchase-orders.create') }}">
+                <x-primary-button>
+                    Nueva orden de compra
+                </x-primary-button>
+            </a>
+        </div>
     </div>
 
     <livewire:ui.counter-po />
