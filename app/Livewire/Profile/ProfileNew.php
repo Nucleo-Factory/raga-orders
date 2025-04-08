@@ -45,25 +45,10 @@ class ProfileNew extends Component {
     }
 
     public function updateProfile() {
-        $this->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'company' => 'required',
-            'phone' => 'required',
-            'country' => 'required',
-        ]);
-
-
         $this->user->update([
             'name' => $this->name,
             'email' => $this->email,
             'description' => $this->description,
-        ]);
-
-        $this->user->company->update([
-            'name' => $this->company,
-            'phone' => $this->phone,
-            'country' => $this->country,
         ]);
 
         $this->editProfile = false;

@@ -140,25 +140,25 @@
                     <div class="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
                         <div>
                             <label class="block mb-1 text-xs text-gray-300">Empresa</label>
-                            <input type="text" wire:model="company" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="Grupo Linc">
+                            <input type="text" wire:model="company" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="Grupo Linc" disabled>
                         </div>
                         <div>
                             <label class="block mb-1 text-xs text-gray-300">Teléfono</label>
-                            <input type="tel" wire:model="phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="+506 8753-0522">
+                            <input type="tel" wire:model="phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="+506 8753-0522" disabled>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block mb-1 text-xs text-gray-300">País</label>
-                            <input type="text" wire:model="country" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="Costa Rica">
+                            <input type="text" wire:model="country" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="Costa Rica" disabled>
                         </div>
                         <div>
                             <label class="block mb-1 text-xs text-gray-300">Ciudad</label>
-                            <input type="text" wire:model="city" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="San Ramón">
+                            <input type="text" wire:model="city" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="San Ramón" disabled>
                         </div>
                         <div>
                             <label class="block mb-1 text-xs text-gray-300">Código Postal</label>
-                            <input type="text" wire:model="zip" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="20201">
+                            <input type="text" wire:model="zip" class="w-full px-3 py-2 border border-gray-200 rounded-lg {{ $editProfile ? '!border-[#9AABFF]' : '' }}" value="20201" disabled>
                         </div>
                     </div>
                 </div>
