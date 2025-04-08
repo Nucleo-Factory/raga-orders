@@ -363,7 +363,7 @@ class CreatePucharseOrder extends Component
     {
         if (strlen($this->searchTerm) >= 2) {
             $this->searchResults = Product::where('material_id', 'like', '%' . $this->searchTerm . '%')
-                ->orWhere('description', 'like', '%' . $this->searchTerm . '%')
+                ->orWhere('short_text', 'like', '%' . $this->searchTerm . '%')
                 ->take(5)
                 ->get();
         } else {
@@ -399,7 +399,7 @@ class CreatePucharseOrder extends Component
                 $this->orderProducts[] = [
                     'id' => $this->selectedProduct->id,
                     'material_id' => $this->selectedProduct->material_id,
-                    'description' => $this->selectedProduct->description,
+                    'short_text' => $this->selectedProduct->short_text,
                     'price_per_unit' => $this->selectedProduct->price_per_unit,
                     'quantity' => $this->quantity,
                     'subtotal' => $this->selectedProduct->price_per_unit * $this->quantity

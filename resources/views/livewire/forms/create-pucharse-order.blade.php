@@ -467,9 +467,9 @@
                                         @foreach ($searchResults as $product)
                                             <li class="relative py-2 pl-3 cursor-pointer select-none pr-9 hover:bg-gray-100"
                                                 wire:click="selectProduct({{ $product->id }})">
-                                                <div class="flex items-center">
+                                                <div class="flex flex-col items-start">
                                                     <span class="font-medium">{{ $product->material_id }}</span>
-                                                    <span class="ml-2 text-gray-500">{{ $product->description }}</span>
+                                                    <span class="text-sm text-gray-500">{{ $product->short_text }}</span>
                                                 </div>
                                             </li>
                                         @endforeach
@@ -501,7 +501,7 @@
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-medium">{{ $selectedProduct->material_id }}</p>
-                                <p class="text-sm text-gray-500">{{ $selectedProduct->description }}</p>
+                                <p class="text-sm text-gray-500">{{ $selectedProduct->short_text }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-medium">Precio: {{ number_format($selectedProduct->price_per_unit, 2) }}
@@ -543,7 +543,7 @@
                                 <tr>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                         {{ $product['material_id'] }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $product['description'] }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $product['short_text'] }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         {{ number_format($product['price_per_unit'], 2) }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
