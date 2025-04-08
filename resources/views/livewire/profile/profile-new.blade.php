@@ -12,10 +12,12 @@
         <div class="lg:w-[35%] space-y-6 flex flex-col">
             <!-- Tarjeta de Perfil -->
             <div class="flex-1 p-8 bg-white rounded-lg">
-                <div class="relative w-[206px] h-[206px] mx-auto mb-4">
-                    <div class="w-full h-full overflow-hidden rounded-full">
-                        @if($user->getFirstMediaUrl('profile-photo'))
-                            <img src="{{ $user->getFirstMediaUrl('profile-photo') }}"
+                <div class="relative w-[206px] h-[206px] mx-auto mb-4" wire:poll.5000ms>
+                    <div class="w-full h-full overflow-hidden rounded-full"
+                         x-data
+                         x-on:profile-photo-updated.window="$wire.$refresh()">
+                        @if($user->getMedia('profile-photo')->last())
+                            <img src="{{ $user->getMedia('profile-photo')->last()->getUrl() }}?{{ now()->timestamp }}"
                                  alt="Profile"
                                  class="object-cover w-full h-full">
                         @else

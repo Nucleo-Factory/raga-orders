@@ -78,10 +78,10 @@ class ProfileNew extends Component {
     public function updatedProfileImage()
     {
         $this->validate([
-            'profileImage' => 'image|max:1024',
+            'profileImage' => 'image|max:5000',
         ]);
 
-        // Eliminar los medios anteriores en la colección 'profile-photo'
+        // Eliminar todas las imágenes anteriores
         $this->user->clearMediaCollection('profile-photo');
 
         // Agregar la nueva imagen a la colección
@@ -93,9 +93,11 @@ class ProfileNew extends Component {
         // Limpiar la variable temporal
         $this->profileImage = null;
 
-        // Refrescar el usuario para obtener la nueva URL de la imagen
-        $this->user->refresh();
+        // Forzar la actualización del usuario y la vista
+        $this->user = $this->user->fresh();
 
+        // Emitir un evento para actualizar la interfaz
+        $this->dispatch('profile-photo-updated');
         $this->dispatch('open-modal', 'successModal');
     }
 
