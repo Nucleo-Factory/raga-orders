@@ -10,7 +10,31 @@
                 <x-slot name="trigger">
                     <button
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out border border-transparent rounded-md hover:bg-white focus:out line-none">
-                        <div class="w-8 h-8 bg-gray-400 rounded-full"></div>
+
+                        <div class="flex items-center justify-center bg-gray-400 rounded-full">
+                            @if(auth()->user()->getFirstMediaUrl('profile-photo'))
+                                <div class="h-[40px] w-[40px] overflow-hidden rounded-full bg-[#190FDB] flex items-center justify-center text-white font-medium">
+                                    <img src="{{ auth()->user()->getFirstMediaUrl('profile-photo') }}" alt="Profile" class="object-cover w-full h-full rounded-full">
+                                </div>
+                            @else
+                                <div class="avatar-container h-[40px] w-[40px] overflow-hidden rounded-full bg-[#190FDB] flex items-center justify-center text-white font-medium"
+                                    x-data="{
+                                        name: '{{ auth()->user()->name }}',
+                                        initials() {
+                                            return this.name.split(' ')
+                                                .map(part => part.charAt(0))
+                                                .slice(0, 2)
+                                                .join('')
+                                                .toUpperCase();
+                                        }
+                                    }"
+                                    x-text="initials()"
+                                    x-on:profile-updated.window="name = $event.detail.name">
+                                </div>
+                            @endif
+                        </div>
+
+
                         <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
                             x-on:profile-updated.window="name = $event.detail.name"></div>
                         <div class="ms-1">
