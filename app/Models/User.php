@@ -7,10 +7,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -86,5 +88,11 @@ class User extends Authenticatable
                 'frequency' => $frequency
             ]
         );
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('profile-photo')
+            ->singleFile(); // Esto asegura que solo haya una imagen de perfil a la vez
     }
 }

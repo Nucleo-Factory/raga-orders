@@ -3,8 +3,14 @@
 namespace App\Livewire\Profile;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Livewire\Attributes\Watch;
 
 class ProfileNew extends Component {
+    use WithFileUploads;
+
     public $user;
     public $role;
     public $name;
@@ -16,6 +22,7 @@ class ProfileNew extends Component {
     public $zip;
     public $description;
     public $website;
+    public $profileImage;
 
     public $editProfile;
 
@@ -65,6 +72,31 @@ class ProfileNew extends Component {
 
     public function cancelEditProfile() {
         $this->editProfile = false;
+    }
+
+    #[Watch('profileImage')]
+    public function updatedProfileImage()
+    {
+        $this->validate([
+            'profileImage' => 'image|max:1024',
+        ]);
+
+        // Eliminar los medios anteriores en la colección 'profile-photo'
+        $this->user->clearMediaCollection('profile-photo');
+
+        // Agregar la nueva imagen a la colección
+        $media = $this->user->addMediaFromStream($this->profileImage->get())
+            ->usingName($this->user->name . '-profile')
+            ->usingFileName($this->profileImage->hashName())
+            ->toMediaCollection('profile-photo');
+
+        // Limpiar la variable temporal
+        $this->profileImage = null;
+
+        // Refrescar el usuario para obtener la nueva URL de la imagen
+        $this->user->refresh();
+
+        $this->dispatch('open-modal', 'successModal');
     }
 
     public function render() {
