@@ -50,6 +50,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('products/forecast', 'products.forecast')
         ->name('products.forecast');
+
+    Route::view('products/forecast-graph', 'products.forecast-graph')
+        ->name('products.forecast-graph');
+
+    Route::get('products/forecast-edit/{id}', function ($id) {
+        return view('products.forecast-edit', ['forecast' => \App\Models\Forecast::findOrFail($id)]);
+    })->name('products.forecast.edit');
 });
 
 // Rutas para documentación de envío

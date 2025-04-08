@@ -131,9 +131,16 @@
                         </li>
 
                         <li>
+                            <x-sidebar-dropdown-item href="{{ route('products.forecast-graph') }}"
+                                :active="request()->routeIs('products.forecast-graph')">
+                                Forecast de materiales
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
                             <x-sidebar-dropdown-item href="{{ route('products.forecast') }}"
                                 :active="request()->routeIs('products.forecast')">
-                                Forecast de materiales
+                                Tabla de forecast
                             </x-sidebar-dropdown-item>
                         </li>
 
