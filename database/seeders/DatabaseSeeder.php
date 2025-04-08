@@ -18,9 +18,6 @@ class DatabaseSeeder extends Seeder
         try {
             $this->call([
                 CompanySeeder::class,     // Companies must be created first
-                UserSeeder::class,        // Users depend on companies
-                ProductSeeder::class,     // Products are independent
-                PurchaseOrderSeeder::class, // Purchase orders depend on companies and products
                 KanbanBoardSeeder::class, // Usar KanbanBoardSeeder en lugar de KanbanSeeder
                 HubSeeder::class,
             ]);
