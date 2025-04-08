@@ -17,6 +17,8 @@ class ProfileNew extends Component {
     public $description;
     public $website;
 
+    public $editProfile;
+
     public function mount() {
         $this->user = auth()->user();
         $this->role = $this->user->roles->first()->name;
@@ -29,6 +31,10 @@ class ProfileNew extends Component {
         $this->zip = $this->user->company->zip;
         $this->description = $this->user->description;
         $this->website = $this->user->company->website;
+    }
+
+    public function activeEditProfile() {
+        $this->editProfile = true;
     }
 
     public function updateProfile() {
@@ -52,6 +58,13 @@ class ProfileNew extends Component {
             'phone' => $this->phone,
             'country' => $this->country,
         ]);
+
+        $this->editProfile = false;
+        $this->dispatch('open-modal', 'successModal');
+    }
+
+    public function cancelEditProfile() {
+        $this->editProfile = false;
     }
 
     public function render() {
