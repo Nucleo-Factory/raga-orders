@@ -1,6 +1,6 @@
 <div>
     {{-- In work, do what you enjoy. --}}
-    <div class="mb-4 flex justify-between">
+    <div class="flex justify-between mb-4">
         @if ($showSearch && !empty($searchable))
             <div class="flex items-center">
                 <x-search-input class="w-64" wire:model.debounce.300ms="search" />
@@ -9,7 +9,7 @@
                     @foreach ($filterable as $filter)
                         @if (isset($filterOptions[$filter]))
                             <select wire:model="filters.{{ $filter }}"
-                                class="ml-4 rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="px-4 py-2 ml-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Todos</option>
                                 @foreach ($filterOptions[$filter] as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -24,7 +24,7 @@
         @if ($showPerPage)
             <div>
                 <select wire:model="perPage"
-                    class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="10">10 por página</option>
                     <option value="25">25 por página</option>
                     <option value="50">50 por página</option>
@@ -45,13 +45,13 @@
                             {{ $header }}
                             @if (in_array($key, $sortable) && $sortField === $key)
                                 @if ($sortDirection === 'asc')
-                                    <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                    <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 15l7-7 7 7"></path>
                                     </svg>
                                 @else
-                                    <svg class="ml-1 inline-block h-4 w-4" fill="none" stroke="currentColor"
+                                    <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7"></path>
@@ -83,7 +83,7 @@
                                             @if ($actionsView)
                                                 <a href="{{ $this->getRouteFor('view', $row) }}"
                                                     class="text-[#666666] hover:text-indigo-900">
-                                                    <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
@@ -227,8 +227,43 @@
     </div>
 
     @if ($showPagination)
-        <div class="mt-4">
-            {{ $processedRows->links() }}
+        <div class="flex items-center justify-between mt-4">
+            <div class="text-sm text-gray-700">
+                Mostrando {{ $processedRows->firstItem() ?? 0 }} a {{ $processedRows->lastItem() ?? 0 }} de {{ $processedRows->total() }} resultados
+            </div>
+            <div class="flex items-center space-x-1">
+                @if ($processedRows->onFirstPage())
+                    <span class="px-3 py-1 text-gray-500 bg-gray-200 rounded-md cursor-not-allowed">
+                        <span class="sr-only">Previous</span>
+                        &larr;
+                    </span>
+                @else
+                    <button wire:click="previousPage" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        &larr;
+                    </button>
+                @endif
+
+                @foreach ($processedRows->getUrlRange(max(1, $processedRows->currentPage() - 3), min($processedRows->lastPage(), $processedRows->currentPage() + 3)) as $page => $url)
+                    @if ($page == $processedRows->currentPage())
+                        <span class="px-3 py-1 text-white bg-blue-600 rounded-md">{{ $page }}</span>
+                    @else
+                        <button wire:click="gotoPage({{ $page }})" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ $page }}</button>
+                    @endif
+                @endforeach
+
+                @if ($processedRows->hasMorePages())
+                    <button wire:click="nextPage" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        &rarr;
+                    </button>
+                @else
+                    <span class="px-3 py-1 text-gray-500 bg-gray-200 rounded-md cursor-not-allowed">
+                        <span class="sr-only">Next</span>
+                        &rarr;
+                    </span>
+                @endif
+            </div>
         </div>
     @endif
 
@@ -236,16 +271,16 @@
     @if ($confirmingDelete)
         <div class="fixed inset-0 z-10 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
             aria-modal="true">
-            <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
                 <div
-                    class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                    <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor"
+                                class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-red-100 rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
@@ -265,13 +300,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                    <div class="px-4 py-3 bg-gray-50 sm:flex sm:flex-row-reverse sm:px-6">
                         <button wire:click="delete" type="button"
-                            class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+                            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
                             Eliminar
                         </button>
                         <button wire:click="cancelDelete" type="button"
-                            class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
+                            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
                             Cancelar
                         </button>
                     </div>

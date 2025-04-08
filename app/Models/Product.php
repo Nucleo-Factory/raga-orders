@@ -17,17 +17,12 @@ class Product extends Model
      */
     protected $fillable = [
         'material_id',
-        'description',
-        'legacy_material',
-        'contract',
-        'order_quantity',
-        'qty_unit',
-        'price_per_unit',
-        'price_per_uon',
-        'net_value',
-        'vat_rate',
-        'vat_value',
-        'delivery_date',
+        'short_text',
+        'supplying_plant',
+        'unit_of_measure',
+        'plant',
+        'vendor_name',
+        'vendor_code',
     ];
 
     /**
@@ -39,10 +34,6 @@ class Product extends Model
         'order_quantity' => 'decimal:2',
         'price_per_unit' => 'decimal:2',
         'price_per_uon' => 'decimal:2',
-        'net_value' => 'decimal:2',
-        'vat_rate' => 'decimal:2',
-        'vat_value' => 'decimal:2',
-        'delivery_date' => 'date',
     ];
 
     /**

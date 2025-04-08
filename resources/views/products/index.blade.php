@@ -51,18 +51,19 @@
             @php
                 $headers = [
                     'material_id' => 'ID',
-                    'description' => 'Descripción',
-                    'qty_unit' => 'Cantidad',
-                    'price_per_unit' => 'Precio Unitario',
-                    'net_value' => 'Valor Neto',
-                    'vat_value' => 'Valor IVA',
+                    'short_text' => 'Descripción',
+                    'supplying_plant' => 'Planta',
+                    'unit_of_measure' => 'Unidad de Medida',
+                    'plant' => 'Planta',
+                    'vendor_name' => 'Proveedor',
+                    'vendor_code' => 'Código Proveedor',
                     'actions' => 'Acciones',
                     'actions_html' => '',
                 ];
 
-                $sortable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
-                $searchable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
-                $filterable = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+                $sortable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
+                $searchable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
+                $filterable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
                 $filterOptions = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
             @endphp
 
