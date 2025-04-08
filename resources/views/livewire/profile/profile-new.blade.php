@@ -29,8 +29,8 @@
                            accept="image/*">
                 </div>
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold">{{ $user->name }}</h2>
-                    <p class="text-lg text-gray-500">{{ $user->roles->first()->name }}</p>
+                    <h2 class="text-2xl font-bold">{{ $user->name ?? 'Sin nombre' }}</h2>
+                    <p class="text-lg text-gray-500">{{ $user->roles->first()->name ?? 'Sin rol' }}</p>
                 </div>
             </div>
 
