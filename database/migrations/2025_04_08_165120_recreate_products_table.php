@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,34 +12,41 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // First drop the foreign key constraint
-        Schema::table('purchase_order_product', function (Blueprint $table) {
-            $table->dropForeign(['product_id']);
-        });
+        // Check if the foreign key exists before trying to drop it
+        $foreignKeys = DB::select("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.TABLE_CONSTRAINTS
+            WHERE CONSTRAINT_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'purchase_order_product'
+            AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+            AND CONSTRAINT_NAME = 'purchase_order_product_product_id_foreign'
+        ");
+
+        if (!empty($foreignKeys)) {
+            Schema::table('purchase_order_product', function (Blueprint $table) {
+                $table->dropForeign(['product_id']);
+            });
+        }
 
         // Then drop the table
         Schema::dropIfExists('products');
 
-        // Create the new table with the specified fields
+        // Create the new table with only material_id
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('material_id')->nullable();
-            $table->string('short_text')->nullable();
-            $table->string('supplying_plant')->nullable();
-            $table->string('unit_of_measure')->nullable();
-            $table->string('plant')->nullable();
-            $table->string('vendor_name')->nullable();
-            $table->string('vendo_code')->nullable();
             $table->timestamps();
         });
 
         // Recreate the foreign key constraint
-        Schema::table('purchase_order_product', function (Blueprint $table) {
-            $table->foreign('product_id')
-                  ->references('id')
-                  ->on('products')
-                  ->onDelete('cascade');
-        });
+        if (Schema::hasTable('purchase_order_product') && Schema::hasColumn('purchase_order_product', 'product_id')) {
+            Schema::table('purchase_order_product', function (Blueprint $table) {
+                $table->foreign('product_id')
+                      ->references('id')
+                      ->on('products')
+                      ->onDelete('cascade');
+            });
+        }
     }
 
     /**
@@ -46,10 +54,21 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // First drop the foreign key constraint
-        Schema::table('purchase_order_product', function (Blueprint $table) {
-            $table->dropForeign(['product_id']);
-        });
+        // Check if the foreign key exists before trying to drop it
+        $foreignKeys = DB::select("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.TABLE_CONSTRAINTS
+            WHERE CONSTRAINT_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'purchase_order_product'
+            AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+            AND CONSTRAINT_NAME = 'purchase_order_product_product_id_foreign'
+        ");
+
+        if (!empty($foreignKeys)) {
+            Schema::table('purchase_order_product', function (Blueprint $table) {
+                $table->dropForeign(['product_id']);
+            });
+        }
 
         Schema::dropIfExists('products');
     }
