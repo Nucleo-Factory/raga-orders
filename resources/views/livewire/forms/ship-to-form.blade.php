@@ -12,7 +12,7 @@
     </div>
 
     <form wire:submit.prevent="saveShipTo">
-        <div class="w-full max-w-[1254px] space-y-6">
+        <div class="w-full max-w-[1254px] space-y-6 bg-white rounded-2xl p-8">
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                 <!-- Información básica -->
                 <x-form-input>

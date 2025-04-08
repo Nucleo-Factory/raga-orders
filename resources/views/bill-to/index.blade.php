@@ -14,8 +14,10 @@
             </x-slot:content>
         </x-view-title>
 
-        <a href="{{ route('bill-to.create') }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Nueva Dirección de facturación
+        <a href="{{ route('bill-to.create') }}">
+            <x-primary-button>
+                Nueva Dirección de facturación
+            </x-primary-button>
         </a>
     </div>
 
