@@ -12,6 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // First, backup existing product IDs if the products table exists
+        $existingProductIds = [];
+        if (Schema::hasTable('products')) {
+            $existingProductIds = DB::table('products')->pluck('id')->toArray();
+        }
+
         // Check if the foreign key exists before trying to drop it
         $foreignKeys = DB::select("
             SELECT CONSTRAINT_NAME
@@ -37,6 +43,20 @@ return new class extends Migration
             $table->string('material_id')->nullable();
             $table->timestamps();
         });
+
+        // If we have existing product IDs, we need to re-create those records
+        // to maintain foreign key integrity
+        if (!empty($existingProductIds)) {
+            // First, create new empty records with the same IDs
+            foreach ($existingProductIds as $id) {
+                DB::table('products')->insert([
+                    'id' => $id,
+                    'material_id' => null,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        }
 
         // Recreate the foreign key constraint
         if (Schema::hasTable('purchase_order_product') && Schema::hasColumn('purchase_order_product', 'product_id')) {
