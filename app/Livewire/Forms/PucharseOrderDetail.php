@@ -142,7 +142,7 @@ class PucharseOrderDetail extends Component
             ]);
 
             $trackingService = new TrackingService();
-            $this->trackingData = $trackingService->getTracking($trackingId);
+            $this->trackingData = $trackingService->getShip24Tracking($trackingId);
 
             Log::info('Tracking data loaded successfully', [
                 'has_timeline' => isset($this->trackingData['timeline']),
