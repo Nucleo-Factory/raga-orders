@@ -14,9 +14,26 @@
             <div class="flex-1 p-8 bg-white rounded-lg">
                 <div class="relative w-[206px] h-[206px] mx-auto mb-4">
                     <div class="w-full h-full overflow-hidden rounded-full">
-                        <img src="{{ $user->getFirstMediaUrl('profile-photo') ?: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20pantalla%202025-04-07%20a%20la%28s%29%2010.57.21%E2%80%AFp.%C2%A0m.-nA7CeLiGVWDs4fuuPVs2ZpyFP5lzwD.png' }}"
-                             alt="Profile"
-                             class="object-cover w-full h-full">
+                        @if($user->getFirstMediaUrl('profile-photo'))
+                            <img src="{{ $user->getFirstMediaUrl('profile-photo') }}"
+                                 alt="Profile"
+                                 class="object-cover w-full h-full">
+                        @else
+                            <div class="w-full h-full bg-[#190FDB] flex items-center justify-center text-white text-[60px] font-medium"
+                                x-data="{
+                                    name: '{{ $user->name }}',
+                                    initials() {
+                                        return this.name.split(' ')
+                                            .map(part => part.charAt(0))
+                                            .slice(0, 2)
+                                            .join('')
+                                            .toUpperCase();
+                                    }
+                                }"
+                                x-text="initials()"
+                                x-on:profile-updated.window="name = $event.detail.name">
+                            </div>
+                        @endif
                     </div>
 
                     <label for="profile-image-input" class="absolute bottom-0 right-0 flex items-center justify-center w-10 h-10 text-white bg-indigo-500 rounded-lg cursor-pointer">
