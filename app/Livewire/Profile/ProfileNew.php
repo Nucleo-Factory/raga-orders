@@ -28,16 +28,16 @@ class ProfileNew extends Component {
 
     public function mount() {
         $this->user = auth()->user();
-        $this->role = $this->user->roles->first()->name;
-        $this->name = $this->user->name;
-        $this->email = $this->user->email;
-        $this->company = $this->user->company->name;
-        $this->phone = $this->user->phone;
-        $this->country = $this->user->company->country;
-        $this->city = $this->user->company->city;
-        $this->zip = $this->user->company->zip;
-        $this->description = $this->user->description;
-        $this->website = $this->user->company->website;
+        $this->role = $this->user->roles->first()->name ?? 'Sin rol';
+        $this->name = $this->user->name ?? 'Sin nombre';
+        $this->email = $this->user->email ?? 'Sin correo';
+        $this->company = $this->user->company->name ?? 'Sin empresa';
+        $this->phone = $this->user->phone ?? 'Sin teléfono';
+        $this->country = $this->user->company->country ?? 'Sin país';
+        $this->city = $this->user->company->city ?? 'Sin ciudad';
+        $this->zip = $this->user->company->zip ?? 'Sin código postal';
+        $this->description = $this->user->description ?? 'Sin descripción';
+        $this->website = $this->user->company->website ?? 'Sin sitio web';
     }
 
     public function activeEditProfile() {
