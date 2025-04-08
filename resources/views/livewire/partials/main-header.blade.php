@@ -23,11 +23,15 @@
                     </button>
                 </x-slot>
                 <x-slot name="content">
+                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                        {{ __('Perfil') }}
+                    </x-responsive-nav-link>
+
                     <!-- Authentication -->
                     <button wire:click="logout" class="w-full text-start">
-                        <x-dropdown-link>
+                        <x-responsive-nav-link>
                             {{ __('Log Out') }}
-                        </x-dropdown-link>
+                        </x-responsive-nav-link>
                     </button>
                 </x-slot>
             </x-dropdown>
