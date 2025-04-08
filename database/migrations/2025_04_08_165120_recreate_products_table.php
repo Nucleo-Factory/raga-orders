@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Primero eliminamos la tabla si existe
+        // First drop the foreign key constraint
+        Schema::table('purchase_order_product', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+        });
+
+        // Then drop the table
         Schema::dropIfExists('products');
 
-        // Luego creamos la nueva tabla con los campos especificados
+        // Create the new table with the specified fields
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('material_id')->nullable();
@@ -26,6 +31,14 @@ return new class extends Migration
             $table->string('vendo_code')->nullable();
             $table->timestamps();
         });
+
+        // Recreate the foreign key constraint
+        Schema::table('purchase_order_product', function (Blueprint $table) {
+            $table->foreign('product_id')
+                  ->references('id')
+                  ->on('products')
+                  ->onDelete('cascade');
+        });
     }
 
     /**
@@ -33,6 +46,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // First drop the foreign key constraint
+        Schema::table('purchase_order_product', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+        });
+
         Schema::dropIfExists('products');
     }
 };
