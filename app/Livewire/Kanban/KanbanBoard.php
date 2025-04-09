@@ -5,11 +5,15 @@ namespace App\Livewire\Kanban;
 use App\Models\KanbanBoard as KanbanBoardModel;
 use App\Models\KanbanStatus;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderComment;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Livewire\WithFileUploads;
 
 class KanbanBoard extends Component {
+    use WithFileUploads;
+
     public $boardId;
     public $board;
     public $columns = [];
@@ -32,6 +36,9 @@ class KanbanBoard extends Component {
     public $comment_stage_08;
     public $comments = [];
     public $showCommentModal = false;
+
+    public $comment = '';
+    public $attachment = null;
 
     public function mount($boardId = null) {
         // Determinar el tipo de tablero según la ruta actual
@@ -245,20 +252,77 @@ class KanbanBoard extends Component {
         $this->dispatch('purchaseOrderStatusUpdated');
     }
 
-    public function setComments($taskId, $comment) {
+    public function setComments($taskId, $comment)
+    {
+        // Si no hay comentario, no hacemos nada y retornamos
+        if (empty(trim($comment))) {
+            return;
+        }
+
         \Log::info("Setting comments for task $taskId: " . $comment);
 
         try {
-            DB::table('purchase_order_comments')->insert([
+            $operacion = $this->getOperacionName($this->newColumnId);
+
+            $commentModel = PurchaseOrderComment::create([
                 'purchase_order_id' => $taskId,
                 'user_id' => auth()->id(),
                 'comment' => $comment,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'operacion' => $operacion
             ]);
+
+            if ($this->attachment) {
+                $commentModel
+                    ->addMedia($this->attachment->getRealPath())
+                    ->usingName($this->attachment->getClientOriginalName())
+                    ->usingFileName($this->attachment->getClientOriginalName())
+                    ->toMediaCollection('attachments');
+            }
+
+            // Limpiar los campos después de guardar
+            $this->comment = '';
+            $this->attachment = null;
+
         } catch (\Exception $e) {
             \Log::error("Error setting comments: " . $e->getMessage());
         }
+    }
+
+    // Método helper para obtener el nombre de la operación
+    private function getOperacionName($columnId)
+    {
+        $operaciones = [
+            1 => 'Hub Teórico',
+            2 => 'Hub Teórico',
+            3 => 'Validación Operativa',
+            4 => 'Pickup',
+            5 => 'En Tránsito',
+            6 => 'Llegada a Hub',
+            7 => 'Validación Operativa Cliente',
+            8 => 'Consolidación Hub Real',
+            9 => 'Gestión Documental'
+        ];
+
+        return $operaciones[$columnId] ?? 'Operación no especificada';
+    }
+
+    public function getCommentsWithAttachments($taskId) {
+        return PurchaseOrderComment::with(['user', 'media'])
+            ->where('purchase_order_id', $taskId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'comment' => $comment->comment,
+                    'user' => $comment->user->name,
+                    'created_at' => $comment->created_at->format('d/m/Y H:i'),
+                    'attachment' => $comment->getAttachment() ? [
+                        'name' => $comment->getAttachment()->name,
+                        'url' => $comment->getAttachment()->getUrl()
+                    ] : null
+                ];
+            });
     }
 
     public function setPickupDate($taskId, $pickupDate) {

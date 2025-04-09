@@ -606,218 +606,89 @@
 
             <div x-show="activeTab === 'tab4'" x-transition>
                 <div class="flex items-center justify-between mb-6">
-                    <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
-
-                    <div class="flex gap-4">
-                        <!-- Botón upload -->
-                        <form wire:submit.prevent="uploadFile" class="flex gap-4">
-                            <input
-                                type="file"
-                                wire:model="newFile"
-                                id="file-upload"
-                                class="hidden"
-                            />
-
-                            <x-primary-button type="submit" class="flex items-center gap-2 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="17 8 12 3 7 8"></polyline>
-                                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                                <span>Subir</span>
-                            </x-primary-button>
-
-                            <x-secondary-button type="button" class="group flex items-center gap-[0.625rem]" onclick="document.getElementById('file-upload').click()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
-                                    viewBox="0 0 21 22" fill="none">
-                                    <path
-                                        d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
-                                        stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                        class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
-                                </svg>
-
-                                <span>Adjuntar documentación</span>
-                            </x-secondary-button>
-                        </form>
-                    </div>
+                    <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar en el historial..." />
                 </div>
 
-                <!-- Mostrar mensajes de notificación -->
-                @if (session()->has('message'))
-                    <div class="p-4 mb-6 text-sm text-green-800 bg-green-100 rounded-md">
-                        {{ session('message') }}
-                    </div>
-                @endif
-
-                @if (session()->has('error'))
-                    <div class="p-4 mb-6 text-sm text-red-800 bg-red-100 rounded-md">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <!-- Tabla para comentarios y archivos adjuntos -->
+                <!-- Tabla de historial -->
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-[#E0E5FF]">
                         <tr>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortComments('user_name')">
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                <input type="checkbox" class="rounded text-primary-600">
+                            </th>
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Fecha y hora
+                            </th>
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
                                 Usuario
-                                @if ($commentSortField === 'user_name')
-                                    @if ($commentSortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
                             </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortComments('content')">
-                                Contenido / Archivo
-                                @if ($commentSortField === 'content' || $commentSortField === 'filename')
-                                    @if ($commentSortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Rol
                             </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortComments('created_at')">
-                                Fecha
-                                @if ($commentSortField === 'created_at')
-                                    @if ($commentSortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Operación
                             </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase">
-                                Tipo
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Estado
                             </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase">
-                                Acciones
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Comentarios
+                            </th>
+                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                                Archivos adjuntos
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Comentarios -->
                         @forelse($comments as $comment)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $comment['user_name'] }}</div>
-                                </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ $comment['comment'] }}</div>
+                                    <input type="checkbox" class="rounded text-primary-600">
+                                </td>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    {{ \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    {{ $comment['user_name'] }}
+                                </td>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    {{ $comment['user_role'] }}
+                                </td>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    {{ $comment['operation'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}</div>
+                                    @if($comment['status'] === 'Aprobado')
+                                        <span class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">
+                                            Aprobado <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </span>
+                                    @elseif($comment['status'] === 'Pendiente')
+                                        <span class="inline-flex px-2 text-xs font-semibold leading-5 text-yellow-800 bg-yellow-100 rounded-full">
+                                            Pendiente <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </span>
+                                    @else
+                                        <span class="inline-flex px-2 text-xs font-semibold leading-5 text-red-800 bg-red-100 rounded-full">
+                                            Rechazada <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </span>
+                                    @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="inline-flex px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">
-                                        Comentario
-                                    </div>
+                                <td class="px-6 py-4 text-sm">
+                                    {{ $comment['comment'] }}
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    @if($comment['attachment'])
+                                        <a href="{{ $comment['attachment']['url'] }}"
+                                           class="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                           target="_blank">
+                                            {{ $comment['attachment']['name'] }}
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                         @endforelse
-
-                        <!-- Archivos adjuntos -->
-                        @forelse($attachments as $attachment)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $attachment['user_name'] }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
-                                        <div class="text-sm text-gray-900">{{ $attachment['filename'] }}</div>
-                                        <span class="ml-2 text-xs text-gray-500">({{ $attachment['file_size'] }})</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($attachment['created_at'])->format('d/m/Y H:i') }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="inline-flex px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                        {{ $attachment['file_type'] }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                    <div class="flex space-x-2">
-                                        <a href="{{ $attachment['url'] }}" download class="text-indigo-600 hover:text-indigo-900">Descargar</a>
-                                        <a href="{{ $attachment['url'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Ver</a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                        @endforelse
-
-                        @if(count($comments) === 0 && count($attachments) === 0)
-                            <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                                    No se encontraron comentarios ni documentos adjuntos para esta orden de compra
-                                </td>
-                            </tr>
-                        @endif
                     </tbody>
                 </table>
-
-                <div class="p-4 mt-4 mb-6 bg-white rounded-md shadow-md">
-                    <!-- Formulario de comentarios -->
-                    <form wire:submit.prevent="addComment" class="mt-4 mb-6">
-                        <div class="flex flex-col items-start gap-4">
-                            <div class="flex-grow w-full">
-                                <textarea
-                                    wire:model.defer="newComment"
-                                    placeholder="Escribe un comentario..."
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                    rows="2"
-                                ></textarea>
-                                @error('newComment') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                            </div>
-                            <button
-                                type="submit"
-                                class="w-full bg-[#565aff] hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg mb-4">
-                                Comentar
-                            </button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
     </div>

@@ -161,33 +161,27 @@ class PucharseOrderDetail extends Component
 
     protected function loadCommentsAndAttachments()
     {
-        // Carga de comentarios desde la relación en el modelo
+        // Carga de comentarios con sus archivos adjuntos
         $this->comments = $this->purchaseOrder->comments()
+            ->with(['user', 'media']) // Asegúrate de tener estas relaciones definidas
             ->latest()
             ->get()
             ->map(function($comment) {
+                $attachment = $comment->getFirstMedia('attachments');
+
                 return [
                     'id' => $comment->id,
-                    'user_name' => $comment->user->name ?? 'Usuario',  // Asumiendo que hay una relación user en el comentario
+                    'user_name' => $comment->user->name ?? 'Usuario',
+                    'user_role' => $comment->user->roles->first()->name ?? 'Sin rol',
                     'comment' => $comment->comment,
                     'created_at' => $comment->created_at,
-                    'type' => 'comment'
-                ];
-            })
-            ->toArray();
-
-        // Carga de archivos adjuntos usando Spatie Media Library
-        $this->attachments = $this->purchaseOrder->getMedia('attachments')
-            ->map(function($media) {
-                return [
-                    'id' => $media->id,
-                    'user_name' => $media->custom_properties['uploaded_by'] ?? 'Usuario',  // Asumiendo que guardas quién subió el archivo
-                    'filename' => $media->file_name,
-                    'file_type' => strtoupper($media->extension),
-                    'file_size' => $this->formatBytes($media->size),
-                    'created_at' => $media->created_at,
-                    'url' => $media->getUrl(),
-                    'type' => 'attachment'
+                    'status' => 'Aprobado', // Aquí deberías obtener el estado real del comentario
+                    'operation' => $comment->operacion,
+                    'attachment' => $attachment ? [
+                        'name' => $attachment->file_name,
+                        'url' => $attachment->getUrl(),
+                        'type' => strtoupper($attachment->extension),
+                    ] : null
                 ];
             })
             ->toArray();
