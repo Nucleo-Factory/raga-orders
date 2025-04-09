@@ -25,17 +25,70 @@
         </div>
 
         <div class="flex space-x-4">
-            <a href="#" class="relative">
+            <a href="#" class="relative" wire:click.prevent="toggleEdit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none"
                     class="absolute -translate-y-1/2 left-4 top-1/2">
                     <path
                         d="M1.87604 17.1159C1.92198 16.7024 1.94496 16.4957 2.00751 16.3025C2.06301 16.131 2.14143 15.9679 2.24064 15.8174C2.35246 15.6478 2.49955 15.5008 2.79373 15.2066L16 2.0003C17.1046 0.895732 18.8955 0.895734 20 2.0003C21.1046 3.10487 21.1046 4.89573 20 6.0003L6.79373 19.2066C6.49955 19.5008 6.35245 19.6479 6.18289 19.7597C6.03245 19.8589 5.86929 19.9373 5.69785 19.9928C5.5046 20.0553 5.29786 20.0783 4.88437 20.1243L1.5 20.5003L1.87604 17.1159Z"
                         stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                <x-primary-button class="pl-12">Editar</x-primary-button>
+                <x-primary-button class="pl-12">{{ $isEditing ? 'Cancelar' : 'Editar' }}</x-primary-button>
             </a>
         </div>
     </div>
+
+    @if($isEditing)
+        <div class="p-4 mb-8 bg-white rounded-lg shadow">
+            <div class="mb-4">
+                <h3 class="mb-2 text-lg font-semibold">Agregar órdenes de compra</h3>
+                <div class="relative">
+                    <input
+                        type="text"
+                        wire:model.debounce.300ms="searchPO"
+                        wire:keyup="searchPurchaseOrders"
+                        placeholder="Buscar por número de PO..."
+                        class="rounded-xl border-2 border-[#A5A3A3] pl-11 pr-[1.125rem] py-[0.625rem] placeholder:text-[#9AABFF] w-full"
+                    >
+                </div>
+            </div>
+
+            @if(count($searchResults) > 0)
+                <div class="mt-2 overflow-hidden border rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-[#E0E5FF]">
+                            <tr>
+                                <th class="px-6 py-6 text-xs font-bold text-left uppercase textblack">Número PO</th>
+                                <th class="px-6 py-6 text-xs font-bold text-left uppercase textblack">Proveedor</th>
+                                <th class="px-6 py-6 text-xs font-bold text-left uppercase textblack">Total</th>
+                                <th class="px-6 py-6 text-xs font-bold text-left uppercase textblack">Estado</th>
+                                <th class="px-6 py-6 text-xs font-bold text-left uppercase textblack">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($searchResults as $result)
+                                <tr>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">{{ $result['order_number'] }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">{{ $result['vendor_name'] }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">{{ number_format($result['total_amount'], 2) }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">{{ $result['status'] }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                        <button
+                                            wire:click="attachPurchaseOrder({{ $result['id'] }})"
+                                            class="text-blue-600 hover:text-blue-900"
+                                        >
+                                            Agregar
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @elseif(strlen($searchPO) >= 3)
+                <p class="mt-2 text-gray-500">No se encontraron resultados</p>
+            @endif
+        </div>
+    @endif
 
     <div class="mb-8 flex max-w-[600px] justify-between gap-5 rounded-[0.625rem] bg-white p-4 text-xs">
         <div class="flex flex-col justify-between space-y-[0.875rem]">

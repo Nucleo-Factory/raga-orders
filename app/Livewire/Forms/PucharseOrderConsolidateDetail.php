@@ -29,6 +29,9 @@ class PucharseOrderConsolidateDetail extends Component {
     public $hubLocation = null;
     public $commentSortField = 'created_at';
     public $commentSortDirection = 'desc';
+    public $isEditing = false;
+    public $searchPO = '';
+    public $searchResults = [];
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -434,6 +437,52 @@ class PucharseOrderConsolidateDetail extends Component {
 
         // Este método se ejecuta automáticamente cuando se selecciona un archivo
         // Puedes poner aquí parte de la lógica para verificar que está funcionando
+    }
+
+    public function toggleEdit()
+    {
+        $this->isEditing = !$this->isEditing;
+        $this->searchPO = '';
+        $this->searchResults = [];
+    }
+
+    public function searchPurchaseOrders()
+    {
+        if (strlen($this->searchPO) < 3) {
+            $this->searchResults = [];
+            return;
+        }
+
+        $this->searchResults = \App\Models\PurchaseOrder::query()
+            ->where('order_number', 'like', "%{$this->searchPO}%")
+            ->whereNotIn('id', $this->shippingDocument->purchaseOrders->pluck('id'))
+            ->where('status', '!=', 'cancelled')
+            ->with('vendor')
+            ->limit(5)
+            ->get()
+            ->map(function($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'vendor_name' => $order->vendor->name ?? 'N/A',
+                    'total_amount' => $order->total_amount,
+                    'status' => $order->status
+                ];
+            });
+    }
+
+    public function attachPurchaseOrder($orderId)
+    {
+        try {
+            $this->shippingDocument->purchaseOrders()->attach($orderId);
+            $this->loadRelatedPurchaseOrders(); // Refresh the list
+            $this->searchPO = ''; // Clear search
+            $this->searchResults = []; // Clear results
+
+            session()->flash('message', 'Orden de compra agregada exitosamente');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al agregar la orden de compra');
+        }
     }
 
     public function render() {
