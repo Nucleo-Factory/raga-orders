@@ -10,7 +10,7 @@ window.sidebarState = {
 };
 
 // Función para inicializar la barra lateral
-function initializeSidebar(retryCount = 0) {
+window.initializeSidebar = function(retryCount = 0) {
     const maxRetries = 5;
     const sidebarEl = document.querySelector(".main-sidebar");
     const togglerBtn = document.querySelector(".sidebar-toggler-btn");
@@ -139,8 +139,15 @@ function initializeSidebar(retryCount = 0) {
         });
     }
 
-    // Agregar el event listener con captura
-    togglerBtn.addEventListener("click", function(e) {
+    // Cambiar el event listener a una delegación de eventos en el documento
+    document.removeEventListener('click', handleTogglerClick); // Remover listener anterior si existe
+    document.addEventListener('click', handleTogglerClick);
+
+    // Mover la función del manejador fuera para poder removerla si es necesario
+    function handleTogglerClick(e) {
+        const togglerBtn = e.target.closest('.sidebar-toggler-btn');
+        if (!togglerBtn) return;
+
         window.sidebarState.expanded = !window.sidebarState.expanded;
 
         if (window.sidebarState.expanded) {
@@ -148,7 +155,7 @@ function initializeSidebar(retryCount = 0) {
         } else {
             collapseSidebar();
         }
-    }, true);
+    }
 
     // Inicializar directamente una vez
     collapseSidebar();
@@ -177,6 +184,20 @@ if (typeof window.Livewire !== 'undefined') {
             initializeSidebar();
         });
     });
+
+    document.addEventListener('livewire:load', function() {
+        // Inicializar cuando Livewire carga
+        if (!window.sidebarState.expanded) {
+            collapseSidebar();
+        }
+    });
+
+    document.addEventListener('livewire:navigated', function() {
+        // Reinicializar después de la navegación
+        if (!window.sidebarState.expanded) {
+            collapseSidebar();
+        }
+    });
 }
 
 // 5. Ejecutar periódicamente hasta que se inicialice (como último recurso)
@@ -198,3 +219,212 @@ window.toggleSidebar = function(expanded) {
     const sidebarEl = document.querySelector(".main-sidebar");
     // Aquí el resto de la lógica para expandir/colapsar
 };
+
+// Crear una función para manejar el click que esté disponible globalmente
+window.handleSidebarToggle = function() {
+    const sidebarEl = document.querySelector(".main-sidebar");
+
+    if (!window.sidebarState) {
+        window.sidebarState = {
+            initialized: false,
+            expanded: false
+        };
+    }
+
+    window.sidebarState.expanded = !window.sidebarState.expanded;
+
+    if (window.sidebarState.expanded) {
+        expandSidebar();
+    } else {
+        collapseSidebar();
+    }
+};
+
+// También podemos agregar un listener para turbo:load si estás usando Turbo
+document.addEventListener('turbo:load', function() {
+    if (!window.sidebarState.expanded) {
+        collapseSidebar();
+    }
+});
+
+// Definir las funciones globalmente
+window.sidebarState = {
+    initialized: false,
+    expanded: false
+};
+
+// Función para expandir el sidebar
+window.expandSidebar = function() {
+    const sidebarEl = document.querySelector(".main-sidebar");
+    const togglerBtn = document.querySelector(".sidebar-toggler-btn");
+    const sidebarLinkAll = document.querySelectorAll(".sidebar-link");
+    const sidebarLinkTextAll = document.querySelectorAll(".link-text");
+    const logoutBtnText = document.querySelector(".logout-btn");
+    const profileContainer = document.querySelector(".profile-container");
+    const profileName = document.querySelector(".profile-name");
+    const sidebarDropdowns = document.querySelectorAll('.sidebar-dropdown');
+    const sidebarDropdownTextContainers = document.querySelectorAll(".sidebar-dropdown-text-container");
+    const sidebarDropdownTexts = document.querySelectorAll(".sidebar-dropdown-text");
+    const sidebarDropdownArrowIcons = document.querySelectorAll('.sidebar-dropdown .icon');
+    const sidebarDropdownItemsText = document.querySelectorAll('.dropdown-item-text');
+
+    if (!sidebarEl) return;
+
+    window.sidebarState.expanded = true;
+    sidebarEl.classList.add("sidebar-expanded");
+
+    sidebarLinkAll.forEach((link) => {
+        link.style.gap = "0.75rem";
+    });
+
+    sidebarLinkTextAll.forEach((linkText) => {
+        linkText.style.width = linkText.scrollWidth + "px";
+        linkText.style.opacity = "1";
+    });
+
+    if (logoutBtnText) {
+        logoutBtnText.style.gap = "0.625rem";
+    }
+
+    if (togglerBtn) {
+        togglerBtn.style.transform = "rotate(0deg)";
+    }
+
+    if (profileContainer) {
+        profileContainer.style.gap = "0.625rem";
+    }
+
+    if (profileName) {
+        profileName.style.width = profileName.scrollWidth + "px";
+        profileName.style.opacity = "1";
+    }
+
+    sidebarDropdowns.forEach((dropdown) => {
+        dropdown.style.gap = "0.75rem";
+    });
+
+    sidebarDropdownTextContainers.forEach((container) => {
+        container.style.gap = "0.625rem";
+    });
+
+    sidebarDropdownTexts.forEach((text) => {
+        text.style.width = text.scrollWidth + "px";
+        text.style.opacity = "1";
+    });
+
+    sidebarDropdownArrowIcons.forEach((icon) => {
+        icon.style.width = icon.scrollWidth + "px";
+        icon.style.opacity = "1";
+    });
+
+    sidebarDropdownItemsText.forEach((itemText) => {
+        itemText.style.width = itemText.scrollWidth + "px";
+        itemText.style.opacity = "1";
+    });
+};
+
+// Función para colapsar el sidebar
+window.collapseSidebar = function() {
+    const sidebarEl = document.querySelector(".main-sidebar");
+    const togglerBtn = document.querySelector(".sidebar-toggler-btn");
+    const sidebarLinkAll = document.querySelectorAll(".sidebar-link");
+    const sidebarLinkTextAll = document.querySelectorAll(".link-text");
+    const logoutBtnText = document.querySelector(".logout-btn");
+    const profileContainer = document.querySelector(".profile-container");
+    const profileName = document.querySelector(".profile-name");
+    const sidebarDropdowns = document.querySelectorAll('.sidebar-dropdown');
+    const sidebarDropdownTextContainers = document.querySelectorAll(".sidebar-dropdown-text-container");
+    const sidebarDropdownTexts = document.querySelectorAll(".sidebar-dropdown-text");
+    const sidebarDropdownArrowIcons = document.querySelectorAll('.sidebar-dropdown .icon');
+    const sidebarDropdownItemsText = document.querySelectorAll('.dropdown-item-text');
+
+    if (!sidebarEl) return;
+
+    window.sidebarState.expanded = false;
+    sidebarEl.classList.remove("sidebar-expanded");
+
+    sidebarLinkAll.forEach((link) => {
+        link.style.gap = "0";
+    });
+
+    sidebarLinkTextAll.forEach((linkText) => {
+        linkText.style.width = "0";
+        linkText.style.opacity = "0";
+    });
+
+    if (logoutBtnText) {
+        logoutBtnText.style.gap = "0";
+    }
+
+    if (togglerBtn) {
+        togglerBtn.style.transform = "rotate(180deg)";
+    }
+
+    if (profileContainer) {
+        profileContainer.style.gap = "0";
+    }
+
+    if (profileName) {
+        profileName.style.width = "0";
+        profileName.style.opacity = "0";
+    }
+
+    sidebarDropdowns.forEach((dropdown) => {
+        dropdown.style.gap = "0";
+    });
+
+    sidebarDropdownTextContainers.forEach((container) => {
+        container.style.gap = "0";
+    });
+
+    sidebarDropdownTexts.forEach((text) => {
+        text.style.width = "0";
+        text.style.opacity = "0";
+    });
+
+    sidebarDropdownArrowIcons.forEach((icon) => {
+        icon.style.width = "0";
+        icon.style.opacity = "0";
+    });
+
+    sidebarDropdownItemsText.forEach((itemText) => {
+        itemText.style.width = "0";
+        itemText.style.opacity = "0";
+    });
+};
+
+// Función para manejar el toggle del sidebar
+window.handleSidebarToggle = function() {
+    if (window.sidebarState.expanded) {
+        window.collapseSidebar();
+    } else {
+        window.expandSidebar();
+    }
+};
+
+// Inicialización cuando el DOM está listo
+document.addEventListener("DOMContentLoaded", function() {
+    window.collapseSidebar();
+});
+
+// Listeners para Livewire
+if (typeof window.Livewire !== 'undefined') {
+    document.addEventListener('livewire:load', function() {
+        if (!window.sidebarState.expanded) {
+            window.collapseSidebar();
+        }
+    });
+
+    document.addEventListener('livewire:navigated', function() {
+        if (!window.sidebarState.expanded) {
+            window.collapseSidebar();
+        }
+    });
+}
+
+// Listener para Turbo si está siendo usado
+document.addEventListener('turbo:load', function() {
+    if (!window.sidebarState.expanded) {
+        window.collapseSidebar();
+    }
+});

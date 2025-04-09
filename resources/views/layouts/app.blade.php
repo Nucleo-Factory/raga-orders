@@ -27,7 +27,7 @@
 
         <!-- Static sidebar for desktop -->
 
-        <div class="h-full overflow-y-auto transition-all duration-500 grow" :class="{ 'w-6rem': isCollapsed }">
+        <div class="h-full overflow-y-auto transition-all duration-500 grow">
             <!-- Aqui debe ir el componente header -->
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
@@ -43,5 +43,4 @@
     </body>
 
     @stack("scripts")
-
 </html>

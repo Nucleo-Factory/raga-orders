@@ -753,7 +753,8 @@ class CreatePucharseOrder extends Component
 
             $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
             $purchaseOrder->update($poData);
-            return redirect()->route('purchase-orders.detail', $id);
+
+            $this->dispatch('open-modal', 'modal-purchase-order-created');
     }
 
     public function closeModal() {

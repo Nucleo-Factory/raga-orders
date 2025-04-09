@@ -34,7 +34,8 @@
         </a>
 
         <button
-            class="sidebar-toggler-btn absolute -right-[calc(28px/2)] flex h-7 w-7 items-center justify-center rounded-full bg-[#190FDB]">
+            class="sidebar-toggler-btn absolute -right-[calc(28px/2)] flex h-7 w-7 items-center justify-center rounded-full bg-[#190FDB]"
+            onclick="handleSidebarToggle()">
             <svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none">
                 <path d="M7 1L1 7L7 13" stroke="#F7F7F7" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" />
@@ -204,14 +205,22 @@
                         </li>
 
                         <li>
-                            <x-sidebar-dropdown-item href="{{ route('settings.users') }}" :active="request()->routeIs('settings.users')">
-                                Usuarios
+                            <x-sidebar-dropdown-item href="{{ route('vendors.index') }}"
+                                :active="request()->routeIs('vendors.index')">
+                                Proveedores
                             </x-sidebar-dropdown-item>
                         </li>
 
                         <li>
-                            <x-sidebar-dropdown-item href="{{ route('settings.sessions') }}" :active="request()->routeIs('settings.sessions')">
-                                Sesiones
+                            <x-sidebar-dropdown-item href="{{ route('ship-to.index') }}"
+                                :active="request()->routeIs('ship-to.index')">
+                                Direcciones
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.users') }}" :active="request()->routeIs('settings.users')">
+                                Usuarios
                             </x-sidebar-dropdown-item>
                         </li>
 
@@ -222,29 +231,14 @@
                         </li>
 
                         <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.sessions') }}" :active="request()->routeIs('settings.sessions')">
+                                Sesiones activas
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.history') }}" :active="request()->routeIs('settings.history')">
                                 Log Histórico
-                            </x-sidebar-dropdown-item>
-                        </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('vendors.index') }}"
-                                :active="request()->routeIs('vendors.index')">
-                                Proveedores
-                            </x-sidebar-dropdown-item>
-                        </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('ship-to.index') }}"
-                                :active="request()->routeIs('ship-to.index')">
-                                Direcciones de entrega
-                            </x-sidebar-dropdown-item>
-                        </li>
-
-                        <li>
-                            <x-sidebar-dropdown-item href="{{ route('bill-to.index') }}"
-                                :active="request()->routeIs('bill-to.index')">
-                                Direcciones de facturación
                             </x-sidebar-dropdown-item>
                         </li>
                     </ul>

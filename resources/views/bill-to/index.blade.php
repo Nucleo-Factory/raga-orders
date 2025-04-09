@@ -21,6 +21,17 @@
         </a>
     </div>
 
+    <nav class="px-6 py-4 text-lg bg-white rounded-2xl">
+        <ul class="flex items-center justify-between max-w-screen-md mx-auto">
+            <a href="{{ route('ship-to.index') }}" class="border-b-2 border-transparent">
+                Direcciones de entrega
+            </a>
+            <a href="{{ route('bill-to.index') }}" class="border-b-2 border-[#190FDB] text-[#190FDB]">
+                Direcciones de facturación
+            </a>
+        </ul>
+    </nav>
+
     @if (session('message'))
         <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
             {{ session('message') }}

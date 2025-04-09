@@ -612,11 +612,19 @@
 
     <x-modal-success name="modal-purchase-order-created">
         <x-slot:title>
-            Orden de compra creada correctamente
+            @if ($id)
+                Orden de compra fue editada correctamente
+            @else
+                Orden de compra creada correctamente
+            @endif
         </x-slot:title>
 
         <x-slot:description>
-            La orden de compra ha sido creada correctamente con el número de orden: {{ $order_number }}
+            @if ($id)
+                La orden de compra ha sido editada correctamente con el número de orden: {{ $order_number }}
+            @else
+                La orden de compra ha sido creada correctamente con el número de orden: {{ $order_number }}
+            @endif
         </x-slot:description>
 
         <x-primary-button wire:click="closeModal" class="w-full">
