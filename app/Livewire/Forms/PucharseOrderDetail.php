@@ -36,6 +36,9 @@ class PucharseOrderDetail extends Component
     public $newComment = '';
     public $fileSelected = false;
 
+    public $comment = '';
+    public $attachment = null;
+
     public function mount($id)
     {
         // Cargar la orden de compra con sus productos y hub relacionados
@@ -309,6 +312,54 @@ class PucharseOrderDetail extends Component
             $this->newFile = null;
         } catch (\Exception $e) {
             session()->flash('error', 'Error al subir archivo: ' . $e->getMessage());
+        }
+    }
+
+    public function uploadFileAction() {
+        $this->validate([
+            'newFile' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        $this->uploadFile();
+    }
+
+    public function setComments()
+    {
+        // Si no hay comentario, no hacemos nada y retornamos
+        if (empty(trim($this->comment))) {
+            return;
+        }
+
+        try {
+            // Crear el comentario
+            $commentModel = $this->purchaseOrder->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => $this->comment,
+                'operacion' => 'Detalle PO' // O cualquier operación que quieras registrar
+            ]);
+
+            // Si hay un archivo adjunto, procesarlo
+            if ($this->attachment) {
+                $commentModel
+                    ->addMedia($this->attachment->getRealPath())
+                    ->usingName($this->attachment->getClientOriginalName())
+                    ->usingFileName($this->attachment->getClientOriginalName())
+                    ->toMediaCollection('attachments');
+            }
+
+            // Limpiar los campos después de guardar
+            $this->comment = '';
+            $this->attachment = null;
+
+            // Recargar los comentarios
+            $this->loadCommentsAndAttachments();
+
+            // Notificar éxito
+            session()->flash('message', 'Comentario agregado correctamente');
+
+        } catch (\Exception $e) {
+            \Log::error("Error setting comments: " . $e->getMessage());
+            session()->flash('error', 'Error al agregar el comentario');
         }
     }
 

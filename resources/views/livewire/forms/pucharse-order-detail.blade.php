@@ -607,34 +607,58 @@
             <div x-show="activeTab === 'tab4'" x-transition>
                 <div class="flex items-center justify-between mb-6">
                     <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar en el historial..." />
+
+                    <div class="flex gap-4">
+                        <x-primary-button
+                            type="button"
+                            class="flex items-center gap-2 group"
+                            x-on:click="window.location.reload()"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18.453 10.8927C18.1752 13.5026 16.6964 15.9483 14.2494 17.3611C10.1839 19.7083 4.98539 18.3153 2.63818 14.2499L2.38818 13.8168M1.54613 9.10664C1.82393 6.49674 3.30272 4.05102 5.74971 2.63825C9.8152 0.29104 15.0137 1.68398 17.3609 5.74947L17.6109 6.18248M1.49316 16.0657L2.22521 13.3336L4.95727 14.0657M15.0424 5.93364L17.7744 6.66569L18.5065 3.93364" stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </x-primary-button>
+
+                        <x-secondary-button type="button" class="group flex items-center gap-[0.625rem]" @click="$dispatch('open-modal', 'modal-upload-document')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22"
+                                viewBox="0 0 21 22" fill="none">
+                                <path
+                                    d="M19.1527 9.89994L10.1371 18.9156C8.08686 20.9658 4.76275 20.9658 2.71249 18.9156C0.662241 16.8653 0.662242 13.5412 2.71249 11.4909L11.7281 2.47532C13.0949 1.10849 15.311 1.10849 16.6779 2.47532C18.0447 3.84216 18.0447 6.05823 16.6779 7.42507L8.01579 16.0871C7.33238 16.7705 6.22434 16.7705 5.54092 16.0871C4.8575 15.4037 4.8575 14.2957 5.54092 13.6123L13.1423 6.01086"
+                                    stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                            </svg>
+
+                            <span>Adjuntar documentación</span>
+                        </x-secondary-button>
+                    </div>
                 </div>
 
                 <!-- Tabla de historial -->
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-[#E0E5FF]">
                         <tr>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 <input type="checkbox" class="rounded text-primary-600">
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Fecha y hora
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Usuario
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Rol
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Operación
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Estado
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Comentarios
                             </th>
-                            <th class="px-6 py-3 text-xs font-bold text-left text-black uppercase">
+                            <th class="px-6 py-6 text-xs font-bold text-left text-black uppercase">
                                 Archivos adjuntos
                             </th>
                         </tr>
@@ -692,4 +716,81 @@
             </div>
         </div>
     </div>
+
+    <x-modal name="modal-upload-document" maxWidth="lg">
+        <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
+            Agregar comentario
+        </h3>
+
+        <div class="mb-8">
+            <x-form-textarea
+                label=""
+                name="comment_stage_01"
+                wire:model.live="comment"
+                placeholder="Comentarios"
+            />
+        </div>
+
+        <div class="mb-12 space-y-2">
+            <div class="space-y-4">
+                <div class="flex flex-col items-start gap-4">
+                    <input
+                        type="file"
+                        wire:model.live="attachment"
+                        class="hidden"
+                        x-ref="fileInput"
+                        id="file-upload-po"
+                        x-bind:disabled="!$wire.comment || $wire.comment.trim() === ''"
+                    >
+                    <x-secondary-button
+                        onclick="document.getElementById('file-upload-po').click()"
+                        class="group flex w-full items-center justify-center gap-[0.625rem]"
+                        x-bind:disabled="!$wire.comment || $wire.comment.trim() === ''"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
+                            fill="none">
+                            <path
+                                d="M19.1525 9.89897L10.1369 18.9146C8.08662 20.9648 4.7625 20.9648 2.71225 18.9146C0.661997 16.8643 0.661998 13.5402 2.71225 11.49L11.7279 2.47435C13.0947 1.10751 15.3108 1.10751 16.6776 2.47434C18.0444 3.84118 18.0444 6.05726 16.6776 7.42409L8.01555 16.0862C7.33213 16.7696 6.22409 16.7696 5.54068 16.0862C4.85726 15.4027 4.85726 14.2947 5.54068 13.6113L13.1421 6.00988"
+                                stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                        </svg>
+
+                        <span>Adjuntar documentación...</span>
+                    </x-secondary-button>
+
+                    @if($attachment)
+                        <div class="text-sm text-gray-600">
+                            Archivo seleccionado: {{ $attachment->getClientOriginalName() }}
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col text-sm text-[#A5A3A3]">
+                        <span>Tipo de formato .xls .xlsx .pdf</span>
+                        <span>Tamaño máximo 5MB</span>
+                    </div>
+                </div>
+
+                @error('attachment')
+                    <span class="text-sm text-red-600">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button
+                x-on:click="$dispatch('close-modal', 'modal-upload-document')"
+                class="w-full"
+            >
+                Cancelar
+            </x-secondary-button>
+
+            <x-primary-button
+                wire:click="setComments"
+                x-on:click="$dispatch('close-modal', 'modal-upload-document')"
+                class="w-full"
+            >
+                Guardar
+            </x-primary-button>
+        </div>
+    </x-modal>
 </div>
