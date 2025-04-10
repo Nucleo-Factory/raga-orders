@@ -13,7 +13,7 @@
             </div>
         @else
             @foreach ($columns as $column)
-                <div class="flex-shrink-0 p-3 mx-2 rounded-lg kanban-column w-80">
+                <div class="flex-shrink-0 p-3 mx-2 rounded-lg kanban-column w-80 {{ $loop->first ? 'first-column' : '' }}">
                     <h3 class="mb-4 border-b-2 border-[#2E2E2E] px-2 text-lg font-bold text-[#2E2E2E]">
                         {{ $column['name'] }}
                         <span class="ml-2 text-sm font-normal text-gray-600">
@@ -682,6 +682,10 @@
         .kanban-column {
             height: 100%;
             min-height: 600px;
+        }
+
+        .first-column {
+            padding-left: 0;
         }
 
         .sortable-fallback {

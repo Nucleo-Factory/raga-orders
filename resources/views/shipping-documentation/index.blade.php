@@ -13,13 +13,6 @@
                 Gestiona todas las etapas de tus embarques
             </x-slot:content>
         </x-view-title>
-
-
-        <a href="/shipping-documentation/create">
-            <x-primary-button>
-                Crear una nueva orden
-            </x-primary-button>
-        </a>
     </div>
 
     <div class="mb-10">

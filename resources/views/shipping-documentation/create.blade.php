@@ -14,12 +14,6 @@
                             Consolidación de ordenes
                         </x-slot:title>
                     </x-view-title>
-
-                    <a href="{{ route('purchase-orders.create') }}">
-                        <x-primary-button>
-                            Nueva orden
-                        </x-primary-button>
-                    </a>
                 </div>
 
                 <div class="mb-10">

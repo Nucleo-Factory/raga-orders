@@ -28,9 +28,7 @@
         </div>
     </div>
 
-    <livewire:ui.counter-po />
-
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between hidden mb-6">
         <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
     </div>
 
@@ -41,12 +39,12 @@
                 <button @click="activeTab = 'tab1'"
                     :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
-                    Órdenes de compra
+                    Por Etapas
                 </button>
                 <button @click="activeTab = 'tab2'"
                     :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
-                    vista en tabla
+                    Reporte
                 </button>
             </div>
         </div>

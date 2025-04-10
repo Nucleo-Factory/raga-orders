@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipping_document_comments', function (Blueprint $table) {
-            $table->string('stage')->default('shipping_document')->after('comment');
+            $table->string('stage')->default('shipping_document')->after('comment')->nullable();
         });
     }
 
