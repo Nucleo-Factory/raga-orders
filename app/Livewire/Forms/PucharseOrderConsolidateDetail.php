@@ -37,6 +37,7 @@ class PucharseOrderConsolidateDetail extends Component {
     public $attachment;
     public $showUploadModal = false;
     public $currentStage = 'shipping_document';
+    public $selectedPoId;
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -506,6 +507,11 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->attachment = null;
     }
 
+    public function deleteOrder($id) {
+        $this->shippingDocument->purchaseOrders()->detach($id);
+        $this->loadRelatedPurchaseOrders();
+    }
+
     public function setComments()
     {
         $this->validate([
@@ -558,6 +564,10 @@ class PucharseOrderConsolidateDetail extends Component {
             ]);
             session()->flash('error', 'Error al agregar el comentario y archivo: ' . $e->getMessage());
         }
+    }
+
+    public function setSelectedPo($poId) {
+        $this->selectedPoId = $poId;
     }
 
     public function render() {

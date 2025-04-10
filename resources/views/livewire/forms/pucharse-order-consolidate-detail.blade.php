@@ -458,9 +458,24 @@
                                             {{ $order['status'] }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                        <a href="{{ route('purchase-orders.show', $order['id']) }}"
-                                            class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                                    <td class="flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                        <a href="{{ route('purchase-orders.detail', $order['id']) }}"
+                                            class="text-indigo-600 hover:text-indigo-900">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M1.61342 8.4761C1.52262 8.33234 1.47723 8.26046 1.45182 8.1496C1.43273 8.06632 1.43273 7.93498 1.45182 7.85171C1.47723 7.74084 1.52262 7.66896 1.61341 7.5252C2.36369 6.33721 4.59693 3.33398 8.00027 3.33398C11.4036 3.33398 13.6369 6.33721 14.3871 7.5252C14.4779 7.66896 14.5233 7.74084 14.5487 7.85171C14.5678 7.93498 14.5678 8.06632 14.5487 8.1496C14.5233 8.26046 14.4779 8.33234 14.3871 8.4761C13.6369 9.66409 11.4036 12.6673 8.00027 12.6673C4.59693 12.6673 2.36369 9.66409 1.61342 8.4761Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M8.00027 10.0007C9.10484 10.0007 10.0003 9.10522 10.0003 8.00065C10.0003 6.89608 9.10484 6.00065 8.00027 6.00065C6.8957 6.00065 6.00027 6.89608 6.00027 8.00065C6.00027 9.10522 6.8957 10.0007 8.00027 10.0007Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </a>
+
+                                        <button
+                                            wire:click="setSelectedPo({{ $order['id'] }})"
+                                            x-on:click="$dispatch('open-modal', 'modal-delete-order')"
+                                            class="text-red-600 hover:text-red-900"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -896,6 +911,31 @@
                 class="w-full"
             >
                 Guardar
+            </x-primary-button>
+        </div>
+    </x-modal>
+
+    <x-modal name="modal-delete-order" maxWidth="md">
+        <h3 class="mb-2 mb-6 text-lg font-bold text-center text-[#FF3459]">
+            Eliminar orden de compra
+        </h3>
+
+        <div class="flex justify-center mb-6">
+            <svg width="104" height="104" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M51.9998 34.667V52.0003M51.9998 69.3337H52.0432M95.3332 52.0003C95.3332 75.9327 75.9322 95.3337 51.9998 95.3337C28.0675 95.3337 8.6665 75.9327 8.6665 52.0003C8.6665 28.068 28.0675 8.66699 51.9998 8.66699C75.9322 8.66699 95.3332 28.068 95.3332 52.0003Z" stroke="#FF3459" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <div class="flex gap-[1.875rem]">
+            <x-secondary-button
+                x-on:click="$dispatch('close-modal', 'modal-delete-order')"
+                class="w-full"
+            >
+                Cancelar
+            </x-secondary-button>
+
+            <x-primary-button x-on:click="$dispatch('close-modal', 'modal-delete-order')" wire:click="deleteOrder({{ $selectedPoId }})" class="w-full !bg-[#FF3459] !border-[#FF3459]" >
+                Eliminar
             </x-primary-button>
         </div>
     </x-modal>
