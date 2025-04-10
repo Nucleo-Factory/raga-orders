@@ -7,7 +7,6 @@
             'requester_id' => 'Usuario',
             'operation_type' => 'Operación',
             'status' => 'Estado',
-            'actions' => 'Acciones',
         ];
 
         $statusClasses = [
@@ -79,19 +78,6 @@
                                 <span class="{{ $statusClasses[$request->status] }}">
                                     {{ $statusLabels[$request->status] }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                @if($actions && $request->status === 'pending')
-                                    <div class="flex space-x-2">
-                                        <button wire:click="approve('{{ $request->id }}')" class="text-green-600 hover:text-green-900">
-                                            Aprobar
-                                        </button>
-                                        <button wire:click="reject('{{ $request->id }}')" class="text-red-600 hover:text-red-900">
-                                            Rechazar
-                                        </button>
-                                    </div>
-                                @else
-                                @endif
                             </td>
                         </tr>
                     @empty

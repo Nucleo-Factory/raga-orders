@@ -43,7 +43,7 @@
 
         <!-- Document History View -->
         <div x-show="activeTab === 'document_history'" class="mt-4">
-            <livewire:tables.requests-table :actions="false" />
+            <livewire:tables.request-approved />
         </div>
     </div>
 
