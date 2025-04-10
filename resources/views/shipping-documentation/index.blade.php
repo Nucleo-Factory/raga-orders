@@ -21,23 +21,19 @@
 
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'table' }" class="mb-6">
-        <div class="border-b border-gray-200">
-            <nav class="flex -mb-px space-x-8" aria-label="Tabs">
-                <button
-                    @click="activeTab = 'table'"
-                    :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'table', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'table' }"
-                    class="px-1 py-4 text-sm font-medium border-b-2 whitespace-nowrap"
-                >
+        <div class="flex items-center justify-between gap-6 mb-3 text-lg font-bold">
+            <div class="flex items-center gap-6">
+                <button @click="activeTab = 'table'"
+                    :class="activeTab === 'table' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                    class="border-b-2 py-[0.625rem]">
                     Vista Kanban
                 </button>
-                <button
-                    @click="activeTab = 'kanban'"
-                    :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'kanban', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'kanban' }"
-                    class="px-1 py-4 text-sm font-medium border-b-2 whitespace-nowrap"
-                >
+                <button @click="activeTab = 'kanban'"
+                    :class="activeTab === 'kanban' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
+                    class="border-b-2 py-[0.625rem]">
                     Vista de Tabla
                 </button>
-            </nav>
+            </div>
         </div>
 
         <!-- Table View -->
