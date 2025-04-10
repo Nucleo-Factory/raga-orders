@@ -148,7 +148,7 @@
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('products.index') }}"
                                 :active="request()->routeIs('products.index')">
-                                Adquisicion de materia prima
+                                Productos
                             </x-sidebar-dropdown-item>
                         </li>
 

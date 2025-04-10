@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\Product;
 use Livewire\Component;
 use Carbon\Carbon;
+use App\Models\Vendor;
 
 class CreateProducts extends Component {
     // Product fields
@@ -18,8 +19,9 @@ class CreateProducts extends Component {
     public $vendor_code;
     public $title;
     public $subtitle;
-
+    public $vendors = [];
     public $product;
+    public $vendor_id;
 
     // Arrays for select options
     public $qtyUnitOptions = ["kg" => "Kilogramos", "pcs" => "Piezas", "lt" => "Litros", "m" => "Metros"];
@@ -27,6 +29,11 @@ class CreateProducts extends Component {
 
     public function mount($product = null)
     {
+        $vendors = Vendor::all();
+        $this->vendors = $vendors->mapWithKeys(function ($vendor) {
+            return [$vendor->id => $vendor->name];
+        });
+
         if ($product) {
             $this->product = $product;
             $this->material_id = $product->material_id;
@@ -53,8 +60,6 @@ class CreateProducts extends Component {
             'supplying_plant' => 'nullable|string|max:100',
             'unit_of_measure' => 'nullable|string|max:100',
             'plant' => 'nullable|string|max:100',
-            'vendor_name' => 'nullable|string|max:100',
-            'vendor_code' => 'nullable|string|max:100',
         ]);
 
         // Create product
@@ -64,8 +69,7 @@ class CreateProducts extends Component {
             'supplying_plant' => $this->supplying_plant,
             'unit_of_measure' => $this->unit_of_measure,
             'plant' => $this->plant,
-            'vendor_name' => $this->vendor_name,
-            'vendor_code' => $this->vendor_code,
+            'vendor_id' => $this->vendor_id,
         ]);
 
         // Reset form

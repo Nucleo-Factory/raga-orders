@@ -2,11 +2,11 @@
     <div class="flex items-center justify-between">
         <x-view-title>
             <x-slot:title>
-                Adquisición de materia
+                Productos
             </x-slot:title>
 
             <x-slot:content>
-                Cree y monitoree las ordenes de adquisición de materia prima
+                Cree y monitoree los productos
             </x-slot:content>
         </x-view-title>
 

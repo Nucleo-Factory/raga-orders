@@ -70,20 +70,7 @@
                     <x-slot:input name="plant" placeholder="Ingrese planta" wire:model="plant">
                     </x-slot:input>
                 </x-form-input>
-                <x-form-input>
-                    <x-slot:label>
-                        Vendor Name
-                    </x-slot:label>
-                    <x-slot:input name="vendor_name" placeholder="Ingrese nombre del proveedor" wire:model="vendor_name">
-                    </x-slot:input>
-                </x-form-input>
-                <x-form-input>
-                    <x-slot:label>
-                        Vendor Code
-                    </x-slot:label>
-                    <x-slot:input name="vendor_code" placeholder="Ingrese código del proveedor" wire:model="vendor_code">
-                    </x-slot:input>
-                </x-form-input>
+                <x-form-select label="Vendor" name="vendor_name" :options="$vendors" wire:model="vendor_name" />
             </div>
         </div>
 
