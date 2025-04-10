@@ -89,7 +89,7 @@ class ShippingDocument extends Model implements HasMedia
      */
     public function comments()
     {
-        return $this->hasMany(ShippingDocumentComment::class);
+        return $this->hasMany(Comment::class, 'shipping_document_id');
     }
 
     /**

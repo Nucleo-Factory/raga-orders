@@ -8,6 +8,7 @@ use App\Services\TrackingService;
 use Illuminate\Support\Facades\Log;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class PucharseOrderConsolidateDetail extends Component {
     use WithFileUploads;
@@ -32,6 +33,10 @@ class PucharseOrderConsolidateDetail extends Component {
     public $isEditing = false;
     public $searchPO = '';
     public $searchResults = [];
+    public $comment = '';
+    public $attachment;
+    public $showUploadModal = false;
+    public $currentStage = 'shipping_document';
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -162,22 +167,31 @@ class PucharseOrderConsolidateDetail extends Component {
             return;
         }
 
-        Log::info('Loading comments for document:', [
-            'shipping_document_id' => $this->shippingDocument->id
-        ]);
-
-        // Load comments from the shipping_document_comments table
         $this->comments = $this->shippingDocument->comments()
-            ->with('user')
-            ->orderBy('created_at', 'desc')
+            ->with(['user', 'attachments'])
+            ->orderBy($this->commentSortField, $this->commentSortDirection)
             ->get()
             ->map(function($comment) {
+                $attachments = $comment->attachments->map(function($attachment) {
+                    return [
+                        'id' => $attachment->id,
+                        'filename' => $attachment->file_name,
+                        'file_type' => strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)),
+                        'file_size' => $this->formatFileSize($attachment->size),
+                        'url' => $attachment->getUrl()
+                    ];
+                })->toArray();
+
                 return [
                     'id' => $comment->id,
-                    'user_name' => $comment->user->name ?? 'Usuario', // Formato esperado por la tabla
-                    'content' => $comment->comment ?? $comment->content ?? '', // Contenido del comentario
+                    'user_name' => $comment->user->name ?? 'Usuario',
+                    'user_role' => $comment->user->role->name ?? 'N/A',
+                    'comment' => $comment->comment ?? '',
                     'created_at' => $comment->created_at,
-                    'type' => 'comment' // Necesario para identificar el tipo en la tabla
+                    'stage' => $comment->stage ?? 'shipping_document',
+                    'status' => $comment->status ?? 'Pendiente',
+                    'attachments' => $attachments,
+                    'type' => 'comment'
                 ];
             })
             ->toArray();
@@ -482,6 +496,67 @@ class PucharseOrderConsolidateDetail extends Component {
             session()->flash('message', 'Orden de compra agregada exitosamente');
         } catch (\Exception $e) {
             session()->flash('error', 'Error al agregar la orden de compra');
+        }
+    }
+
+    public function openUploadModal()
+    {
+        $this->showUploadModal = true;
+        $this->comment = '';
+        $this->attachment = null;
+    }
+
+    public function setComments()
+    {
+        $this->validate([
+            'comment' => 'required|string|min:3',
+            'attachment' => 'nullable|file|max:5120', // 5MB max
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Crear el comentario
+            $comment = $this->shippingDocument->comments()->create([
+                'comment' => $this->comment,
+                'user_id' => auth()->id(),
+                'stage' => $this->currentStage,
+                'shipping_document_id' => $this->shippingDocument->id
+            ]);
+
+            // Si hay un archivo adjunto, procesarlo
+            if ($this->attachment) {
+                $media = $comment->addMedia($this->attachment->getRealPath())
+                    ->preservingOriginal()
+                    ->usingFileName($this->attachment->getClientOriginalName()) // Mantener el nombre original
+                    ->withCustomProperties([
+                        'uploaded_by' => auth()->id(),
+                        'stage' => $this->currentStage,
+                        'comment_id' => $comment->id
+                    ])
+                    ->toMediaCollection('comment_attachments');
+            }
+
+            DB::commit();
+
+            // Limpiar el formulario
+            $this->comment = '';
+            $this->attachment = null;
+            $this->showUploadModal = false;
+
+            // Recargar comentarios
+            $this->loadComments();
+
+            session()->flash('message', 'Comentario y archivo agregados exitosamente');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error adding comment and file: ' . $e->getMessage(), [
+                'exception' => $e,
+                'shipping_document_id' => $this->shippingDocument->id,
+                'user_id' => auth()->id(),
+                'stage' => $this->currentStage
+            ]);
+            session()->flash('error', 'Error al agregar el comentario y archivo: ' . $e->getMessage());
         }
     }
 
