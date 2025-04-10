@@ -492,7 +492,6 @@ class CreatePucharseOrder extends Component
         // Validación básica
         $this->validate([
             'order_number' => 'required',
-            'order_date' => 'required|date',
         ]);
 
         \Log::info('Preparando datos para guardar');
@@ -616,8 +615,8 @@ class CreatePucharseOrder extends Component
             // Guardar los productos asociados a la orden
             foreach ($this->orderProducts as $product) {
                 $purchaseOrder->products()->attach($product['id'], [
-                    'quantity' => $product['quantity'],
-                    'unit_price' => $product['price_per_unit']
+                    'quantity' => $product['quantity'] ?? 0,
+                    'unit_price' => $product['price_per_unit'] ?? 0
                 ]);
             }
 
