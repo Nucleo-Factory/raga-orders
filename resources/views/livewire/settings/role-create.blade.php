@@ -53,6 +53,28 @@
     </form>
 </div>
 
+<x-modal-success name="modal-role-created">
+    <x-slot:title>
+        @if ($id)
+            Rol fue editado correctamente
+        @else
+            Rol creado correctamente
+        @endif
+    </x-slot:title>
+
+    <x-slot:description>
+        @if ($id)
+            El rol ha sido editado correctamente con el nombre: {{ $name }}
+        @else
+            El rol ha sido creado correctamente con el nombre: {{ $name }}
+        @endif
+    </x-slot:description>
+
+    <x-primary-button wire:click="closeModal" class="w-full">
+        Cerrar
+    </x-primary-button>
+</x-modal-success>
+
 <style>
 .toggle-button {
     display: inline-block;

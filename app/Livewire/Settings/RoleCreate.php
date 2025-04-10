@@ -11,9 +11,12 @@ class RoleCreate extends Component
     public $name;
     public $selectedPermissions = [];
     public $permissions = [];
+    public $id;
 
-    public function mount()
+    public function mount($id = null)
     {
+        $this->id = $id;
+
         // Inicializamos los permisos basados en tu plantilla
         $this->permissions = [
             'read' => 'Permiso de lectura',
@@ -51,7 +54,7 @@ class RoleCreate extends Component
         }
 
         $this->reset(['name', 'selectedPermissions']);
-        session()->flash('message', 'Rol creado exitosamente.');
+        $this->dispatch('open-modal', 'modal-role-created');
     }
 
     public function togglePermission($permission)
@@ -61,6 +64,11 @@ class RoleCreate extends Component
         } else {
             $this->selectedPermissions[$permission] = !$this->selectedPermissions[$permission];
         }
+    }
+
+    public function closeModal()
+    {
+        $this->dispatch('close-modal', 'modal-role-created');
     }
 
     public function render()
