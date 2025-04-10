@@ -35,7 +35,7 @@
 
         <button
             class="sidebar-toggler-btn absolute -right-[calc(28px/2)] flex h-7 w-7 items-center justify-center rounded-full bg-[#190FDB]"
-            onclick="handleSidebarToggle()">
+            onclick="toggleSidebarSimple()">
             <svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none">
                 <path d="M7 1L1 7L7 13" stroke="#F7F7F7" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" />

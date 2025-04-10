@@ -428,3 +428,99 @@ document.addEventListener('turbo:load', function() {
         window.collapseSidebar();
     }
 });
+
+// Agregar al inicio del archivo, después de las importaciones
+window.toggleSidebarSimple = function() {
+    const sidebarEl = document.querySelector(".main-sidebar");
+    const togglerBtn = document.querySelector(".sidebar-toggler-btn");
+    const sidebarLinkAll = document.querySelectorAll(".sidebar-link");
+    const sidebarLinkTextAll = document.querySelectorAll(".link-text");
+    const logoutBtnText = document.querySelector(".logout-btn");
+    const profileContainer = document.querySelector(".profile-container");
+    const profileName = document.querySelector(".profile-name");
+    const sidebarDropdowns = document.querySelectorAll('.sidebar-dropdown');
+    const sidebarDropdownTextContainers = document.querySelectorAll(".sidebar-dropdown-text-container");
+    const sidebarDropdownTexts = document.querySelectorAll(".sidebar-dropdown-text");
+    const sidebarDropdownArrowIcons = document.querySelectorAll('.sidebar-dropdown .icon');
+    const sidebarDropdownItemsText = document.querySelectorAll('.dropdown-item-text');
+
+    // Obtener el estado actual del sidebar
+    const isExpanded = sidebarEl.classList.contains("sidebar-expanded");
+
+    if (isExpanded) {
+        // Colapsar
+        sidebarEl.classList.remove("sidebar-expanded");
+        togglerBtn.style.transform = "rotate(180deg)";
+
+        sidebarLinkAll.forEach(link => link.style.gap = "0");
+        sidebarLinkTextAll.forEach(text => {
+            text.style.width = "0";
+            text.style.opacity = "0";
+        });
+
+        if (logoutBtnText) logoutBtnText.style.gap = "0";
+        if (profileContainer) profileContainer.style.gap = "0";
+        if (profileName) {
+            profileName.style.width = "0";
+            profileName.style.opacity = "0";
+        }
+
+        sidebarDropdowns.forEach(dropdown => dropdown.style.gap = "0");
+        sidebarDropdownTextContainers.forEach(container => container.style.gap = "0");
+        sidebarDropdownTexts.forEach(text => {
+            text.style.width = "0";
+            text.style.opacity = "0";
+        });
+        sidebarDropdownArrowIcons.forEach(icon => {
+            icon.style.width = "0";
+            icon.style.opacity = "0";
+        });
+        sidebarDropdownItemsText.forEach(text => {
+            text.style.width = "0";
+            text.style.opacity = "0";
+        });
+    } else {
+        // Expandir
+        sidebarEl.classList.add("sidebar-expanded");
+        togglerBtn.style.transform = "rotate(0deg)";
+
+        sidebarLinkAll.forEach(link => link.style.gap = "0.75rem");
+        sidebarLinkTextAll.forEach(text => {
+            text.style.width = text.scrollWidth + "px";
+            text.style.opacity = "1";
+        });
+
+        if (logoutBtnText) logoutBtnText.style.gap = "0.625rem";
+        if (profileContainer) profileContainer.style.gap = "0.625rem";
+        if (profileName) {
+            profileName.style.width = profileName.scrollWidth + "px";
+            profileName.style.opacity = "1";
+        }
+
+        sidebarDropdowns.forEach(dropdown => dropdown.style.gap = "0.75rem");
+        sidebarDropdownTextContainers.forEach(container => container.style.gap = "0.625rem");
+        sidebarDropdownTexts.forEach(text => {
+            text.style.width = text.scrollWidth + "px";
+            text.style.opacity = "1";
+        });
+        sidebarDropdownArrowIcons.forEach(icon => {
+            icon.style.width = icon.scrollWidth + "px";
+            icon.style.opacity = "1";
+        });
+        sidebarDropdownItemsText.forEach(text => {
+            text.style.width = text.scrollWidth + "px";
+            text.style.opacity = "1";
+        });
+    }
+
+    // Guardar el estado en localStorage
+    localStorage.setItem('sidebarExpanded', !isExpanded);
+};
+
+// Aplicar el estado guardado al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const savedState = localStorage.getItem('sidebarExpanded');
+    if (savedState === 'true') {
+        toggleSidebarSimple();
+    }
+});
