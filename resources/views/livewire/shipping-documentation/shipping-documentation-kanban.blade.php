@@ -254,7 +254,6 @@
         <div class="flex gap-[1.875rem]">
             <x-secondary-button
                 x-on:click="$dispatch('close-modal', 'modal-document-move')"
-                wire:click="cancelMove"
                 class="w-full">
                 Cancelar
             </x-secondary-button>
