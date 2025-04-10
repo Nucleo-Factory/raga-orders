@@ -40,6 +40,13 @@ class KanbanBoard extends Component {
     public $comment = '';
     public $attachment = null;
 
+    // Agregar los listeners para los eventos
+    protected $listeners = [
+        'refreshKanban' => 'loadData',
+        'purchaseOrderStatusUpdated' => '$refresh',
+        'notificationsUpdated' => '$refresh'
+    ];
+
     public function mount($boardId = null) {
         // Determinar el tipo de tablero según la ruta actual
         $currentRoute = Route::currentRouteName();
@@ -176,10 +183,33 @@ class KanbanBoard extends Component {
         \Log::info("Moving task $taskId to status $newStatus");
 
         try {
+            // Obtener el estado anterior
+            $task = PurchaseOrder::findOrFail($taskId);
+            $oldStatus = $task->kanban_status_id;
+
+            // Obtener nombres de columnas para el mensaje
+            $oldColumnName = KanbanStatus::find($oldStatus)->name ?? 'desconocido';
+            $newColumnName = KanbanStatus::find($newStatus)->name ?? 'desconocido';
+
             // Actualizar directamente en la base de datos
             DB::table('purchase_orders')
                 ->where('id', $taskId)
                 ->update(['kanban_status_id' => $newStatus]);
+
+            // Crear notificación para todos los usuarios
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyAll(
+                'task_moved',
+                'Tarea Movida',
+                "La orden de compra {$task->order_number} fue movida de '{$oldColumnName}' a '{$newColumnName}' por " . auth()->user()->name,
+                [
+                    'task_id' => $task->id,
+                    'po_number' => $task->order_number,
+                    'old_status' => $oldColumnName,
+                    'new_status' => $newColumnName,
+                    'moved_by' => auth()->user()->name
+                ]
+            );
 
             // Log para depuración
             \Log::info("Task moved successfully");
@@ -195,6 +225,7 @@ class KanbanBoard extends Component {
             // Forzar la actualización de la vista
             $this->dispatch('refreshKanban');
             $this->dispatch('purchaseOrderStatusUpdated');
+            $this->dispatch('notificationsUpdated');
         } catch (\Exception $e) {
             \Log::error("Error moving task: " . $e->getMessage());
         }

@@ -3,7 +3,10 @@
     $hubArray = $hubArray->pluck('name', 'id')->toArray();
 @endphp
 
-<div class="w-full mx-auto">
+<div class="w-full mx-auto"
+     x-data="{}"
+     x-on:refreshKanban.window="$wire.$refresh()"
+     x-on:purchaseOrderStatusUpdated.window="$wire.$refresh()">
     <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
         @if (!$board)
             <div class="p-6 bg-white rounded-lg shadow-md">

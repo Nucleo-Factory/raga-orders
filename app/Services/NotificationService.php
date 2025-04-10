@@ -3,45 +3,80 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\NotificationType;
-use Illuminate\Support\Facades\Notification;
+use App\Models\Notification;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
-    public function notify(string $type, $notifiable, array $data = [])
+    /**
+     * Crear una nueva notificación para un usuario
+     *
+     * @param User $user Usuario destinatario
+     * @param string $type Tipo de notificación
+     * @param string $title Título de la notificación
+     * @param string $message Mensaje de la notificación
+     * @param array $data Datos adicionales (opcional)
+     * @return Notification
+     */
+    public function createForUser(User $user, string $type, string $title, string $message, array $data = [])
     {
-        $notificationType = NotificationType::where('key', $type)->firstOrFail();
-
-        // Obtener preferencias del usuario
-        $preference = $notifiable->notificationPreferences()
-            ->where('notification_type_id', $notificationType->id)
-            ->first();
-
-        if (!$preference || !$preference->enabled) {
-            return;
-        }
-
-        // Determinar si enviar ahora o programar según la frecuencia
-        if ($preference->frequency === 'immediate') {
-            $this->sendNotification($notifiable, $type, $data);
-        } else {
-            $this->queueNotification($notifiable, $type, $data, $preference->frequency);
-        }
+        return Notification::create([
+            'type' => $type,
+            'user_id' => $user->id,
+            'title' => $title,
+            'message' => $message,
+            'data' => $data
+        ]);
     }
 
-    protected function sendNotification($notifiable, $type, $data)
+    /**
+     * Notificar a todos los usuarios
+     *
+     * @param string $type Tipo de notificación
+     * @param string $title Título de la notificación
+     * @param string $message Mensaje de la notificación
+     * @param array $data Datos adicionales (opcional)
+     * @return array Arreglo de notificaciones creadas
+     */
+    public function notifyAll(string $type, string $title, string $message, array $data = [])
     {
-        // Aquí implementarías la lógica para enviar la notificación
-        // según el tipo de notificación que se está enviando
-        Notification::send($notifiable, new \App\Notifications\GeneralNotification(
-            $type,
-            $data
-        ));
+        $users = User::all();
+        $notifications = [];
+
+        foreach ($users as $user) {
+            try {
+                $notifications[] = $this->createForUser($user, $type, $title, $message, $data);
+            } catch (\Exception $e) {
+                Log::error("Error creando notificación para el usuario {$user->id}: " . $e->getMessage());
+            }
+        }
+
+        return $notifications;
     }
 
-    protected function queueNotification($notifiable, $type, $data, $frequency)
+    /**
+     * Notificar a usuarios específicos
+     *
+     * @param array $userIds IDs de usuarios
+     * @param string $type Tipo de notificación
+     * @param string $title Título de la notificación
+     * @param string $message Mensaje de la notificación
+     * @param array $data Datos adicionales (opcional)
+     * @return array Arreglo de notificaciones creadas
+     */
+    public function notifyUsers(array $userIds, string $type, string $title, string $message, array $data = [])
     {
-        // Implementar lógica para cola de notificaciones programadas
-        // Esto podría usar un job para procesamiento posterior
+        $users = User::whereIn('id', $userIds)->get();
+        $notifications = [];
+
+        foreach ($users as $user) {
+            try {
+                $notifications[] = $this->createForUser($user, $type, $title, $message, $data);
+            } catch (\Exception $e) {
+                Log::error("Error creando notificación para el usuario {$user->id}: " . $e->getMessage());
+            }
+        }
+
+        return $notifications;
     }
 }
