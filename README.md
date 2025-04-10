@@ -262,3 +262,33 @@ Si las notificaciones no se están enviando, verifica:
 
 
 
+### Enviar notificaciones
+
+```php
+// Ejemplo 1: Notificar a todos los usuarios
+app(\App\Services\NotificationService::class)->notifyAll(
+    'new_comment',
+    'Nuevo comentario',
+    "El usuario {$user->name} ha comentado en la orden {$order->number}",
+    ['order_id' => $order->id, 'comment_id' => $comment->id]
+);
+
+// Ejemplo 2: Notificar a usuarios específicos
+app(\App\Services\NotificationService::class)->notifyUsers(
+    [$manager->id, $supervisor->id],
+    'order_approved',
+    'Orden aprobada',
+    "La orden {$order->number} ha sido aprobada",
+    ['order_id' => $order->id]
+);
+
+// Ejemplo 3: Notificar a un solo usuario
+app(\App\Services\NotificationService::class)->createForUser(
+    $user,
+    'task_assigned',
+    'Tarea asignada',
+    "Se te ha asignado la tarea {$task->name}",
+    ['task_id' => $task->id]
+);
+```
+
