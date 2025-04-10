@@ -190,8 +190,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/active-sessions', ActiveSessions::class)
         ->name('settings.active-sessions');
 
-    Route::get('settings/profile', Profile::class)
-        ->name('settings.profile');
+    Route::get('settings/profile', function() {
+        return view('profile.index');
+    })->name('settings.profile');
 
     Route::get('settings/sessions', Sessions::class)
         ->name('settings.sessions');

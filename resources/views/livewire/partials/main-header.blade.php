@@ -47,7 +47,7 @@
                     </button>
                 </x-slot>
                 <x-slot name="content">
-                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                    <x-responsive-nav-link href="{{ route('settings.profile') }}" wire:navigate>
                         {{ __('Perfil') }}
                     </x-responsive-nav-link>
 
@@ -115,7 +115,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                <x-responsive-nav-link href="/settings/profile" wire:navigate>
                     {{ __('Perfil') }}
                 </x-responsive-nav-link>
 

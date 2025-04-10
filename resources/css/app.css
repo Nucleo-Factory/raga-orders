@@ -284,3 +284,67 @@ th {
     width: 320px !important;
 }
 
+/* Sidebar styles - Simple and clean approach */
+.main-sidebar {
+    width: 93px;
+    transition: width 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded {
+    width: 270px;
+}
+
+/* Elementos de texto que se ocultan/muestran */
+.main-sidebar .link-text,
+.main-sidebar .profile-name,
+.main-sidebar .sidebar-dropdown-text,
+.main-sidebar .sidebar-dropdown .icon,
+.main-sidebar .dropdown-item-text {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+/* Cuando el sidebar está expandido */
+.main-sidebar.sidebar-expanded .link-text,
+.main-sidebar.sidebar-expanded .profile-name,
+.main-sidebar.sidebar-expanded .sidebar-dropdown-text,
+.main-sidebar.sidebar-expanded .sidebar-dropdown .icon,
+.main-sidebar.sidebar-expanded .dropdown-item-text {
+    width: auto;
+    opacity: 1;
+}
+
+/* Espaciado de elementos */
+.main-sidebar .sidebar-link,
+.main-sidebar .logout-btn,
+.main-sidebar .profile-container,
+.main-sidebar .sidebar-dropdown,
+.main-sidebar .sidebar-dropdown-text-container {
+    gap: 0;
+    transition: gap 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded .sidebar-link,
+.main-sidebar.sidebar-expanded .sidebar-dropdown {
+    gap: 0.75rem;
+}
+
+.main-sidebar.sidebar-expanded .logout-btn,
+.main-sidebar.sidebar-expanded .profile-container,
+.main-sidebar.sidebar-expanded .sidebar-dropdown-text-container {
+    gap: 0.625rem;
+}
+
+/* Rotación del botón toggler */
+.sidebar-toggler-btn {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded .sidebar-toggler-btn {
+    transform: rotate(0deg);
+}
+
