@@ -37,7 +37,8 @@ class ShippingDocumentationKanban extends Component
     public $release_date;
     public $instruction_date;
     public $comentario_documento;
-    public $file = null;
+    public $attachment = null;
+    public $originalColumnId;
 
 
     public function mount($boardId = null)
@@ -304,13 +305,21 @@ class ShippingDocumentationKanban extends Component
 
     public function setCurrentDocument($documentId, $newColumnId)
     {
+        \Log::info("setCurrentDocument called", [
+            'documentId' => $documentId,
+            'newColumnId' => $newColumnId
+        ]);
+
         $this->currentDocumentId = $documentId;
         $this->newColumnId = $newColumnId;
+        $this->originalColumnId = null;
 
         // Find the current document from the loaded documents
         foreach ($this->documents as $document) {
             if ($document['id'] == $documentId) {
                 $this->currentDocument = $document;
+                $this->originalColumnId = $document['kanban_status_id'];
+                \Log::info("Document found", ['document' => $this->currentDocument]);
                 break;
             }
         }
@@ -383,10 +392,10 @@ class ShippingDocumentationKanban extends Component
             $shippingDoc->save();
 
             // Process file upload if a file exists
-            if ($this->file) {
+            if ($this->attachment) {
                 // Add file to media library
-                $media = $shippingDoc->addMedia($this->file->getRealPath())
-                    ->usingName($this->file->getClientOriginalName())
+                $media = $shippingDoc->addMedia($this->attachment->getRealPath())
+                    ->usingName($this->attachment->getClientOriginalName())
                     ->withCustomProperties([
                         'stage' => 'attachment',
                         'comment' => $this->comment ?? null,
@@ -397,7 +406,7 @@ class ShippingDocumentationKanban extends Component
                 \Log::info("File uploaded with ID: " . $media->id);
 
                 // Reset the file upload field
-                $this->file = null;
+                $this->attachment = null;
             }
 
         } catch (\Exception $e) {
@@ -435,131 +444,109 @@ class ShippingDocumentationKanban extends Component
     // First, add a method that handles everything in one go
     public function saveAndMoveDocument()
     {
-        \Log::info("saveAndMoveDocument: Starting with documentId={$this->currentDocumentId}, newColumnId={$this->newColumnId}");
-
         try {
-            // Extract the document ID from the document ID string
+            DB::beginTransaction();
+
             $shippingDocId = str_replace('DOC-', '', $this->currentDocumentId);
+            $shippingDoc = ShippingDocument::findOrFail($shippingDocId);
 
-            // Find the shipping document
-            $shippingDoc = ShippingDocument::find($shippingDocId);
+            // 1. Obtener el nombre de la columna actual
+            $kanbanStatus = KanbanStatus::findOrFail($this->newColumnId);
+            $statusName = strtolower($kanbanStatus->name);
+            $newStatus = $this->mapKanbanStatusToDocumentStatus($statusName);
 
-            if (!$shippingDoc) {
-                \Log::error("Shipping document not found: $shippingDocId");
-                return;
-            }
-
-            // Validar el tracking cuando estamos moviendo a la columna 2 y hay datos ingresados
-            if ($this->newColumnId == $this->columns[1]['id'] &&
-                (!empty($this->tracking_id) || !empty($this->booking_code) || !empty($this->container_number) || !empty($this->mbl_number))) {
-
-                $trackingValid = $this->validateTracking();
-
-                \Log::info("Tracking validation result: " . ($trackingValid ? 'success' : 'failed'));
-
-                if($trackingValid) {
-                    $shippingDoc->tracking_id = $this->tracking_id;
-                    $shippingDoc->booking_code = $this->booking_code;
-                    $shippingDoc->container_number = $this->container_number;
-                    $shippingDoc->mbl_number = $this->mbl_number;
-                    $shippingDoc->hbl_number = $this->hbl_number;
-                    $shippingDoc->save();
-                }
-
-                if (!$trackingValid) {
-                    \Log::error("Tracking validation failed: ID not found in tracking systems");
-                    return;
-                }
-            }
-
-            if(!empty($this->instruction_date)) {
-                $shippingDoc->instruction_date = $this->instruction_date;
-                $shippingDoc->save();
-            }
-
-            // 1. Save comment if exists
-            if (!empty($this->comment)) {
-                // Usar el modelo ShippingDocumentComment
-                $commentModel = new ShippingDocumentComment();
-                $commentModel->shipping_document_id = $shippingDocId;
-                $commentModel->user_id = auth()->id();
-                $commentModel->comment = $this->comment;
-                $commentModel->save();
-
-                \Log::info("Comment saved with ID: " . $commentModel->id);
-
-                // También podemos actualizar el campo notes del documento si existe
-                if (Schema::hasColumn('shipping_documents', 'notes')) {
-                    $oldNotes = $shippingDoc->notes ?? '';
-                    $shippingDoc->notes = ($oldNotes ? $oldNotes . "\n" : '') . $this->comment;
-                    \Log::info("Comment also added to shipping document notes field");
-                }
-            }
-
-            // 2. Update document fields
+            // Actualizar el documento
+            $shippingDoc->status = $newStatus;
+            $shippingDoc->notes = $this->updateKanbanNotes($shippingDoc->notes, $this->newColumnId);
             $this->updateDocumentFields($shippingDoc);
+            $shippingDoc->save();
 
-            // 3. Process file upload if a file exists
-            if ($this->file) {
-                // Add file to media library
-                $media = $shippingDoc->addMedia($this->file->getRealPath())
-                    ->usingName($this->file->getClientOriginalName())
-                    ->withCustomProperties([
-                        'stage' => 'attachment',
-                        'comment' => $this->comment ?? null,
-                        'uploaded_by' => auth()->id() ?: 'system'
-                    ])
-                    ->toMediaCollection('shipping_documents');
+            // 2. Crear comentario si existe
+            if (!empty($this->comment)) {
+                // Crear el comentario
+                $comment = $shippingDoc->comments()->create([
+                    'comment' => $this->comment,
+                    'user_id' => auth()->id(),
+                    'stage' => $kanbanStatus->name,
+                    'shipping_document_id' => $shippingDocId
+                ]);
 
-                \Log::info("File uploaded with ID: " . $media->id);
+                // Si hay archivo adjunto, procesarlo
+                if ($this->attachment) {
+                    $media = $comment->addMedia($this->attachment->getRealPath())
+                        ->preservingOriginal()
+                        ->usingFileName($this->attachment->getClientOriginalName())
+                        ->withCustomProperties([
+                            'uploaded_by' => auth()->id(),
+                            'stage' => $kanbanStatus->name,
+                            'comment_id' => $comment->id
+                        ])
+                        ->toMediaCollection('comment_attachments');
+                }
             }
 
-            // 4. Move document to new column (this includes saving the document)
-            $this->moveDocument($this->currentDocumentId, $this->newColumnId);
+            DB::commit();
+
+            // 3. Recargar datos y actualizar UI
+            $this->loadData();
+
+            // 4. Notificar éxito
+            $this->dispatch('document-moved-successfully');
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Documento actualizado exitosamente'
+            ]);
+
+            // 5. Limpiar el formulario y cerrar modal
+            $this->resetFormFields();
+            $this->dispatch('close-modal', 'modal-document-move');
 
         } catch (\Exception $e) {
-            \Log::error("Error in saveAndMoveDocument: " . $e->getMessage());
-            $this->dispatchBrowserEvent('notify', [
-                'type' => 'error',
+            DB::rollBack();
+            \Log::error("Error in saveAndMoveDocument: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $this->dispatch('error', [
                 'message' => 'Error al actualizar el documento: ' . $e->getMessage()
             ]);
         }
-
-        // Reset all form fields
-        $this->resetFormFields();
     }
 
-    /**
-     * Valida que el tracking_id, booking_code o container_number sea válido en la API de Porth
-     * @return bool
-     */
-    private function validateTracking()
+    private function updateKanbanNotes($currentNotes, $newStatusId)
     {
-        try {
-            // Determinar qué ID vamos a validar, en orden de prioridad
-            $trackingToValidate = $this->tracking_id ?: ($this->booking_code ?: $this->container_number);
+        $kanbanInfo = "KANBAN_STATUS_ID:" . $newStatusId;
+        $currentNotes = $currentNotes ?? '';
 
-            if (empty($trackingToValidate)) {
-                return true; // Si no hay nada que validar, consideramos que es válido
-            }
-
-            // Usar el servicio de tracking para validar
-            $trackingService = new TrackingService();
-
-            // Primero intentamos con Porth porque es para shipping documents
-            $porthResult = $trackingService->getPorthTracking($trackingToValidate);
-
-            if ($porthResult) {
-                \Log::info("Tracking validation successful with Porth API");
-                return true;
-            }
-
-        } catch (\Exception $e) {
-            \Log::error("Error validating tracking:", [
-                'error' => $e->getMessage()
-            ]);
-            return false;
+        if (strpos($currentNotes, 'KANBAN_STATUS_ID:') !== false) {
+            return preg_replace('/KANBAN_STATUS_ID:\d+/', $kanbanInfo, $currentNotes);
         }
+
+        return $currentNotes ? ($currentNotes . "\n" . $kanbanInfo) : $kanbanInfo;
+    }
+
+    // Agregar este nuevo método helper
+    private function mapKanbanStatusToDocumentStatus($statusName)
+    {
+        if (str_contains($statusName, 'gestion documental')) {
+            return 'draft';
+        } elseif (str_contains($statusName, 'coordinación de salida') || str_contains($statusName, 'coordinacion de salida') || str_contains($statusName, 'zarpe')) {
+            return 'pending';
+        } elseif (str_contains($statusName, 'en tránsito') || str_contains($statusName, 'en transito') || str_contains($statusName, 'seguimiento')) {
+            return 'in_transit';
+        } elseif (str_contains($statusName, 'entrega') || str_contains($statusName, 'liberación') || str_contains($statusName, 'liberacion') || str_contains($statusName, 'facturación')) {
+            return 'delivered';
+        } elseif (str_contains($statusName, 'notificación de arribo') || str_contains($statusName, 'notificacion de arribo')) {
+            return 'approved';
+        } elseif (str_contains($statusName, 'digitaciones')) {
+            return 'approved';
+        } elseif (str_contains($statusName, 'transito interno destino')) {
+            return 'in_transit';
+        } elseif (str_contains($statusName, 'archivado')) {
+            return 'delivered';
+        }
+
+        return 'draft'; // estado por defecto
     }
 
     // Add this new method to reset all form fields
@@ -575,8 +562,7 @@ class ShippingDocumentationKanban extends Component
         $this->mbl_number = null;
         $this->release_date = null;
         $this->instruction_date = null;
-        $this->comentario_documento = null;
-        $this->file = null;
+        $this->attachment = null;
     }
 
     public function render()

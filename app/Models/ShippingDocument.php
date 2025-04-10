@@ -97,8 +97,8 @@ class ShippingDocument extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('shipping_documents')
-            ->useDisk('public');
+        $this->addMediaCollection('shipping_documents');
+        $this->addMediaCollection('comment_attachments');
     }
 
     /**

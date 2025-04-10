@@ -1,76 +1,104 @@
-<div class="w-full px-0 mx-0">
-    <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
-        @if(!$board)
-            <div class="p-6 bg-white rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
-                <p class="mt-2 text-gray-600">No se encontró ningún tablero Kanban para documentación de embarque. Contacta al administrador para crear uno.</p>
-            </div>
-        @else
-            @foreach($columns as $column)
-                <div class="flex-shrink-0 p-3 mx-2 rounded-lg kanban-column w-80">
-                    <h3 class="mb-4 border-b-2 border-[#2E2E2E] px-2 text-lg font-bold text-[#2E2E2E]">
-                        {{ $column['name'] }}
-                        <span class="ml-2 text-sm font-normal text-gray-600">
-                            ({{ count($documentsByColumn[$column['id']]) }})
-                        </span>
-                    </h3>
-
-                    <div
-                        id="column-{{ $column['id'] }}"
-                        data-column-id="{{ $column['id'] }}"
-                        class="space-y-3 min-h-40"
-                        x-data="{ isModalOpen: false }"
-                        x-init="
-                            new Sortable($el, {
-                                group: 'documents',
-                                animation: 150,
-                                ghostClass: 'bg-gray-100',
-                                chosenClass: 'bg-gray-200',
-                                dragClass: 'cursor-grabbing',
-                                forceFallback: true,
-                                fallbackClass: 'sortable-fallback',
-                                fallbackOnBody: true,
-                                onEnd: function(evt) {
-                                    if (isModalOpen) return;
-
-                                    const documentId = evt.item.getAttribute('data-document-id');
-                                    const newColumn = evt.to.getAttribute('data-column-id');
-
-                                    if (evt.from.getAttribute('data-column-id') !== newColumn) {
-                                        isModalOpen = true;
-                                        $wire.setCurrentDocument(documentId, newColumn)
-                                            .then(() => {
-                                                $dispatch('open-modal', 'modal-document-move');
-                                            });
-
-                                        setTimeout(() => {
-                                            isModalOpen = false;
-                                        }, 1000);
-                                    }
-                                }
-                            })
-                        "
-                    >
-                        @foreach($documentsByColumn[$column['id']] as $document)
-                            <div
-                                class="cursor-move document-card"
-                                data-document-id="{{ $document['id'] }}">
-                                <x-shipping-documentation-card
-                                    :documentId="$document['document_number']"
-                                    :trackingId="$document['document_id']"
-                                    :hubLocation="$document['hub_location']"
-                                    :creationDate="$document['creation_date']"
-                                    :estimatedDepartureDate="$document['estimated_departure_date']"
-                                    :estimatedArrivalDate="$document['estimated_arrival_date']"
-                                    :totalWeight="number_format($document['weight_kg'], 0) . ' kg'"
-                                    :poCount="$document['po_count']"
-                                />
-                            </div>
-                        @endforeach
-                    </div>
+<div>
+    <div class="w-full px-0 mx-0">
+        <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
+            @if(!$board)
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
+                    <p class="mt-2 text-gray-600">No se encontró ningún tablero Kanban para documentación de embarque. Contacta al administrador para crear uno.</p>
                 </div>
-            @endforeach
-        @endif
+            @else
+                @foreach($columns as $column)
+                    <div class="flex-shrink-0 p-3 mx-2 rounded-lg kanban-column w-80">
+                        <h3 class="mb-4 border-b-2 border-[#2E2E2E] px-2 text-lg font-bold text-[#2E2E2E]">
+                            {{ $column['name'] }}
+                            <span class="ml-2 text-sm font-normal text-gray-600">
+                                ({{ count($documentsByColumn[$column['id']]) }})
+                            </span>
+                        </h3>
+
+                        <div
+                            id="column-{{ $column['id'] }}"
+                            data-column-id="{{ $column['id'] }}"
+                            class="space-y-3 min-h-40"
+                            x-data="{
+                                isModalOpen: false,
+                                originalColumnId: null
+                            }"
+                            x-init="
+                                new Sortable($el, {
+                                    group: 'documents',
+                                    animation: 150,
+                                    ghostClass: 'bg-gray-100',
+                                    chosenClass: 'bg-gray-200',
+                                    dragClass: 'cursor-grabbing',
+                                    forceFallback: true,
+                                    fallbackClass: 'sortable-fallback',
+                                    fallbackOnBody: true,
+                                    onStart: function(evt) {
+                                        originalColumnId = evt.from.getAttribute('data-column-id');
+                                        console.log('Drag started from column:', originalColumnId);
+                                    },
+                                    onEnd: function(evt) {
+                                        const documentId = evt.item.getAttribute('data-document-id');
+                                        const newColumn = evt.to.getAttribute('data-column-id');
+
+                                        console.log('Drag ended:', {
+                                            documentId: documentId,
+                                            newColumn: newColumn,
+                                            originalColumn: originalColumnId
+                                        });
+
+                                        if (originalColumnId !== newColumn) {
+                                            $wire.setCurrentDocument(documentId, newColumn)
+                                                .then(() => {
+                                                    $dispatch('open-modal', 'modal-document-move');
+                                                });
+                                        }
+                                    }
+                                });
+
+                                // Event listeners
+                                window.addEventListener('document-moved-successfully', () => {
+                                    console.log('Document moved successfully');
+                                    $wire.loadData();
+                                });
+
+                                window.addEventListener('error', (e) => {
+                                    console.error('Error moving document:', e.detail);
+                                    // Revertir el movimiento
+                                    const cards = document.querySelectorAll('.document-card');
+                                    cards.forEach(card => {
+                                        if (card.getAttribute('data-document-id') === documentId) {
+                                            const originalColumn = document.querySelector(`#column-${originalColumnId}`);
+                                            if (originalColumn) {
+                                                originalColumn.appendChild(card);
+                                            }
+                                        }
+                                    });
+                                });
+                            "
+                        >
+                            @foreach($documentsByColumn[$column['id']] as $document)
+                                <div
+                                    class="cursor-move document-card"
+                                    data-document-id="{{ $document['id'] }}">
+                                    <x-shipping-documentation-card
+                                        :documentId="$document['document_number']"
+                                        :trackingId="$document['document_id']"
+                                        :hubLocation="$document['hub_location']"
+                                        :creationDate="$document['creation_date']"
+                                        :estimatedDepartureDate="$document['estimated_departure_date']"
+                                        :estimatedArrivalDate="$document['estimated_arrival_date']"
+                                        :totalWeight="number_format($document['weight_kg'], 0) . ' kg'"
+                                        :poCount="$document['po_count']"
+                                    />
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
     </div>
 
     <x-modal name="modal-document-move" maxWidth="lg">
@@ -182,58 +210,61 @@
             <x-form-textarea label="" name="comentario_documento" wireModel="comment" placeholder="Comentarios" />
         </div>
 
-
         <div class="mb-12 space-y-2">
-            <label class="ml-[1.125rem] text-sm font-medium text-[#565AFF]">
-                Adjuntar documentación (opcional)
-            </label>
+            <input
+                type="file"
+                wire:model.live="attachment"
+                class="hidden"
+                x-ref="fileInput"
+                id="file-upload-po"
+                x-bind:disabled="!$wire.comment || $wire.comment.trim() === ''"
+            >
+            <x-secondary-button
+                onclick="document.getElementById('file-upload-po').click()"
+                class="group flex w-full items-center justify-center gap-[0.625rem]"
+                x-bind:disabled="!$wire.comment || $wire.comment.trim() === ''"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
+                    fill="none">
+                    <path
+                        d="M19.1525 9.89897L10.1369 18.9146C8.08662 20.9648 4.7625 20.9648 2.71225 18.9146C0.661997 16.8643 0.661998 13.5402 2.71225 11.49L11.7279 2.47435C13.0947 1.10751 15.3108 1.10751 16.6776 2.47434C18.0444 3.84118 18.0444 6.05726 16.6776 7.42409L8.01555 16.0862C7.33213 16.7696 6.22409 16.7696 5.54068 16.0862C4.85726 15.4027 4.85726 14.2947 5.54068 13.6113L13.1421 6.00988"
+                        stroke="#565AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                </svg>
 
-            <div class="flex items-center justify-center w-full">
-                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <p class="mb-1 text-sm text-gray-500">
-                            <span class="font-semibold">Haz clic para subir</span> o arrastra y suelta
-                        </p>
-                        <p class="text-xs text-gray-500">XLS, XLSX, PDF (máx. 5MB)</p>
-                    </div>
-                    <input id="dropzone-file" wire:model="file" type="file" class="hidden" />
-                </label>
-            </div>
+                <span>Adjuntar documentación...</span>
+            </x-secondary-button>
 
-            @error('file')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
-
-            @if($file)
-                <div class="flex items-center justify-between p-2 mt-2 bg-gray-100 rounded-md">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <span class="text-sm text-gray-700 truncate">{{ $file->getClientOriginalName() }}</span>
-                    </div>
-                    <button type="button" wire:click="$set('file', null)" class="text-red-500 hover:text-red-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+            @if($attachment)
+                <div class="text-sm text-gray-600">
+                    Archivo seleccionado: {{ is_object($attachment) ? $attachment->getClientOriginalName() : $attachment['name'] ?? 'Archivo' }}
                 </div>
             @endif
+
+            <div class="flex flex-col text-sm text-[#A5A3A3]">
+                <span>Tipo de formato .xls .xlsx .pdf</span>
+                <span>Tamaño máximo 5MB</span>
+            </div>
+
+            @error('attachment')
+                <span class="text-sm text-red-600">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="flex gap-[1.875rem]">
-            <x-secondary-button x-on:click="$dispatch('close-modal', 'modal-document-move')" class="w-full">
+            <x-secondary-button
+                x-on:click="$dispatch('close-modal', 'modal-document-move')"
+                wire:click="cancelMove"
+                class="w-full">
                 Cancelar
             </x-secondary-button>
 
             <x-primary-button
                 wire:click="saveAndMoveDocument"
-                x-on:click="$dispatch('close-modal', 'modal-document-move')"
+                wire:loading.attr="disabled"
                 class="w-full">
-                Continuar
+                <span wire:loading.remove>Continuar</span>
+                <span wire:loading>Guardando...</span>
             </x-primary-button>
         </div>
     </x-modal>
