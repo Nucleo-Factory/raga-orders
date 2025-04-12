@@ -150,7 +150,7 @@ class Notifications extends Component
                 }
             }
 
-            session()->flash('message', 'Preferencias de notificaciones guardadas correctamente.');
+            $this->dispatch('open-modal', 'modal-notifications-saved');
             Log::info('Preferences saved successfully');
 
             // Re-cargar las preferencias desde la base de datos para verificar que se guardaron correctamente

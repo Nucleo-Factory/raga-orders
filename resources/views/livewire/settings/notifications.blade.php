@@ -193,6 +193,16 @@
     </form>
 </div>
 
+<x-modal-success name="modal-notifications-saved">
+    <x-slot:title class="text-center">
+        Preferencias de notificaciones guardadas correctamente
+    </x-slot:title>
+
+    <x-primary-button wire:click="$dispatch('close-modal', 'modal-notifications-saved')" class="w-full">
+        Cerrar
+    </x-primary-button>
+</x-modal-success>
+
 <style>
 /* Estilos para los botones de alternancia */
 .toggle-button {

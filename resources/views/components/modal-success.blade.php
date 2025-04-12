@@ -14,7 +14,7 @@
                     stroke="#5DD595" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            <h3 class="text-lg font-bold text-success">
+            <h3 class="text-lg font-bold text-center text-success">
                 {{ $title ?? 'Operación Exitosa' }}
             </h3>
         </div>
