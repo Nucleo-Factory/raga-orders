@@ -67,7 +67,7 @@
                         Modalidad
                     </th>
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">
-                        Intercom
+                        Incoterms
                     </th>
 
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">

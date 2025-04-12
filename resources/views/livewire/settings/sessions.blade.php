@@ -24,16 +24,16 @@
             @foreach($sessions as $session)
                 <tr>
                     <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
-                        {{ $session->user->name }}
+                        {{ $session->user->name ?? 'Usuario desconocido' }}
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        {{ $session->ip_address }}
+                        {{ $session->ip_address ?? 'IP desconocida' }}
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        {{ $session->user_agent }}
+                        {{ $session->user_agent ?? 'Agente de usuario desconocido' }}
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        {{ $session->last_activity }}
+                        {{ $session->last_activity ?? 'Última actividad desconocida' }}
                     </td>
                 </tr>
             @endforeach
