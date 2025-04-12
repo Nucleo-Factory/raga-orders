@@ -15,12 +15,6 @@
         </div>
     </div>
 
-    @if (session()->has('message'))
-        <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-lg">
-            {{ session('message') }}
-        </div>
-    @endif
-
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-[#E0E5FF]">
             <tr>
@@ -53,9 +47,8 @@
                                class="text-blue-600 hover:text-blue-900">
                                 Editar
                             </a>
-                            <button wire:click="deleteUser({{ $user->id }})"
-                                    class="text-red-600 hover:text-red-900"
-                                    onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
+                            <button wire:click="openModal({{ $user->id }})"
+                                    class="text-red-600 hover:text-red-900">
                                 Eliminar
                             </button>
                         </div>
@@ -64,4 +57,20 @@
             @endforeach
         </tbody>
     </table>
+
+    <x-modal-warning name="modal-delete-user">
+        <x-slot:title>
+            Estás seguro de querer eliminar el usuario {{ $user->name }}?
+        </x-slot:title>
+
+        <div class="flex space-x-2">
+            <x-primary-button wire:click="closeModal" class="w-full">
+                Cancelar
+            </x-primary-button>
+
+            <x-primary-button wire:click="deleteUser({{ $id }})" class="w-full bg-red-600 hover:bg-red-700">
+                Eliminar
+            </x-primary-button>
+        </div>
+    </x-modal-warning>
 </div>

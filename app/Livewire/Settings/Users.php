@@ -8,6 +8,8 @@ use Spatie\Permission\Models\Role;
 
 class Users extends Component
 {
+    public $id;
+    public $user;
     public $headers = [
         'name' => 'Nombre',
         'email' => 'Email',
@@ -19,10 +21,17 @@ class Users extends Component
     public function deleteUser($userId)
     {
         $user = User::find($userId);
+
         if ($user) {
             $user->delete();
-            session()->flash('message', 'Usuario eliminado correctamente.');
+            $this->dispatch('close-modal', 'modal-delete-user');
         }
+    }
+
+    public function openModal($id) {
+        $this->id = $id;
+        $this->user = User::find($id);
+        $this->dispatch('open-modal', 'modal-delete-user');
     }
 
     public function render()
