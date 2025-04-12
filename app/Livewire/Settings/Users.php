@@ -11,10 +11,10 @@ class Users extends Component
     public $id;
     public $user;
     public $headers = [
-        'name' => 'Nombre',
-        'email' => 'Email',
-        'role' => 'Rol',
-        'created_at' => 'Fecha de registro',
+        'user' => 'Usuario',
+        'date' => 'Fecha',
+        'status' => 'Estado',
+        'role_type' => 'Tipo de Rol',
         'actions' => 'Acciones'
     ];
 
