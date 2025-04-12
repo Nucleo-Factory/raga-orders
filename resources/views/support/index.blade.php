@@ -11,9 +11,9 @@
 
     <div class="space-y-11">
         <div class="flex gap-4">
-            <x-search-input class="w-[760px]" />
+            <x-search-input class="w-[760px]" id="support-search" />
 
-            <x-primary-button class="group">
+            <x-primary-button class="group" onclick="handleSearch()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path
                         d="M19 19L15.5001 15.5M18 9.5C18 14.1944 14.1944 18 9.5 18C4.80558 18 1 14.1944 1 9.5C1 4.80558 4.80558 1 9.5 1C14.1944 1 18 4.80558 18 9.5Z"
@@ -22,11 +22,11 @@
             </x-primary-button>
         </div>
 
-        <ul class="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-x-6 gap-y-8">
+        <ul class="grid grid-cols-4 gap-x-6 gap-y-8" id="support-cards">
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="14" viewBox="0 0 17 14"
                             fill="none">
                             <path
@@ -47,7 +47,7 @@
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17"
                             fill="none">
                             <path
@@ -68,7 +68,7 @@
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14"
                             fill="none">
                             <path
@@ -89,7 +89,7 @@
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 19 18"
                             fill="none">
                             <g clip-path="url(#clip0_3161_105211)">
@@ -127,7 +127,7 @@
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19"
                             fill="none">
                             <g clip-path="url(#clip0_3161_105221)">
@@ -162,7 +162,7 @@
             <li>
                 <x-card-icon class="w-full !flex-col shadow-2xl">
                     <x-slot:icon
-                        class="self-start flex min-h-11 min-w-11 items-center justify-center rounded-full bg-neutral-blue p-2">
+                        class="flex items-center self-start justify-center p-2 rounded-full min-h-11 min-w-11 bg-neutral-blue">
                         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 19 18"
                             fill="none">
                             <g clip-path="url(#clip0_3161_105229)">
@@ -196,3 +196,25 @@
         </ul>
     </div>
 </x-app-layout>
+
+<script>
+function handleSearch() {
+    const searchInput = document.getElementById('support-search');
+    const searchTerm = searchInput.value.toLowerCase();
+    const cards = document.querySelectorAll('#support-cards li');
+
+    cards.forEach(card => {
+        const title = card.querySelector('.text-lg').textContent.toLowerCase();
+        const content = card.querySelector('.text-sm').textContent.toLowerCase();
+
+        if (title.includes(searchTerm) || content.includes(searchTerm)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// También realizar búsqueda al escribir
+document.getElementById('support-search').addEventListener('input', handleSearch);
+</script>
