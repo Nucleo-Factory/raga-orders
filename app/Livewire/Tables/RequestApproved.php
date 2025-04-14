@@ -15,6 +15,19 @@ class RequestApproved extends Component {
         'operation' => ''
     ];
 
+    public $showModal = false;
+    public $selectedRequest;
+
+    public function openModal($id) {
+        $this->selectedRequest = AuthorizationRequest::find($id);
+        $this->dispatch('open-modal', 'modal-requests');
+    }
+
+    public function closeModal() {
+        $this->selectedRequest = null;
+        $this->dispatch('close-modal', 'modal-requests');
+    }
+
     public function render() {
         $query = AuthorizationRequest::with(['requester', 'authorizer'])
                                    ->whereIn('status', ['approved', 'rejected']); // Solo procesadas
