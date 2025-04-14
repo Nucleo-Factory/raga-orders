@@ -43,7 +43,7 @@
                                     Número PO
                                 </x-slot:label>
 
-                                <x-slot:input name="order_number" placeholder="Ingrese número PO" wire:model="order_number" class="pr-10"></x-slot:input>
+                                <x-slot:input name="order_number" placeholder="Ingrese número PO" wire:model="order_number" class="pr-10 {{ $errors->has('order_number') ? 'border-red-500' : '' }}"></x-slot:input>
 
                                 <x-slot:icon>
                                     <button wire:click="generateUniqueOrderNumber"
@@ -66,16 +66,16 @@
                             <x-slot:label>
                                 Fecha de creación
                             </x-slot:label>
-                            <x-slot:input name="order_date" type="date" placeholder="Ingrese número PO"
-                                wire:model="order_date">
+                            <x-slot:input name="order_date" type="date" placeholder="Ingrese número PO" wire:model="order_date" class="pr-10 {{ $errors->has('order_date') ? 'border-red-500' : '' }}">
                             </x-slot:input>
+                            <x-slot:error>
+                                {{ $errors->first('order_date') }}
+                            </x-slot:error>
                         </x-form-input>
-                        <x-form-select label="Moneda" name="currency" wireModel="currency" :options="$currencyArray" />
-                        <x-form-select label="Incoterms" name="incoterms" wireModel="incoterms" :options="$tiposIncotermArray" />
-                        <x-form-select label="HUB Planificado" name="planned_hub_id" wireModel="planned_hub_id"
-                            :options="$hubsArray" />
-                        <x-form-select label="HUB Real" name="actual_hub_id" wireModel="actual_hub_id"
-                            :options="$hubsArray" />
+                        <x-form-select label="Moneda" name="currency" wireModel="currency" :options="$currencyArray" :error="$errors->has('currency') ? true : false" />
+                        <x-form-select label="Incoterms" name="incoterms" wireModel="incoterms" :options="$tiposIncotermArray" :error="$errors->has('incoterms') ? true : false" />
+                        <x-form-select label="HUB Planificado" name="planned_hub_id" wireModel="planned_hub_id" :options="$hubsArray" :error="$errors->has('planned_hub_id') ? true : false" />
+                        <x-form-select label="HUB Real" name="actual_hub_id" wireModel="actual_hub_id" :options="$hubsArray" :error="$errors->has('actual_hub_id') ? true : false" />
                     </div>
                 </div>
 
@@ -93,7 +93,7 @@
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Seleccionar Vendor" name="vendor_id" wireModel="vendor_id"
-                        :options="$vendorArray" />
+                        :options="$vendorArray" :error="$errors->has('vendor_id') ? true : false" />
                 </div>
             </div>
 
@@ -102,7 +102,7 @@
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Seleccionar Ship to" name="ship_to_id" wireModel="ship_to_id"
-                        :options="$shipToArray" />
+                        :options="$shipToArray" :error="$errors->has('ship_to_id') ? true : false" />
                 </div>
             </div>
 
@@ -110,7 +110,7 @@
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos de facturación</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Seleccionar Bill to" name="bill_to_id" wireModel="bill_to_id"
-                        :options="$billToArray" />
+                        :options="$billToArray" :error="$errors->has('bill_to_id') ? true : false" />
                 </div>
             </div>
 

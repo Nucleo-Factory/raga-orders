@@ -492,6 +492,22 @@ class CreatePucharseOrder extends Component
         // Validación básica
         $this->validate([
             'order_number' => 'required',
+            'order_date' => 'required',
+            'currency' => 'required',
+            'incoterms' => 'required',
+            'payment_terms' => 'required',
+            'vendor_id' => 'required',
+            'ship_to_id' => 'required',
+            'bill_to_id' => 'required',
+        ], [
+            'order_number.required' => 'El número de orden es requerido',
+            'order_date.required' => 'La fecha de orden es requerida',
+            'currency.required' => 'La moneda es requerida',
+            'incoterms.required' => 'El incoterm es requerido',
+            'payment_terms.required' => 'Los términos de pago son requeridos',
+            'vendor_id.required' => 'El vendor es requerido',
+            'ship_to_id.required' => 'El ship to es requerido',
+            'bill_to_id.required' => 'El bill to es requerido',
         ]);
 
         \Log::info('Preparando datos para guardar');
