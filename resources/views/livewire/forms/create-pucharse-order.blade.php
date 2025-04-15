@@ -336,6 +336,8 @@
                 <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Tipo de Material" name="material_type" wire:model="material_type" :options="['dangerous' => 'Peligroso', 'general' => 'General', 'exclusive' => 'Exclusivo', 'estibable' => 'Estibable']" />
+
+
                     <x-form-select label="Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
                     <x-form-input>
                         <x-slot:label>
@@ -508,7 +510,7 @@
                                                 wire:click="selectProduct({{ $product->id }})">
                                                 <div class="flex flex-col items-start">
                                                     <span class="font-medium">{{ $product->material_id }}</span>
-                                                    <span class="text-sm text-gray-500">{{ $product->short_text }}</span>
+                                                    <span class="text-sm text-gray-500">{{ $product->short_text ?? 'Sin descripción' }}</span>
                                                 </div>
                                             </li>
                                         @endforeach
@@ -585,7 +587,7 @@
                                 <tr>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                         {{ $product['material_id'] }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $product['short_text'] }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $product['short_text'] ?? 'Sin descripción' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         {{ number_format($product['price_per_unit'], 2) }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
