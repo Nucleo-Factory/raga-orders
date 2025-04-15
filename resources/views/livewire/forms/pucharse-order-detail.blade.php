@@ -590,7 +590,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Ver</a>
+                                    <a href="{{ route('products.edit', $product['id']) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                                 </td>
                             </tr>
                         @empty
