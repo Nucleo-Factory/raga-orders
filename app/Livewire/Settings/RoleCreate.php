@@ -69,6 +69,13 @@ class RoleCreate extends Component
     public function closeModal()
     {
         $this->dispatch('close-modal', 'modal-role-created');
+        return redirect()->route('settings.roles');
+    }
+
+    public function backToList()
+    {
+        $this->dispatch('close-modal', 'modal-role-created');
+        return redirect()->route('settings.roles');
     }
 
     public function render()

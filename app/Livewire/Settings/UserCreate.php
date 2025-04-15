@@ -57,7 +57,20 @@ class UserCreate extends Component
 
     public function save()
     {
-        $this->validate();
+        $this->validate([
+            'name' => 'required|min:3',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'role_id' => 'required|exists:roles,id'
+        ], [
+            'name.required' => 'El nombre es requerido',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres',
+            'email.required' => 'El email es requerido',
+            'email.email' => 'El email debe ser una dirección de correo válida',
+            'email.unique' => 'El email ya está en uso',
+            'role_id.required' => 'El rol es requerido',
+            'role_id.exists' => 'El rol seleccionado no es válido',
+        ]);
 
         if ($this->id) {
             $user = User::findOrFail($this->id);
@@ -87,9 +100,13 @@ class UserCreate extends Component
             $role = Role::findById($this->role_id);
             $user->assignRole($role->name);
 
-            session()->flash('message', 'Usuario creado correctamente.');
+            $this->dispatch('open-modal', 'modal-user-created');
         }
+    }
 
+    public function closeModal()
+    {
+        $this->dispatch('close-modal', 'modal-user-created');
         return redirect()->route('settings.users');
     }
 

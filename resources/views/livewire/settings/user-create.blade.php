@@ -14,9 +14,12 @@
                             <x-slot:input
                                 name="name"
                                 placeholder="Ingrese nombre del usuario"
-                                wire:model="name">
+                                wire:model="name"
+                                class="pr-10 {{ $errors->has('name') ? 'border-red-500' : '' }}">
                             </x-slot:input>
-                            @error('name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                            <x-slot:error>
+                                {{ $errors->first('name') }}
+                            </x-slot:error>
                         </x-form-input>
 
                         <x-form-input>
@@ -27,9 +30,12 @@
                                 type="email"
                                 name="email"
                                 placeholder="Ingrese correo electrónico"
-                                wire:model="email">
+                                wire:model="email"
+                                class="pr-10 {{ $errors->has('email') ? 'border-red-500' : '' }}">
                             </x-slot:input>
-                            @error('email') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                            <x-slot:error>
+                                {{ $errors->first('email') }}
+                            </x-slot:error>
                         </x-form-input>
                     </div>
 
@@ -42,9 +48,12 @@
                                 type="password"
                                 name="password"
                                 placeholder="Ingrese contraseña"
-                                wire:model="password">
+                                wire:model="password"
+                                class="pr-10 {{ $errors->has('password') ? 'border-red-500' : '' }}">
                             </x-slot:input>
-                            @error('password') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                            <x-slot:error>
+                                {{ $errors->first('password') }}
+                            </x-slot:error>
                         </x-form-input>
 
                         <x-form-select
@@ -52,8 +61,11 @@
                             name="role_id"
                             :options="$roles->pluck('name', 'id')"
                             wire:model="role_id"
+                            :error="$errors->has('role_id') ? true : false"
                         />
-                        @error('role_id') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                        <x-slot:error>
+                            {{ $errors->first('role_id') }}
+                        </x-slot:error>
                     </div>
 
                     <div class="flex justify-end gap-4 mt-6">
@@ -70,12 +82,6 @@
         </div>
     </div>
 
-    @if (session()->has('message'))
-        <div class="p-4 mt-4 text-green-700 bg-green-100 rounded-md">
-            {{ session('message') }}
-        </div>
-    @endif
-
     <x-modal-success name="modal-user-created">
         <x-slot:title>
             Usuario creado correctamente
@@ -85,7 +91,7 @@
             El usuario ha sido creado correctamente
         </x-slot:description>
 
-        <x-primary-button wire:click="$dispatch('close-modal', 'modal-user-created')" class="w-full">
+        <x-primary-button wire:click="closeModal" class="w-full">
             Cerrar
         </x-primary-button>
     </x-modal-success>

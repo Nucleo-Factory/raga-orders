@@ -6,7 +6,7 @@
             <li class="border-b-2 border-[#190FDB] text-[#190FDB]">
                 Histórico Operaciones
             </li>
-            <li>
+            <li class="hidden">
                 Histórico Usuarios
             </li>
         </ul>
