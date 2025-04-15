@@ -121,22 +121,34 @@
                         <x-slot:label>
                             Largo (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="largo_cm" placeholder="0.00">
+                        <x-slot:input type="number" step="0.01" wire:model="largo_cm" name="largo_cm" placeholder="0.00" class="pr-10 {{ $errors->has('largo_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('largo_cm') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Ancho (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="ancho_cm" placeholder="0.00">
+                        <x-slot:input type="number" step="0.01" wire:model="ancho_cm" name="ancho_cm" placeholder="0.00" class="pr-10 {{ $errors->has('ancho_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('ancho_cm') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Alto (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="alto_cm" placeholder="0.00">
+                        <x-slot:input type="number" step="0.01" wire:model="alto_cm" name="alto_cm" placeholder="0.00" class="pr-10 {{ $errors->has('alto_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('alto_cm') }}
+                        </x-slot:error>
                     </x-form-input>
                 </div>
             </div>
@@ -149,40 +161,60 @@
                             Largo (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="largo" placeholder="0.00"
-                            wire:model="largo" disabled>
+                            wire:model="largo" disabled class="pr-10 {{ $errors->has('largo') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('largo') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Ancho (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="ancho" placeholder="0.00"
-                            wire:model="ancho" disabled>
+                            wire:model="ancho" disabled class="pr-10 {{ $errors->has('ancho') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('ancho') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Alto (in)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="alto" placeholder="0.00"
-                            wire:model="alto" disabled>
+                            wire:model="alto" disabled class="pr-10 {{ $errors->has('alto') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('alto') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Volumen (ft³)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="volumen" placeholder="0.00"
-                            wire:model="volumen" disabled>
+                            wire:model="volumen" disabled class="pr-10 {{ $errors->has('volumen') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('volumen') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Peso (kg)
                         </x-slot:label>
                         <x-slot:input type="number" step="1" min="0" name="peso_kg"
-                            placeholder="0" wire:model="peso_kg">
+                            placeholder="0" wire:model="peso_kg" class="pr-10 {{ $errors->has('peso_kg') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('peso_kg') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
@@ -205,8 +237,12 @@
                         </x-slot:label>
 
                         <x-slot:input type="date" name="date_required_in_destination"
-                            wire:model="date_required_in_destination">
+                            wire:model="date_required_in_destination" class="pr-10 {{ $errors->has('date_required_in_destination') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('date_required_in_destination') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
@@ -305,8 +341,11 @@
                         <x-slot:label>
                             Modo
                         </x-slot:label>
-                        <x-slot:input name="mode" placeholder="Ingrese modo" wire:model="mode">
+                        <x-slot:input name="mode" placeholder="Ingrese modo" wire:model="mode" class="pr-10 {{ $errors->has('mode') ? 'border-red-500' : '' }}">
                         </x-slot:input>
+                        <x-slot:error>
+                            {{ $errors->first('mode') }}
+                        </x-slot:error>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
@@ -513,6 +552,9 @@
                     </div>
                 @endif
 
+                @if ($errors->has('products'))
+                    <div class="mt-4 text-red-500">{{ $errors->first('products') }}</div>
+                @endif
                 <!-- Tabla de productos agregados -->
                 <div class="mt-4">
                     <table class="min-w-full divide-y divide-gray-200">

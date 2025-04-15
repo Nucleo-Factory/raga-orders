@@ -138,6 +138,11 @@ class CreatePucharseOrder extends Component
     public $saving_not_executed = 0;
     public $comments;
 
+    // Dimensiones
+    public $largo_cm;
+    public $ancho_cm;
+    public $alto_cm;
+
     // Añade esta propiedad junto con las otras propiedades de dimensiones
     public $pallets;
 
@@ -492,23 +497,41 @@ class CreatePucharseOrder extends Component
         // Validación básica
         $this->validate([
             'order_number' => 'required',
-            'order_date' => 'required',
             'currency' => 'required',
             'incoterms' => 'required',
-            'payment_terms' => 'required',
             'vendor_id' => 'required',
             'ship_to_id' => 'required',
             'bill_to_id' => 'required',
+            'date_required_in_destination' => 'required',
+            'planned_hub_id' => 'required',
+            'mode' => 'required',
+            'peso_kg' => 'required',
+            'largo_cm' => 'required',
+            'ancho_cm' => 'required',
+            'alto_cm' => 'required',
         ], [
             'order_number.required' => 'El número de orden es requerido',
-            'order_date.required' => 'La fecha de orden es requerida',
             'currency.required' => 'La moneda es requerida',
             'incoterms.required' => 'El incoterm es requerido',
-            'payment_terms.required' => 'Los términos de pago son requeridos',
             'vendor_id.required' => 'El vendor es requerido',
             'ship_to_id.required' => 'El ship to es requerido',
             'bill_to_id.required' => 'El bill to es requerido',
+            'date_required_in_destination.required' => 'La fecha de entrega es requerida',
+            'planned_hub_id.required' => 'El hub es requerido',
+            'mode.required' => 'El modo es requerido',
+            'peso_kg.required' => 'El peso es requerido',
+            'ancho.required' => 'El ancho es requerido',
+            'largo.required' => 'El largo es requerido',
+            'alto.required' => 'El alto es requerido',
+            'volumen.required' => 'El volumen es requerido',
         ]);
+
+        // Validar que tenga al menos un producto
+        if (empty($this->orderProducts) || count($this->orderProducts) < 1) {
+            $this->addError('products', 'Debe agregar al menos un producto a la orden de compra');
+            return;
+        }
+
 
         \Log::info('Preparando datos para guardar');
 
