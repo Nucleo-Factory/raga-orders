@@ -1,10 +1,4 @@
 <div>
-    @if (session()->has('message'))
-        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-            {{ session('message') }}
-        </div>
-    @endif
-
     @if (session()->has('error'))
         <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
             {{ session('error') }}
@@ -352,6 +346,20 @@
             </x-primary-button>
         </div>
     </x-modal>
+
+    <x-modal-success name="modal-consolidate-order">
+        <x-slot:title>
+            Orden consolidada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La orden ha sido consolidada correctamente
+        </x-slot:description>
+
+        <x-primary-button wire:click="$dispatch('close-modal', 'modal-consolidate-order')" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 
     <style>
         /* Estilos personalizados para el paginador */

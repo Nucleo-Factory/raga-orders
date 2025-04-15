@@ -254,6 +254,9 @@ class CustomPurchaseOrdersTable extends Component
 
         // Proceed with shipping document creation
         $this->createShippingDocument();
+
+        // Show success message
+        $this->dispatch('open-modal', 'modal-consolidate-order');
     }
 
     private function getPurchaseOrdersQuery()
