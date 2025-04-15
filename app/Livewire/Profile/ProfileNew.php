@@ -64,6 +64,9 @@ class ProfileNew extends Component {
     {
         $this->validate([
             'profileImage' => 'image|max:5000',
+        ], [
+            'profileImage.image' => 'El archivo debe ser una imagen.',
+            'profileImage.max' => 'El tamaño máximo de la imagen es de 5MB.',
         ]);
 
         // Eliminar todas las imágenes anteriores

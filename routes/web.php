@@ -19,6 +19,9 @@ use App\Livewire\Settings\Users;
 use App\Livewire\Settings\RoleCreate;
 use App\Livewire\Settings\UserCreate;
 use App\Livewire\Settings\Sessions;
+use App\Http\Controllers\AuthorizationController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 Route::view('/', 'welcome')
     ->name('welcome');
@@ -200,6 +203,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->name('bill-to.index');
     Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->name('bill-to.create');
     Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->name('bill-to.edit');
+
+    // Rutas para autorizaciones
+    Route::get('/authorizations', [AuthorizationController::class, 'index'])->name('authorizations.index');
+    Route::get('/authorizations/{request}', [AuthorizationController::class, 'show'])->name('authorizations.show');
+    Route::post('/authorizations/{request}/approve', [AuthorizationController::class, 'approve'])->name('authorizations.approve');
+    Route::post('/authorizations/{request}/reject', [AuthorizationController::class, 'reject'])->name('authorizations.reject');
+
+    Route::post('logout-session', function (Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/')->with('message', 'Has cerrado sesión correctamente.');
+    })->name('logout-session');
 });
 
 Route::view('support', 'support.index')

@@ -96,7 +96,7 @@ $login = function () {
 
         <!-- Botón de inicio de sesión -->
         <button type="submit" class="w-full bg-[#565aff] hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg mb-4">
-            Iniciar Sesión
+            Iniciar sesión
         </button>
 
         <!-- Botón de registro -->

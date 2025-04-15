@@ -71,4 +71,17 @@ class AuthorizationService
                                   ->where('status', 'pending')
                                   ->exists();
     }
+
+    /**
+     * Obtiene todas las solicitudes (pendientes y aprobadas) para un modelo dado
+     */
+    public function getAllRequestsForModel(Model $model)
+    {
+        return AuthorizationRequest::with(['requester', 'authorizer'])
+                                  ->where('authorizable_type', get_class($model))
+                                  ->where('authorizable_id', $model->id)
+                                  ->whereIn('status', ['pending', 'approved'])
+                                  ->latest()
+                                  ->get();
+    }
 }

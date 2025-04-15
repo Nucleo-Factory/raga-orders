@@ -141,7 +141,7 @@ $register = function () {
 
         <!-- Botón de registro -->
         <a href="{{ route('login') }}" class="w-full bg-[#9aabff] hover:bg-indigo-200 text-white font-medium py-3 px-4 rounded-lg mb-8 block text-center">
-            Iniciar Sesión
+            Iniciar sesión
         </a>
     </form>
 </div>

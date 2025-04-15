@@ -3,7 +3,7 @@
         $headers = [
             'created_at' => 'Fecha y hora',
             'operation_id' => 'ID Operación',
-            'authorizable_id' => 'ID',
+            'authorizable_id' => 'Número de PO',
             'requester_id' => 'Usuario',
             'operation_type' => 'Operación',
             'status' => 'Estado',
@@ -67,7 +67,7 @@
                                 {{ $request->operation_id }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                {{ $request->authorizable_id }}
+                                {{ $request->order_number ?? $request->authorizable_id }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 {{ $request->requester->name ?? 'Usuario desconocido' }}

@@ -73,7 +73,7 @@ $resetPassword = function () {
 <div>
     @if (!$showSuccessMessage)
         <h3 class="login-title mb-[10px]">¡Crea una nueva contraseña!</h3>
-        <div class="mb-4 text-sm text-gray-600 text-center">
+        <div class="mb-4 text-sm text-center text-gray-600">
             {{ __(' Ingresa una nueva contraseña para tu cuenta.  Por tu seguridad, debe incluir una combinación de letras, números y símbolos.') }}
         </div>
         <form wire:submit="resetPassword">
@@ -85,7 +85,7 @@ $resetPassword = function () {
             </div>
 
             <!-- Password -->
-            <div class="mt-7 relative">
+            <div class="relative mt-7">
                 <x-input-label for="password" :value="__('Password')"  class="{{ $errors->has('password') ? 'text-[#FF3459]' : '' }}"/>
                 <x-text-input wire:model="password" id="password" class="block mt-1 w-full border-2 {{ $errors->has('password') ? 'border-[#FF3459]' : '' }}" type="password" name="password" autocomplete="new-password" />
                 <x-input-error :messages="$errors->get('password')" class="mt-2 absolute -bottom-[19px] !text-[10px] text-[#FF3459] " />
@@ -123,7 +123,7 @@ $resetPassword = function () {
 
     @if ($showSuccessMessage)
         <div class="pb-[60px]">
-            <div class="text-center flex justify-center flex-col items-center">
+            <div class="flex flex-col items-center justify-center text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="104" height="105" viewBox="0 0 104 105" fill="none">
                     <path d="M32.5 52.5L45.5 65.5L71.5 39.5M95.3333 52.5C95.3333 76.4323 75.9323 95.8333 52 95.8333C28.0676 95.8333 8.66663 76.4323 8.66663 52.5C8.66663 28.5676 28.0676 9.16663 52 9.16663C75.9323 9.16663 95.3333 28.5676 95.3333 52.5Z" stroke="#5DD595" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>

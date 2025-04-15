@@ -44,4 +44,12 @@ class PurchaseOrderComment extends Model implements HasMedia
     {
         return $this->user->roles->first()->name ?? 'Sin rol';
     }
+
+    /**
+     * Define las colecciones de medios disponibles para este modelo
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments');
+    }
 }

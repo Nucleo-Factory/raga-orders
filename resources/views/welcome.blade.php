@@ -29,7 +29,7 @@
 
                 <a href="{{ route("login") }}"
                     class="h-[40px] border-[2px] rounded-[56px] border-[#3C5BFF] flex justify-center items-center w-[150px] lg:w-[180px] text-[16px] text-[#3C5BFF] font-bold hover:bg-[#3C5BFF] hover:text-white transition-all">
-                    Iniciar Sesión
+                    Iniciar sesión
                 </a>
             </div>
         </div>

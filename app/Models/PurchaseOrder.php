@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PurchaseOrder extends Model implements HasMedia
 {
@@ -287,5 +288,13 @@ class PurchaseOrder extends Model implements HasMedia
     public function comments()
     {
         return $this->hasMany(PurchaseOrderComment::class);
+    }
+
+    /**
+     * Get all authorization requests for this purchase order.
+     */
+    public function authorizationRequests(): MorphMany
+    {
+        return $this->morphMany(AuthorizationRequest::class, 'authorizable');
     }
 }
