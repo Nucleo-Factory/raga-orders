@@ -22,12 +22,25 @@ class RequestsTable extends Component {
         'operation' => ''
     ];
 
+    public $showModal = false;
+    public $selectedRequest;
+
     protected $listeners = [
         'refreshRequests' => '$refresh'
     ];
 
     public function mount($actions = false) {
         $this->actions = $actions;
+    }
+
+    public function closeModal() {
+        $this->selectedRequest = null;
+        $this->dispatch('close-modal', 'modal-requests');
+    }
+
+    public function openModal($id) {
+        $this->selectedRequest = Authorization::find($id);
+        $this->dispatch('open-modal', 'modal-requests');
     }
 
     public function approve($requestId)

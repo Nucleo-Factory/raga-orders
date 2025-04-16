@@ -82,10 +82,13 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 @if($actions && $request->status === 'pending')
-                                    <div class="flex space-x-2">
+                                    <div class="flex gap-3">
+                                        <button wire:click="openModal({{ $request->id }})" class="text-dark-blue hover:text-green-900">
+                                            Ver
+                                        </button> |
                                         <button wire:click="approve('{{ $request->id }}')" class="text-green-600 hover:text-green-900">
                                             Aprobar
-                                        </button>
+                                        </button> |
                                         <button wire:click="reject('{{ $request->id }}')" class="text-red-600 hover:text-red-900">
                                             Rechazar
                                         </button>
@@ -155,4 +158,133 @@
             </div>
         </div>
     </div>
+
+    <x-modal-requests name="modal-requests" show="{{ $showModal ?? false }}">
+        <x-slot name="title">
+            Detalles de la Solicitud de Autorización
+        </x-slot>
+
+        <x-slot name="operationId">
+            {{ $selectedRequest->operation_id ?? '' }}
+        </x-slot>
+
+        <x-slot name="requester">
+            <div class="flex items-center">
+                <div class="flex items-center justify-center w-8 h-8 text-sm font-medium text-white bg-blue-600 rounded-full">
+                    @if(isset($selectedRequest->requester))
+                        {{ substr($selectedRequest->requester->name ?? 'UN', 0, 2) }}
+                    @else
+                        {{ 'UN' }}
+                    @endif
+                </div>
+                <span class="ml-2 text-gray-700">
+                    @if(isset($selectedRequest->requester))
+                        {{ $selectedRequest->requester->name }}
+                    @else
+                        Usuario ID: {{ $selectedRequest->requester_id ?? 'Desconocido' }}
+                    @endif
+                </span>
+            </div>
+        </x-slot>
+
+        <x-slot name="date">
+            <p class="text-gray-700">
+                @if(isset($selectedRequest->created_at))
+                    {{ \Carbon\Carbon::parse($selectedRequest->created_at)->format('d/m/Y') }}
+                @else
+                    --/--/----
+                @endif
+            </p>
+        </x-slot>
+
+        <x-slot name="time">
+            <p class="text-gray-700">
+                @if(isset($selectedRequest->created_at))
+                    {{ \Carbon\Carbon::parse($selectedRequest->created_at)->format('H:i:s') }}
+                @else
+                    --:--:--
+                @endif
+            </p>
+        </x-slot>
+
+        <x-slot name="operationType">
+            <p class="text-gray-700">{{ $selectedRequest->operation_type ?? '' }}</p>
+        </x-slot>
+
+        <x-slot name="authorizableInfo">
+            <p class="text-gray-700">
+                <span class="font-medium">Número PO:</span>
+                @if(isset($selectedRequest->authorizable_type) && strpos($selectedRequest->authorizable_type, 'PurchaseOrder') !== false && isset($selectedRequest->authorizable_id))
+                    @php
+                        // Get the order number from the purchase order model
+                        $purchaseOrder = App\Models\PurchaseOrder::find($selectedRequest->authorizable_id);
+                        $orderNumber = $purchaseOrder ? $purchaseOrder->order_number : $selectedRequest->authorizable_id;
+                    @endphp
+                    <a href="{{ route('purchase-orders.detail', $selectedRequest->authorizable_id) }}" class="text-blue-600 underline hover:text-blue-800">
+                        {{ $orderNumber }}
+                    </a>
+                @else
+                    {{ $selectedRequest->authorizable_id ?? '' }}
+                @endif
+            </p>
+        </x-slot>
+
+        <x-slot name="status">
+            @if(isset($selectedRequest->status))
+                <span class="{{ $statusClasses[$selectedRequest->status] ?? '' }}">
+                    {{ $statusLabels[$selectedRequest->status] ?? $selectedRequest->status }}
+                </span>
+                @if(isset($selectedRequest->authorized_at))
+                    <p class="mt-1 text-sm text-gray-500">
+                        Autorizado: {{ \Carbon\Carbon::parse($selectedRequest->authorized_at)->format('d/m/Y H:i:s') }}
+                    </p>
+                @endif
+            @else
+                <p class="text-gray-500">No definido</p>
+            @endif
+        </x-slot>
+
+        <x-slot name="dataContent">
+            @if(isset($selectedRequest->data))
+                <div class="p-3 overflow-auto text-sm text-gray-600 bg-gray-100 rounded-md max-h-40">
+                    @php
+                        $data = is_array($selectedRequest->data)
+                            ? $selectedRequest->data
+                            : json_decode($selectedRequest->data, true);
+                    @endphp
+
+                    @if(is_array($data))
+                        @foreach($data as $key => $value)
+                            <div class="mb-1">
+                                <span class="font-semibold">{{ ucfirst($key) }}:</span>
+                                @if(is_bool($value))
+                                    {{ $value ? 'Sí' : 'No' }}
+                                @elseif(is_array($value) || is_object($value))
+                                    <pre class="text-xs">{{ json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                @else
+                                    {{ $value }}
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        {{ $selectedRequest->data }}
+                    @endif
+                </div>
+            @else
+                <p class="text-gray-500">Sin datos adicionales</p>
+            @endif
+        </x-slot>
+
+        <x-slot name="notes">
+            <p class="text-sm text-gray-500">
+                {{ $selectedRequest->notes ?? 'Sin notas adicionales' }}
+            </p>
+        </x-slot>
+
+        <x-slot name="actions">
+            <button class="w-full py-3 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700" wire:click="closeModal">
+                Aceptar
+            </button>
+        </x-slot>
+    </x-modal-requests>
 </div>
