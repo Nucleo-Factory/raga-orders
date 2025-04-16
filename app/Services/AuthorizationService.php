@@ -46,10 +46,70 @@ class AuthorizationService
         ]);
 
         // If the authorization is for a model with status, update the model's status
-        if ($result && $authorization->authorizable &&
-            method_exists($authorization->authorizable, 'isApproved')) {
+        if ($result && $authorization->authorizable) {
+            // Check for comment with file attachment
+            if ($authorization->operation_type === 'attach_file_to_comment') {
+                // Get the data from the authorization
+                $data = $authorization->data ?? [];
 
-            $authorization->authorizable->update(['status' => Authorization::STATUS_APPROVED]);
+                // Log to debug
+                \Log::info('Procesando aprobación de archivo adjunto', [
+                    'auth_id' => $authorization->id,
+                    'authorizable_type' => $authorization->authorizable_type,
+                    'authorizable_id' => $authorization->authorizable_id,
+                    'data' => $data
+                ]);
+
+                // Check if we have a comment_id
+                if (!empty($data['comment_id'])) {
+                    try {
+                        // Find the comment
+                        $comment = \App\Models\PurchaseOrderComment::find($data['comment_id']);
+
+                        if ($comment) {
+                            \Log::info('Comentario encontrado para autorización', [
+                                'comment_id' => $comment->id,
+                                'auth_id' => $authorization->id
+                            ]);
+
+                            // Get the pending attachment
+                            $pendingMedia = $comment->getMedia('pending_attachments')->first();
+
+                            if ($pendingMedia) {
+                                // Move the media to the approved collection
+                                $pendingMedia->move($comment, 'attachments');
+
+                                \Log::info('Archivo movido de pendiente a aprobado', [
+                                    'comment_id' => $comment->id,
+                                    'media_id' => $pendingMedia->id,
+                                    'authorization_id' => $authorization->id
+                                ]);
+                            } else {
+                                \Log::warning('No se encontró archivo pendiente para el comentario', [
+                                    'comment_id' => $comment->id,
+                                    'auth_id' => $authorization->id
+                                ]);
+                            }
+                        } else {
+                            \Log::warning('No se encontró el comentario para la autorización', [
+                                'comment_id' => $data['comment_id'],
+                                'auth_id' => $authorization->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error al mover archivo de pendiente a aprobado', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'auth_id' => $authorization->id
+                        ]);
+                    }
+                }
+            }
+
+            // If the model has a status field, update it
+            if (method_exists($authorization->authorizable, 'isApproved')) {
+                $authorization->authorizable->update(['status' => Authorization::STATUS_APPROVED]);
+            }
         }
 
         return $result;
@@ -68,10 +128,69 @@ class AuthorizationService
         ]);
 
         // If the authorization is for a model with status, update the model's status
-        if ($result && $authorization->authorizable &&
-            method_exists($authorization->authorizable, 'isRejected')) {
+        if ($result && $authorization->authorizable) {
+            // Check for comment with file attachment
+            if ($authorization->operation_type === 'attach_file_to_comment') {
+                // Get the data from the authorization
+                $data = $authorization->data ?? [];
 
-            $authorization->authorizable->update(['status' => Authorization::STATUS_REJECTED]);
+                \Log::info('Procesando rechazo de archivo adjunto', [
+                    'auth_id' => $authorization->id,
+                    'authorizable_type' => $authorization->authorizable_type,
+                    'authorizable_id' => $authorization->authorizable_id,
+                    'data' => $data
+                ]);
+
+                // Check if we have a comment_id
+                if (!empty($data['comment_id'])) {
+                    try {
+                        // Find the comment
+                        $comment = \App\Models\PurchaseOrderComment::find($data['comment_id']);
+
+                        if ($comment) {
+                            \Log::info('Comentario encontrado para rechazar', [
+                                'comment_id' => $comment->id,
+                                'auth_id' => $authorization->id
+                            ]);
+
+                            // Get the pending attachment
+                            $pendingMedia = $comment->getMedia('pending_attachments')->first();
+
+                            if ($pendingMedia) {
+                                // Delete the pending media
+                                $pendingMedia->delete();
+
+                                \Log::info('Archivo pendiente eliminado por rechazo', [
+                                    'comment_id' => $comment->id,
+                                    'media_id' => $pendingMedia->id,
+                                    'authorization_id' => $authorization->id
+                                ]);
+                            } else {
+                                \Log::warning('No se encontró archivo pendiente para eliminar', [
+                                    'comment_id' => $comment->id,
+                                    'auth_id' => $authorization->id
+                                ]);
+                            }
+                        } else {
+                            \Log::warning('No se encontró el comentario para el rechazo', [
+                                'comment_id' => $data['comment_id'],
+                                'auth_id' => $authorization->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error al eliminar archivo pendiente', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'auth_id' => $authorization->id
+                        ]);
+                    }
+                }
+            }
+
+            // If the model has a status field, update it
+            if (method_exists($authorization->authorizable, 'isRejected')) {
+                $authorization->authorizable->update(['status' => Authorization::STATUS_REJECTED]);
+            }
         }
 
         return $result;

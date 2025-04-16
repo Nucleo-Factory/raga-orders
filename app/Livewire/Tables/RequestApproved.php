@@ -19,7 +19,7 @@ class RequestApproved extends Component {
     public $selectedRequest;
 
     public function openModal($id) {
-        $this->selectedRequest = AuthorizationRequest::find($id);
+        $this->selectedRequest = Authorization::find($id);
         $this->dispatch('open-modal', 'modal-requests');
     }
 

@@ -42,39 +42,18 @@ class RequestsTable extends Component {
 
         // Aprobar la solicitud en el servicio (esto solo cambia el estado)
         if ($service->approve($request)) {
-            // Para operaciones que requieren crear un comentario
+            // Para operaciones que requieren adjuntar un archivo a un comentario
             if ($operationType === 'attach_file_to_comment' &&
                 $request->authorizable_type === PurchaseOrder::class &&
                 $authorizable) {
 
-                // Extraer los datos necesarios
-                $commentText = $originalData['comment'] ?? 'Comentario sin contenido';
-
-                try {
-                    // Crear el comentario en la tabla purchase_order_comments
-                    $comment = new PurchaseOrderComment();
-                    $comment->purchase_order_id = $authorizable->id;
-                    $comment->user_id = $request->requester_id;
-                    $comment->comment = $commentText;
-                    $comment->operacion = 'Comentario con archivo (Aprobado)';
-                    $comment->save();
-
-                    // Guardar la información de sesión para que el usuario adjunte el archivo
-                    Session::flash('comment_attachment_approved', true);
-                    Session::flash('comment_id', $comment->id);
-                    Session::flash('purchase_order_id', $authorizable->id);
-
-                    Log::info('Comentario creado después de aprobación desde Livewire', [
-                        'comment_id' => $comment->id,
-                        'purchase_order_id' => $authorizable->id,
-                        'request_id' => $request->id
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Error al crear comentario desde Livewire', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                }
+                // No necesitamos crear un comentario nuevo, el servicio de autorización
+                // ya maneja mover el archivo de 'pending_attachments' a 'attachments'
+                Log::info('Solicitud de archivo adjunto aprobada desde Livewire', [
+                    'purchase_order_id' => $authorizable->id,
+                    'request_id' => $request->id,
+                    'operation_type' => $operationType
+                ]);
             }
             // Para operaciones de subir archivo
             elseif ($operationType === 'upload_file' &&

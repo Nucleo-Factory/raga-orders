@@ -216,7 +216,17 @@ class PucharseOrderDetail extends Component
 
             // Process comments based on their status
             $processedComments = $comments->map(function($comment) {
+                // Check for approved attachment first
                 $attachment = $comment->getFirstMedia('attachments');
+
+                // If no approved attachment, check for pending attachment
+                $pendingAttachment = null;
+                if (!$attachment) {
+                    $pendingAttachment = $comment->getFirstMedia('pending_attachments');
+                }
+
+                // Get final attachment for display (either approved or pending)
+                $displayAttachment = $attachment ?: $pendingAttachment;
 
                 // Log for diagnostics
                 \Log::info('Processing comment', [
@@ -224,18 +234,30 @@ class PucharseOrderDetail extends Component
                     'purchase_order_id' => $comment->purchase_order_id,
                     'user_id' => $comment->user_id,
                     'operation' => $comment->operacion,
-                    'status' => $comment->status,
-                    'comment_text' => $comment->comment,
-                    'has_attachment' => $attachment ? true : false
+                    'has_approved_attachment' => $attachment ? true : false,
+                    'has_pending_attachment' => $pendingAttachment ? true : false,
+                    'attachment_approval_status' => $pendingAttachment ? 'pending' : ($attachment ? 'approved' : 'none'),
+                    'comment_text' => $comment->comment
                 ]);
 
-                // Convert comment status to display text
+                // Get status from authorization relationship
                 $statusDisplay = 'Pendiente';
+                $iconClass = 'warning';
                 if ($comment->isApproved()) {
                     $statusDisplay = 'Aprobado';
+                    $iconClass = 'success';
                 } elseif ($comment->isRejected()) {
                     $statusDisplay = 'Rechazado';
+                    $iconClass = 'danger';
                 }
+
+                \Log::info('Comment status', [
+                    'comment_id' => $comment->id,
+                    'status' => $statusDisplay,
+                    'icon_class' => $iconClass,
+                    'has_pending_attachment' => $pendingAttachment ? true : false,
+                    'has_approved_attachment' => $attachment ? true : false
+                ]);
 
                 // Format the comment for display
                 return [
@@ -245,11 +267,13 @@ class PucharseOrderDetail extends Component
                     'comment' => $comment->comment,
                     'created_at' => $comment->created_at,
                     'status' => $statusDisplay,
+                    'status_icon' => $iconClass,
                     'operation' => $comment->operacion ?? 'Detalle PO',
-                    'attachment' => $attachment ? [
-                        'name' => $attachment->file_name,
-                        'url' => $attachment->getUrl(),
-                        'type' => strtoupper($attachment->extension),
+                    'attachment' => $displayAttachment ? [
+                        'name' => $displayAttachment->file_name . ($pendingAttachment ? ' (pendiente de aprobación)' : ''),
+                        'url' => $attachment ? $displayAttachment->getUrl() : '#', // Solo URL para archivos aprobados
+                        'type' => strtoupper($displayAttachment->extension),
+                        'is_pending' => $pendingAttachment ? true : false
                     ] : null
                 ];
             })->toArray();
@@ -498,17 +522,21 @@ class PucharseOrderDetail extends Component
                         ]);
 
                         try {
+                            // Get filename before using it
+                            $fileName = $this->attachment->getClientOriginalName();
+                            $fileNameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+
                             // Attach the file to the comment
                             $media = $commentModel
                                 ->addMedia($this->attachment->getRealPath())
-                                ->usingName(pathinfo($this->attachment->getClientOriginalName(), PATHINFO_FILENAME))
-                                ->usingFileName($this->attachment->getClientOriginalName())
+                                ->usingName($fileNameWithoutExt)
+                                ->usingFileName($fileName)
                                 ->toMediaCollection('attachments');
 
                             \Log::info('File attached to comment', [
                                 'media_id' => $media->id,
                                 'comment_id' => $commentModel->id,
-                                'file_name' => $this->attachment->getClientOriginalName()
+                                'file_name' => $fileName
                             ]);
 
                             session()->flash('message', 'Archivo adjuntado correctamente al comentario');
@@ -542,7 +570,7 @@ class PucharseOrderDetail extends Component
                 }
             }
 
-            // Crear el comentario sin estado
+            // Create the comment regardless of attachment status
             $commentModel = new \App\Models\PurchaseOrderComment();
             $commentModel->purchase_order_id = $this->purchaseOrder->id;
             $commentModel->user_id = auth()->id();
@@ -550,31 +578,119 @@ class PucharseOrderDetail extends Component
             $commentModel->operacion = 'Detalle PO';
             $commentModel->save();
 
-            // Si hay un archivo adjunto, crear autorización
-            if ($this->attachment) {
-                // Crear solicitud de autorización
-                $authRequest = $commentModel->createAuthorizationRequest(
-                    'attach_file_to_comment',
-                    [
-                        'comment_id' => $commentModel->id,
-                        'file_name' => $this->attachment->getClientOriginalName(),
-                        'file_size' => $this->attachment->getSize(),
-                        'uploaded_by' => auth()->user()->name ?? 'Usuario',
-                    ]
-                );
-            }
-
-            // Log for diagnostics
             \Log::info('Comment created', [
                 'comment_id' => $commentModel->id,
                 'purchase_order_id' => $this->purchaseOrder->id,
-                'user_id' => auth()->id(),
-                'status' => $commentModel->status
+                'user_id' => auth()->id()
             ]);
 
-            // If there's an attachment, create authorization request
+            // Si hay un archivo adjunto, crear autorización
             if ($this->attachment) {
-                session()->flash('message', 'Comentario creado. Pendiente de aprobación para adjuntar archivo.');
+                try {
+                    // Obtener y almacenar el tamaño del archivo antes de subirlo
+                    $fileName = $this->attachment->getClientOriginalName();
+                    $fileSize = 0; // Valor por defecto
+
+                    // Intentar obtener el tamaño si es posible
+                    try {
+                        $fileSize = $this->attachment->getSize();
+                    } catch (\Exception $e) {
+                        \Log::warning('No se pudo obtener el tamaño del archivo, usando valor por defecto', [
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+
+                    // Guardar temporalmente el archivo en una colección específica para pendientes
+                    $tempMedia = $commentModel
+                        ->addMedia($this->attachment->getRealPath())
+                        ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
+                        ->usingFileName($fileName)
+                        ->toMediaCollection('pending_attachments'); // Colección específica para archivos pendientes
+
+                    \Log::info('Archivo guardado temporalmente mientras espera aprobación', [
+                        'media_id' => $tempMedia->id,
+                        'comment_id' => $commentModel->id,
+                        'file_name' => $fileName
+                    ]);
+
+                    // Depuración: Verificar que la orden de compra existe
+                    \Log::info('Información de la orden de compra antes de crear autorización', [
+                        'purchase_order_id' => $this->purchaseOrder->id,
+                        'purchase_order_class' => get_class($this->purchaseOrder),
+                        'purchase_order_exists' => $this->purchaseOrder->exists
+                    ]);
+
+                    try {
+                        // Crear la autorización directamente utilizando los datos ya obtenidos
+                        $authData = [
+                            'comment_id' => $commentModel->id,
+                            'file_name' => $fileName,
+                            'file_size' => $fileSize,
+                            'uploaded_by' => auth()->user()->name ?? 'Usuario',
+                            'temp_media_id' => $tempMedia->id
+                        ];
+
+                        $authRequest = \App\Models\Authorization::create([
+                            'operation_id' => \Illuminate\Support\Str::uuid(),
+                            'authorizable_type' => get_class($this->purchaseOrder),
+                            'authorizable_id' => $this->purchaseOrder->id,
+                            'requester_id' => auth()->id(),
+                            'operation_type' => 'attach_file_to_comment',
+                            'status' => 'pending',
+                            'data' => $authData,
+                        ]);
+
+                        \Log::info('Solicitud de autorización creada correctamente', [
+                            'auth_request_id' => $authRequest->id,
+                            'comment_id' => $commentModel->id,
+                            'purchase_order_id' => $this->purchaseOrder->id,
+                            'temp_media_id' => $tempMedia->id
+                        ]);
+
+                        session()->flash('message', 'Comentario creado con archivo adjunto. Pendiente de aprobación.');
+                    } catch (\Exception $authException) {
+                        \Log::error('Error al crear la autorización directamente', [
+                            'error' => $authException->getMessage(),
+                            'trace' => $authException->getTraceAsString()
+                        ]);
+
+                        // Si falla, intentar con método alternativo sin usar getSize()
+                        try {
+                            $authRequest = DB::table('authorizations')->insert([
+                                'operation_id' => \Illuminate\Support\Str::uuid()->toString(),
+                                'authorizable_type' => get_class($this->purchaseOrder),
+                                'authorizable_id' => $this->purchaseOrder->id,
+                                'requester_id' => auth()->id(),
+                                'operation_type' => 'attach_file_to_comment',
+                                'status' => 'pending',
+                                'data' => json_encode($authData),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+
+                            \Log::info('Solicitud de autorización creada mediante método alternativo', [
+                                'success' => $authRequest,
+                                'comment_id' => $commentModel->id
+                            ]);
+
+                            session()->flash('message', 'Comentario creado con archivo adjunto. Pendiente de aprobación.');
+                        } catch (\Exception $dbException) {
+                            \Log::error('Error también con método alternativo', [
+                                'error' => $dbException->getMessage(),
+                                'trace' => $dbException->getTraceAsString()
+                            ]);
+
+                            session()->flash('error', 'Se creó el comentario y guardó el archivo, pero hubo un error al crear la solicitud de autorización.');
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error al adjuntar archivo temporalmente', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    session()->flash('error', 'Se creó el comentario pero hubo un error al guardar el archivo: ' . $e->getMessage());
+                }
             } else {
                 // No attachment, just show success message
                 session()->flash('message', 'Comentario agregado correctamente');

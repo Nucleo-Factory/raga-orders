@@ -57,6 +57,7 @@ class PurchaseOrderComment extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments');
+        $this->addMediaCollection('pending_attachments');
     }
 
     /**
@@ -64,6 +65,12 @@ class PurchaseOrderComment extends Model implements HasMedia
      */
     public function isPending(): bool
     {
+        // Si el comentario tiene un archivo adjunto en pending_attachments, está pendiente
+        if ($this->getFirstMedia('pending_attachments')) {
+            return true;
+        }
+
+        // Verificar si hay alguna autorización pendiente para este comentario
         return $this->authorizations()
             ->where('operation_type', 'attach_file_to_comment')
             ->where('status', Authorization::STATUS_PENDING)
@@ -75,11 +82,17 @@ class PurchaseOrderComment extends Model implements HasMedia
      */
     public function isApproved(): bool
     {
-        // Si no tiene autorizaciones o todas están aprobadas
+        // Si no tiene archivos adjuntos, se considera aprobado
         if (!$this->hasAttachment()) {
-            return true; // Comentarios sin archivos se consideran aprobados
+            return true;
         }
 
+        // Si tiene un archivo en la colección 'attachments', está aprobado
+        if ($this->getFirstMedia('attachments')) {
+            return true;
+        }
+
+        // Verificar si hay alguna autorización aprobada para este comentario
         return $this->authorizations()
             ->where('operation_type', 'attach_file_to_comment')
             ->where('status', Authorization::STATUS_APPROVED)
@@ -91,6 +104,7 @@ class PurchaseOrderComment extends Model implements HasMedia
      */
     public function isRejected(): bool
     {
+        // Verificar si hay alguna autorización rechazada para este comentario
         return $this->authorizations()
             ->where('operation_type', 'attach_file_to_comment')
             ->where('status', Authorization::STATUS_REJECTED)
@@ -101,6 +115,7 @@ class PurchaseOrderComment extends Model implements HasMedia
     public function hasAttachment(): bool
     {
         return $this->getFirstMedia('attachments') !== null ||
+               $this->getFirstMedia('pending_attachments') !== null ||
                $this->authorizations()->where('operation_type', 'attach_file_to_comment')->exists();
     }
 }
