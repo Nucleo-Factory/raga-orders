@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\AuthorizationRequest;
+use App\Models\Authorization;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -29,7 +29,7 @@ class RequestApproved extends Component {
     }
 
     public function render() {
-        $query = AuthorizationRequest::with(['requester', 'authorizer'])
+        $query = Authorization::with(['requester', 'authorizer'])
                                    ->whereIn('status', ['approved', 'rejected']); // Solo procesadas
 
         // Aplicar búsqueda
@@ -59,7 +59,7 @@ class RequestApproved extends Component {
         $requests = $query->latest()->paginate(15);
 
         // Obtener operaciones únicas para el filtro, solo de solicitudes procesadas
-        $operationTypes = AuthorizationRequest::whereIn('status', ['approved', 'rejected'])
+        $operationTypes = Authorization::whereIn('status', ['approved', 'rejected'])
                                            ->select('operation_type')
                                            ->distinct()
                                            ->pluck('operation_type');

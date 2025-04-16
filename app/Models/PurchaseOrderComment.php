@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Models\Traits\HasAuthorizations;
 
 class PurchaseOrderComment extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, HasAuthorizations;
 
     public $timestamps = true;
 
@@ -20,6 +21,11 @@ class PurchaseOrderComment extends Model implements HasMedia
         'operacion',
         'created_at',
         'updated_at',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relación con la orden de compra
@@ -51,5 +57,50 @@ class PurchaseOrderComment extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments');
+    }
+
+    /**
+     * Check if comment is pending
+     */
+    public function isPending(): bool
+    {
+        return $this->authorizations()
+            ->where('operation_type', 'attach_file_to_comment')
+            ->where('status', Authorization::STATUS_PENDING)
+            ->exists();
+    }
+
+    /**
+     * Check if comment is approved
+     */
+    public function isApproved(): bool
+    {
+        // Si no tiene autorizaciones o todas están aprobadas
+        if (!$this->hasAttachment()) {
+            return true; // Comentarios sin archivos se consideran aprobados
+        }
+
+        return $this->authorizations()
+            ->where('operation_type', 'attach_file_to_comment')
+            ->where('status', Authorization::STATUS_APPROVED)
+            ->exists();
+    }
+
+    /**
+     * Check if comment is rejected
+     */
+    public function isRejected(): bool
+    {
+        return $this->authorizations()
+            ->where('operation_type', 'attach_file_to_comment')
+            ->where('status', Authorization::STATUS_REJECTED)
+            ->exists();
+    }
+
+    // Helper para verificar si tiene archivos adjuntos
+    public function hasAttachment(): bool
+    {
+        return $this->getFirstMedia('attachments') !== null ||
+               $this->authorizations()->where('operation_type', 'attach_file_to_comment')->exists();
     }
 }

@@ -11,10 +11,11 @@ use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\Traits\HasAuthorizations;
 
 class PurchaseOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, HasAuthorizations;
 
     /**
      * The attributes that are mass assignable.
@@ -291,10 +292,11 @@ class PurchaseOrder extends Model implements HasMedia
     }
 
     /**
-     * Get all authorization requests for this purchase order.
+     * Legacy method for backward compatibility
+     * @deprecated Use authorizations() from HasAuthorizations trait instead
      */
     public function authorizationRequests(): MorphMany
     {
-        return $this->morphMany(AuthorizationRequest::class, 'authorizable');
+        return $this->morphMany(Authorization::class, 'authorizable');
     }
 }

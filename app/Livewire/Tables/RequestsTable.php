@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\AuthorizationRequest;
+use App\Models\Authorization;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderComment;
 use App\Services\AuthorizationService;
@@ -32,7 +32,7 @@ class RequestsTable extends Component {
 
     public function approve($requestId)
     {
-        $request = AuthorizationRequest::findOrFail($requestId);
+        $request = Authorization::findOrFail($requestId);
         $service = app(AuthorizationService::class);
 
         // Guardar datos originales antes de cambiar el estado
@@ -103,7 +103,7 @@ class RequestsTable extends Component {
 
     public function reject($requestId)
     {
-        $request = AuthorizationRequest::findOrFail($requestId);
+        $request = Authorization::findOrFail($requestId);
         $service = app(AuthorizationService::class);
 
         if ($service->reject($request)) {
@@ -115,7 +115,7 @@ class RequestsTable extends Component {
     }
 
     public function render() {
-        $query = AuthorizationRequest::with(['requester', 'authorizer'])
+        $query = Authorization::with(['requester', 'authorizer'])
                                    ->where('status', 'pending'); // Solo pendientes
 
         // Aplicar búsqueda
@@ -158,7 +158,7 @@ class RequestsTable extends Component {
         }
 
         // Obtener operaciones únicas solo de solicitudes pendientes para el filtro
-        $operationTypes = AuthorizationRequest::where('status', 'pending')
+        $operationTypes = Authorization::where('status', 'pending')
                                            ->select('operation_type')
                                            ->distinct()
                                            ->pluck('operation_type');

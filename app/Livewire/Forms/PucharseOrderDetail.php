@@ -197,143 +197,75 @@ class PucharseOrderDetail extends Component
     protected function loadCommentsAndAttachments()
     {
         try {
-            // 1. Cargar los comentarios reales de la base de datos directamente con consulta SQL
-            \Log::info('Consultando comentarios de BD para PO', [
-                'purchase_order_id' => $this->purchaseOrder->id,
-                'usando_consulta_directa' => true
-            ]);
-
-            // Consulta SQL directa - Sin relaciones
-            $rawComments = \DB::table('purchase_order_comments')
-                ->where('purchase_order_id', $this->purchaseOrder->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            \Log::info('Comentarios encontrados con consulta directa SQL', [
-                'count' => $rawComments->count(),
-                'purchase_order_id' => $this->purchaseOrder->id,
-                'comment_ids' => $rawComments->pluck('id')->toArray()
-            ]);
-
-            // Consulta a través de Eloquent con todas las relaciones necesarias
-            $dbComments = [];
-
-            // Si hay comentarios en la base de datos, los cargamos con sus relaciones
-            if ($rawComments->count() > 0) {
-                $comments = PurchaseOrderComment::with(['user.roles', 'media'])
-                    ->where('purchase_order_id', $this->purchaseOrder->id)
-                    ->latest()
-                    ->get();
-
-                \Log::info('Comentarios encontrados con Eloquent', [
-                    'count' => $comments->count(),
-                    'purchase_order_id' => $this->purchaseOrder->id,
-                    'comment_ids' => $comments->pluck('id')->toArray()
-                ]);
-
-                $dbComments = $comments->map(function($comment) {
-                    $attachment = $comment->getFirstMedia('attachments');
-
-                    // Log para diagnóstico
-                    \Log::info('Procesando comentario de BD', [
-                        'comment_id' => $comment->id,
-                        'purchase_order_id' => $comment->purchase_order_id,
-                        'user_id' => $comment->user_id,
-                        'operacion' => $comment->operacion,
-                        'comment_text' => $comment->comment,
-                        'has_attachment' => $attachment ? true : false
-                    ]);
-
-                    return [
-                        'id' => $comment->id,
-                        'user_name' => $comment->user->name ?? 'Usuario',
-                        'user_role' => $comment->getRole() ?? 'Sin rol',
-                        'comment' => $comment->comment,
-                        'created_at' => $comment->created_at,
-                        'status' => 'Aprobado', // Solo los comentarios aprobados están en la BD
-                        'operation' => $comment->operacion ?? 'Detalle PO',
-                        'attachment' => $attachment ? [
-                            'name' => $attachment->file_name,
-                            'url' => $attachment->getUrl(),
-                            'type' => strtoupper($attachment->extension),
-                        ] : null
-                    ];
-                })
-                ->toArray();
-            }
-
-            // 2. Cargar las solicitudes de autorización pendientes
-            $pendingRequests = $this->authorizationService->getPendingRequests()
-                ->filter(function($request) {
-                    return $request->authorizable_type === get_class($this->purchaseOrder) &&
-                        $request->authorizable_id === $this->purchaseOrder->id &&
-                        in_array($request->operation_type, ['attach_file_to_comment', 'upload_file']);
-                });
-
-            // Log para diagnóstico
-            \Log::info('Solicitudes pendientes', [
-                'count' => $pendingRequests->count(),
+            // 1. Load all comments from database (both pending and approved)
+            \Log::info('Loading comments for PO', [
                 'purchase_order_id' => $this->purchaseOrder->id
             ]);
 
-            // 3. Convertir solicitudes pendientes a "comentarios virtuales" para mostrar
-            $pendingComments = [];
-            foreach ($pendingRequests as $request) {
-                $data = $request->data ?? [];
+            // Get all comments for this purchase order
+            $comments = PurchaseOrderComment::with(['user.roles', 'media', 'authorizations'])
+                ->where('purchase_order_id', $this->purchaseOrder->id)
+                ->latest()
+                ->get();
 
-                // Para solicitudes de tipo attach_file_to_comment
-                if ($request->operation_type === 'attach_file_to_comment') {
-                    $commentText = $data['comment'] ?? 'Comentario pendiente de aprobación';
-
-                    $pendingComments[] = [
-                        'id' => 'req_' . $request->id,
-                        'user_name' => $request->requester->name ?? 'Usuario',
-                        'user_role' => $request->requester->roles->first()->name ?? 'Sin rol',
-                        'comment' => $commentText,
-                        'created_at' => $request->created_at,
-                        'status' => 'Pendiente',
-                        'operation' => 'Comentario con archivo (Pendiente de aprobación)',
-                        'attachment' => isset($data['file_name']) ? [
-                            'name' => $data['file_name'] . ' (pendiente de aprobación)',
-                            'url' => '#',
-                            'type' => strtoupper(pathinfo($data['file_name'] ?? '', PATHINFO_EXTENSION)),
-                        ] : null
-                    ];
-                }
-                // Para solicitudes de tipo upload_file
-                elseif ($request->operation_type === 'upload_file') {
-                    $pendingComments[] = [
-                        'id' => 'req_' . $request->id,
-                        'user_name' => $request->requester->name ?? 'Usuario',
-                        'user_role' => $request->requester->roles->first()->name ?? 'Sin rol',
-                        'comment' => 'Solicitud de subida de archivo',
-                        'created_at' => $request->created_at,
-                        'status' => 'Pendiente',
-                        'operation' => 'Subir archivo (Pendiente de aprobación)',
-                        'attachment' => isset($data['file_name']) ? [
-                            'name' => $data['file_name'] . ' (pendiente de aprobación)',
-                            'url' => '#',
-                            'type' => strtoupper(pathinfo($data['file_name'] ?? '', PATHINFO_EXTENSION)),
-                        ] : null
-                    ];
-                }
-            }
-
-            // 4. Combinar comentarios reales y pendientes
-            $this->comments = array_merge($dbComments, $pendingComments);
-
-            \Log::info('Total de comentarios cargados', [
-                'count' => count($this->comments),
-                'db_comments' => count($dbComments),
-                'pending_comments' => count($pendingComments)
+            \Log::info('Comments found', [
+                'count' => $comments->count(),
+                'purchase_order_id' => $this->purchaseOrder->id,
+                'comment_ids' => $comments->pluck('id')->toArray()
             ]);
 
-            // 5. Ordenar por fecha
+            // Process comments based on their status
+            $processedComments = $comments->map(function($comment) {
+                $attachment = $comment->getFirstMedia('attachments');
+
+                // Log for diagnostics
+                \Log::info('Processing comment', [
+                    'comment_id' => $comment->id,
+                    'purchase_order_id' => $comment->purchase_order_id,
+                    'user_id' => $comment->user_id,
+                    'operation' => $comment->operacion,
+                    'status' => $comment->status,
+                    'comment_text' => $comment->comment,
+                    'has_attachment' => $attachment ? true : false
+                ]);
+
+                // Convert comment status to display text
+                $statusDisplay = 'Pendiente';
+                if ($comment->isApproved()) {
+                    $statusDisplay = 'Aprobado';
+                } elseif ($comment->isRejected()) {
+                    $statusDisplay = 'Rechazado';
+                }
+
+                // Format the comment for display
+                return [
+                    'id' => $comment->id,
+                    'user_name' => $comment->user->name ?? 'Usuario',
+                    'user_role' => $comment->getRole() ?? 'Sin rol',
+                    'comment' => $comment->comment,
+                    'created_at' => $comment->created_at,
+                    'status' => $statusDisplay,
+                    'operation' => $comment->operacion ?? 'Detalle PO',
+                    'attachment' => $attachment ? [
+                        'name' => $attachment->file_name,
+                        'url' => $attachment->getUrl(),
+                        'type' => strtoupper($attachment->extension),
+                    ] : null
+                ];
+            })->toArray();
+
+            $this->comments = $processedComments;
+
+            \Log::info('Total comments loaded', [
+                'count' => count($this->comments)
+            ]);
+
+            // Sort by date (newest first)
             usort($this->comments, function($a, $b) {
-                return $b['created_at'] <=> $a['created_at']; // Ordenar de más reciente a más antiguo
+                return $b['created_at'] <=> $a['created_at'];
             });
         } catch (\Exception $e) {
-            \Log::error('Error al cargar comentarios y archivos adjuntos', [
+            \Log::error('Error loading comments and attachments', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -528,7 +460,7 @@ class PucharseOrderDetail extends Component
 
     public function setComments()
     {
-        // Si estamos en modo adjuntar archivo a comentario aprobado, solo nos interesa el archivo
+        // If we're attaching a file to an approved comment, we only need the file
         if ($this->commentAttachmentApproved) {
             $this->validate([
                 'attachment' => 'required|file|max:10240', // 10MB max
@@ -536,14 +468,14 @@ class PucharseOrderDetail extends Component
                 'attachment.required' => 'Por favor, seleccione un archivo para adjuntar al comentario aprobado.'
             ]);
         }
-        // En modo normal, necesitamos al menos un comentario
+        // In normal mode, we need at least a comment or an attachment
         elseif (empty(trim($this->comment)) && !$this->attachment) {
             return;
         }
 
         try {
-            // Log para diagnóstico de estado
-            \Log::info('setComments llamado con los siguientes valores', [
+            // Log for diagnostics
+            \Log::info('setComments called with values', [
                 'commentAttachmentApproved' => $this->commentAttachmentApproved,
                 'comment_id' => Session::get('comment_id'),
                 'attachment' => $this->attachment ? true : false,
@@ -551,87 +483,58 @@ class PucharseOrderDetail extends Component
                 'comment_text' => $this->comment
             ]);
 
-            // Si hay un archivo adjunto y hay una aprobación previa, permitir la subida directa
+            // If there's an attachment and a previous approval, allow direct upload
             if ($this->attachment && $this->commentAttachmentApproved) {
-                // Buscar el comentario aprobado por ID
+                // Find the approved comment by ID
                 $commentId = Session::get('comment_id');
                 if ($commentId) {
                     $commentModel = \App\Models\PurchaseOrderComment::find($commentId);
 
                     if ($commentModel) {
-                        \Log::info('Comentario encontrado para adjuntar archivo', [
+                        \Log::info('Found comment to attach file to', [
                             'comment_id' => $commentId,
                             'purchase_order_id' => $commentModel->purchase_order_id,
                             'attachment_name' => $this->attachment->getClientOriginalName()
                         ]);
 
                         try {
-                            // Adjuntar el archivo al comentario
+                            // Attach the file to the comment
                             $media = $commentModel
                                 ->addMedia($this->attachment->getRealPath())
                                 ->usingName(pathinfo($this->attachment->getClientOriginalName(), PATHINFO_FILENAME))
                                 ->usingFileName($this->attachment->getClientOriginalName())
                                 ->toMediaCollection('attachments');
 
-                            \Log::info('Archivo adjuntado correctamente al comentario', [
+                            \Log::info('File attached to comment', [
                                 'media_id' => $media->id,
                                 'comment_id' => $commentModel->id,
                                 'file_name' => $this->attachment->getClientOriginalName()
                             ]);
 
-                            session()->flash('message', 'Archivo adjuntado correctamente al comentario aprobado');
+                            session()->flash('message', 'Archivo adjuntado correctamente al comentario');
 
-                            // Limpiar los campos y banderas
+                            // Clean up fields and flags
                             $this->comment = '';
                             $this->attachment = null;
                             $this->commentAttachmentApproved = false;
 
-                            // Limpiar la sesión
+                            // Clean up session
                             Session::forget(['comment_attachment_approved', 'comment_id', 'purchase_order_id']);
 
-                            // Recargar comentarios
+                            // Reload comments
                             $this->loadCommentsAndAttachments();
 
                             return;
                         } catch (\Exception $mediaException) {
-                            \Log::error('Error al adjuntar archivo al comentario', [
+                            \Log::error('Error attaching file to comment', [
                                 'error' => $mediaException->getMessage(),
                                 'trace' => $mediaException->getTraceAsString()
                             ]);
 
-                            // Intentar de otra manera - método directo
-                            try {
-                                $tempPath = $this->attachment->getRealPath();
-                                $fileName = $this->attachment->getClientOriginalName();
-
-                                // Método alternativo para adjuntar archivos
-                                $media = $commentModel->addMediaFromDisk($tempPath, 'local')
-                                    ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
-                                    ->usingFileName($fileName)
-                                    ->toMediaCollection('attachments');
-
-                                \Log::info('Archivo adjuntado con método alternativo', [
-                                    'media_id' => $media->id
-                                ]);
-
-                                session()->flash('message', 'Archivo adjuntado correctamente (método alternativo)');
-
-                                // Limpieza
-                                $this->comment = '';
-                                $this->attachment = null;
-                                $this->commentAttachmentApproved = false;
-                                Session::forget(['comment_attachment_approved', 'comment_id', 'purchase_order_id']);
-                                $this->loadCommentsAndAttachments();
-                                return;
-                            } catch (\Exception $e2) {
-                                \Log::error('Error también con método alternativo', [
-                                    'error' => $e2->getMessage()
-                                ]);
-                                throw $mediaException; // Lanzar el error original
-                            }
+                            throw $mediaException;
                         }
                     } else {
-                        \Log::error('No se encontró el comentario con ID ' . $commentId);
+                        \Log::error('Comment not found with ID ' . $commentId);
                     }
 
                     session()->flash('error', 'No se encontró el comentario aprobado para adjuntar el archivo');
@@ -639,39 +542,7 @@ class PucharseOrderDetail extends Component
                 }
             }
 
-            // Si hay un archivo adjunto, se requiere autorización - NO CREAMOS EL COMENTARIO AÚN
-            if ($this->attachment) {
-                // Verificar si hay una solicitud pendiente
-                if ($this->authorizationService->isOperationPending('attach_file_to_comment', $this->purchaseOrder)) {
-                    session()->flash('error', 'Ya existe una solicitud de autorización pendiente para adjuntar un archivo');
-                    return;
-                }
-
-                // Crear una solicitud de autorización
-                $authRequest = $this->authorizationService->createRequest(
-                    $this->purchaseOrder,
-                    'attach_file_to_comment',
-                    [
-                        'comment' => $this->comment,
-                        'file_name' => $this->attachment->getClientOriginalName(),
-                        'file_size' => $this->attachment->getSize(),
-                        'uploaded_by' => auth()->user()->name ?? 'Usuario',
-                    ]
-                );
-
-                session()->flash('message', 'Solicitud de autorización para comentario con archivo creada. Pendiente de aprobación.');
-
-                // Limpiar los campos después de guardar
-                $this->comment = '';
-                $this->attachment = null;
-
-                // Recargar comentarios para mostrar la solicitud pendiente
-                $this->loadCommentsAndAttachments();
-
-                return;
-            }
-
-            // Si no hay archivo adjunto, se puede agregar el comentario directamente sin autorización
+            // Crear el comentario sin estado
             $commentModel = new \App\Models\PurchaseOrderComment();
             $commentModel->purchase_order_id = $this->purchaseOrder->id;
             $commentModel->user_id = auth()->id();
@@ -679,22 +550,42 @@ class PucharseOrderDetail extends Component
             $commentModel->operacion = 'Detalle PO';
             $commentModel->save();
 
-            // Log de diagnóstico
-            \Log::info('Comentario creado sin archivo', [
+            // Si hay un archivo adjunto, crear autorización
+            if ($this->attachment) {
+                // Crear solicitud de autorización
+                $authRequest = $commentModel->createAuthorizationRequest(
+                    'attach_file_to_comment',
+                    [
+                        'comment_id' => $commentModel->id,
+                        'file_name' => $this->attachment->getClientOriginalName(),
+                        'file_size' => $this->attachment->getSize(),
+                        'uploaded_by' => auth()->user()->name ?? 'Usuario',
+                    ]
+                );
+            }
+
+            // Log for diagnostics
+            \Log::info('Comment created', [
                 'comment_id' => $commentModel->id,
                 'purchase_order_id' => $this->purchaseOrder->id,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'status' => $commentModel->status
             ]);
 
-            // Limpiar los campos después de guardar
+            // If there's an attachment, create authorization request
+            if ($this->attachment) {
+                session()->flash('message', 'Comentario creado. Pendiente de aprobación para adjuntar archivo.');
+            } else {
+                // No attachment, just show success message
+                session()->flash('message', 'Comentario agregado correctamente');
+            }
+
+            // Clean up fields
             $this->comment = '';
             $this->attachment = null;
 
-            // Recargar los comentarios
+            // Reload comments to show the new ones
             $this->loadCommentsAndAttachments();
-
-            // Notificar éxito
-            session()->flash('message', 'Comentario agregado correctamente');
 
         } catch (\Exception $e) {
             \Log::error("Error setting comments: " . $e->getMessage(), [
