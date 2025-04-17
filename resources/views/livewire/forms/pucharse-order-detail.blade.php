@@ -434,7 +434,7 @@
                 <div class="flex justify-between mb-6 items-centers">
                     <x-search-input class="w-64" />
 
-                    <div class="flex gap-4">
+                    <div class="flex hidden gap-4">
                         <x-primary-button>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                 viewBox="0 0 20 20" fill="none">

@@ -505,7 +505,7 @@
                 <div class="flex justify-between items-centers">
                     <x-search-input class="w-64" />
 
-                    <div class="flex gap-4">
+                    <div class="flex hidden gap-4">
                         <x-primary-button>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                 viewBox="0 0 20 20" fill="none">
@@ -559,7 +559,11 @@
                         @forelse($poSavingsData as $poData)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $poData['order_number'] }}</div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        <a href="{{ route('purchase-orders.detail', $poData['id']) }}" class="text-[#190FDB] underline underline-offset-4">
+                                            {{ $poData['order_number'] }}
+                                        </a>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ number_format($poData['savings_ofr_fcl'], 2) }}</div>
