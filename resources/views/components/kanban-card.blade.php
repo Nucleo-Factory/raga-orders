@@ -17,6 +17,7 @@
     $pickupTime = \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup)->format('d/m/Y');
     $totalWeight = $purchaseOrder->total_weight;
     $dangerLevel = $purchaseOrder->material_type;
+    $materialType = $purchaseOrder->material_type;
 @endphp
 
 <li class="kanban-card relative flex justify-between min-h-[180px] w-full gap-5 rounded-[0.625rem] border-2 border-[#E0E5FF] bg-white px-4 py-2 text-xs"
@@ -39,7 +40,7 @@
         </div>
 
         <div class="flex flex-col justify-between space-y-[0.875rem]"
-            @if ($dangerLevel == 'dangerous')
+            @if (str_contains($materialType, 'dangerous'))
             <x-label class="bg-danger">
                 <span>Producto peligroso</span>
 
