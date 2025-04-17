@@ -813,10 +813,32 @@ class CreatePucharseOrder extends Component
                 'comments' => $this->comments,
             ];
 
-            $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
-            $purchaseOrder->update($poData);
+            try {
+                // Usar transacción para asegurar integridad
+                \DB::beginTransaction();
 
-            $this->dispatch('open-modal', 'modal-purchase-order-created');
+                $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
+                $purchaseOrder->update($poData);
+
+                // Eliminar productos existentes
+                $purchaseOrder->products()->detach();
+
+                // Guardar los productos actualizados asociados a la orden
+                foreach ($this->orderProducts as $product) {
+                    $purchaseOrder->products()->attach($product['id'], [
+                        'quantity' => $product['quantity'] ?? 0,
+                        'unit_price' => $product['price_per_unit'] ?? 0
+                    ]);
+                }
+
+                \DB::commit();
+                $this->dispatch('open-modal', 'modal-purchase-order-created');
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                \Log::error('Error en updatePurchaseOrder: ' . $e->getMessage());
+                session()->flash('error', 'Error al actualizar la orden: ' . $e->getMessage());
+            }
     }
 
     public function closeModal() {
