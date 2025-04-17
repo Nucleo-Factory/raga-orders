@@ -227,6 +227,7 @@ class CreatePucharseOrder extends Component
                 $this->real_cost_real_po = $this->purchaseOrder->real_cost_real_po;
                 $this->other_costs = $this->purchaseOrder->other_costs;
                 $this->other_expenses = $this->purchaseOrder->other_expenses;
+                $this->savings_ofr_fcl = $this->purchaseOrder->savings_ofr_fcl;
 
                 // Fechas
                 $this->date_required_in_destination = $this->purchaseOrder->date_required_in_destination ? $this->purchaseOrder->date_required_in_destination->format('Y-m-d') : null;
@@ -278,9 +279,6 @@ class CreatePucharseOrder extends Component
         $this->billToArray = $billTo->pluck('name', 'id')->toArray();
     }
 
-    /**
-     * Genera un número de orden único
-     */
     public function generateUniqueOrderNumber()
     {
         // Formato: PO-YYYYMMDD-XXXX donde XXXX es un número secuencial
@@ -302,9 +300,6 @@ class CreatePucharseOrder extends Component
         }
     }
 
-    /**
-     * Cuando se selecciona un vendor, rellenar los datos automáticamente
-     */
     public function onVendorSelected()
     {
         if ($this->vendor_id) {
@@ -317,9 +312,6 @@ class CreatePucharseOrder extends Component
         }
     }
 
-    /**
-     * Cuando se selecciona un ship to, rellenar los datos automáticamente
-     */
     public function onShipToSelected()
     {
         if ($this->ship_to_id) {
@@ -333,9 +325,6 @@ class CreatePucharseOrder extends Component
         }
     }
 
-    /**
-     * Cuando se selecciona un bill to, rellenar los datos automáticamente
-     */
     public function onBillToSelected()
     {
         if ($this->bill_to_id) {
@@ -450,8 +439,14 @@ class CreatePucharseOrder extends Component
             $this->net_total += floatval($product['subtotal']);
         }
 
+        // Calcular el additional_cost como Costo OFR Real + Total Neto
+        $this->additional_cost = floatval($this->cost_ofr_real) + floatval($this->net_total);
+
         // Calcular el total final (neto + adicionales)
         $this->total = floatval($this->net_total) + floatval($this->additional_cost) + floatval($this->insurance_cost);
+
+        // Calcular los ahorros
+        $this->calculateSavings();
     }
 
     public function updatedAdditionalCost()
@@ -464,9 +459,6 @@ class CreatePucharseOrder extends Component
         $this->calculateTotals();
     }
 
-    /**
-     * Prepara los campos de fecha para el procesamiento, convirtiendo strings vacíos a null
-     */
     protected function prepareDateFields()
     {
         $dateFields = [
@@ -817,5 +809,55 @@ class CreatePucharseOrder extends Component
         $this->shipToArray = $shipTos->pluck('name', 'id')->toArray();
 
         return view('livewire.forms.create-pucharse-order');
+    }
+
+    public function updatedCostOfrEstimated()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedCostOfrReal()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedGroundTransportCost1()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedGroundTransportCost2()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedEstimatedPalletCost()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedPalletQuantityReal()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function calculateSavings()
+    {
+        // Ahorros OFR FCL = Costo OFR Real - Costo OFR Estimado
+        $this->savings_ofr_fcl =  floatval($this->cost_ofr_estimated) - floatval($this->cost_ofr_real);
+
+        // Ahorro en Recogida → Ahorro pickup = Costo Transporte Terrestre 2 - Costo Transporte Terrestre 1
+        $this->saving_pickup =  floatval($this->ground_transport_cost_1) - floatval($this->ground_transport_cost_2);
+
+        // Costo OFR Estimado = Costo Estimado de Pallets * Cantidad Real de Pallets
+        if (!empty($this->pallet_quantity_real) && !empty($this->estimated_pallet_cost)) {
+            $this->cost_ofr_estimated = floatval($this->estimated_pallet_cost) * floatval($this->pallet_quantity_real);
+        }
     }
 }

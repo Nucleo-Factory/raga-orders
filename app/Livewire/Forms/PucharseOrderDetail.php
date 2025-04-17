@@ -57,8 +57,16 @@ class PucharseOrderDetail extends Component
     public function mount($id)
     {
         // Cargar la orden de compra con sus productos y hub relacionados
-        $this->purchaseOrder = PurchaseOrder::with(['products', 'actualHub'])->findOrFail($id);
+        $this->purchaseOrder = PurchaseOrder::with(['products', 'actualHub', 'shippingDocuments'])->findOrFail($id);
         $this->purchaseOrderDetails = PurchaseOrder::findOrFail($id);
+
+        // Cargar el shipping document asociado (si existe)
+        $this->shippingDocument = $this->purchaseOrder->shippingDocuments->first();
+
+        // Si hay shipping document, cargar las POs asociadas
+        if ($this->shippingDocument) {
+            $this->shippingDocument->load(['purchaseOrders']);
+        }
 
         // Cargar los productos en el formato que necesitamos
         $this->loadOrderProducts();

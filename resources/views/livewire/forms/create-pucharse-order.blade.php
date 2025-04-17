@@ -360,14 +360,14 @@
                         <x-slot:label>
                             Cantidad estimada de pallets
                         </x-slot:label>
-                        <x-slot:input type="number" name="pallet_quantity" placeholder="0" wire:model="pallet_quantity">
+                        <x-slot:input type="number" name="pallet_quantity" placeholder="0" wire:model.live="pallet_quantity">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Cantidad Real de Pallets
                         </x-slot:label>
-                        <x-slot:input type="number" name="pallet_quantity_real" placeholder="0" wire:model="pallet_quantity_real">
+                        <x-slot:input type="number" name="pallet_quantity_real" placeholder="0" wire:model.live="pallet_quantity_real">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -381,14 +381,14 @@
                         <x-slot:label>
                             Costo Transporte Terrestre 1
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_1" placeholder="0.00" wire:model="ground_transport_cost_1">
+                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_1" placeholder="0.00" wire:model.live="ground_transport_cost_1">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Costo Transporte Terrestre 2
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_2" placeholder="0.00" wire:model="ground_transport_cost_2">
+                        <x-slot:input type="number" step="0.01" name="ground_transport_cost_2" placeholder="0.00" wire:model.live="ground_transport_cost_2">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -402,21 +402,21 @@
                         <x-slot:label>
                             Costo OFR Estimado
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="cost_ofr_estimated" placeholder="0.00" wire:model="cost_ofr_estimated">
+                        <x-slot:input type="number" step="0.01" name="cost_ofr_estimated" placeholder="0.00" wire:model.live="cost_ofr_estimated" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Costo OFR Real
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="cost_ofr_real" placeholder="0.00" wire:model="cost_ofr_real">
+                        <x-slot:input type="number" step="0.01" name="cost_ofr_real" placeholder="0.00" wire:model.live="cost_ofr_real">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
                             Costo Estimado de Pallets
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="estimated_pallet_cost" placeholder="0.00" wire:model="estimated_pallet_cost">
+                        <x-slot:input type="number" step="0.01" name="estimated_pallet_cost" placeholder="0.00" wire:model.live="estimated_pallet_cost">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -458,14 +458,14 @@
                         <x-slot:label>
                             Ahorros OFR FCL
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="savings_ofr_fcl" placeholder="0.00" wire:model="savings_ofr_fcl">
+                        <x-slot:input type="number" step="0.01" name="savings_ofr_fcl" placeholder="0.00" wire:model.live="savings_ofr_fcl" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Ahorro en Recogida
+                            Ahorro en pickup
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="saving_pickup" placeholder="0.00" wire:model="saving_pickup">
+                        <x-slot:input type="number" step="0.01" name="saving_pickup" placeholder="0.00" wire:model="saving_pickup" disabled>
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>

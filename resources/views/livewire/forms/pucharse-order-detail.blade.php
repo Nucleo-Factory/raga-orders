@@ -462,144 +462,61 @@
                     <thead class="bg-[#E0E5FF]">
                         <tr>
                             <th scope="col"
-                                class="px-6 py-5 text-xs font-medium tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortBy('material_id')">
-                                Material ID
-                                @if ($sortField === 'material_id')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
+                                class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                                Ahorro OFR para FCL
                             </th>
                             <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortBy('description')">
-                                Descripción
-                                @if ($sortField === 'description')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
+                                class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                                Ahorro en pickup
                             </th>
                             <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortBy('quantity')">
-                                Cantidad
-                                @if ($sortField === 'quantity')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
+                                class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                                Ahorro ejecutado
                             </th>
                             <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortBy('price_per_unit')">
-                                Precio unitario
-                                @if ($sortField === 'price_per_unit')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
-                                wire:click="sortBy('subtotal')">
-                                Subtotal
-                                @if ($sortField === 'subtotal')
-                                    @if ($sortDirection === 'asc')
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 15l7-7 7 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    @endif
-                                @endif
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase">
-                                Acciones
+                                class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                                Ahorro no ejecutado
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($orderProducts as $product)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $product['material_id'] }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ $product['description'] }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $product['quantity'] }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        {{ number_format($product['price_per_unit'], 2) }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        {{ number_format($product['subtotal'], 2) }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                    <a href="{{ route('products.edit', $product['id']) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                    No se encontraron materiales para esta orden de compra
-                                </td>
-                            </tr>
-                        @endforelse
+                        @php
+                            // Variables para acumular los totales de ahorro
+                            $totalSavingsOfrFcl = 0;
+                            $totalSavingPickup = 0;
+                            $totalSavingExecuted = 0;
+                            $totalSavingNotExecuted = 0;
+
+                            // Si tenemos un shipping document, calcular los totales de todas las POs asociadas
+                            if (isset($shippingDocument) && $shippingDocument) {
+                                foreach ($shippingDocument->purchaseOrders as $po) {
+                                    $totalSavingsOfrFcl += $po->savings_ofr_fcl ?? 0;
+                                    $totalSavingPickup += $po->saving_pickup ?? 0;
+                                    $totalSavingExecuted += $po->saving_executed ?? 0;
+                                    $totalSavingNotExecuted += $po->saving_not_executed ?? 0;
+                                }
+                            } else {
+                                // Si no hay shipping document, usar los valores de la PO actual
+                                $totalSavingsOfrFcl = $purchaseOrder->savings_ofr_fcl ?? 0;
+                                $totalSavingPickup = $purchaseOrder->saving_pickup ?? 0;
+                                $totalSavingExecuted = $purchaseOrder->saving_executed ?? 0;
+                                $totalSavingNotExecuted = $purchaseOrder->saving_not_executed ?? 0;
+                            }
+                        @endphp
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingsOfrFcl, 2) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingPickup, 2) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingExecuted, 2) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingNotExecuted, 2) }}</div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
