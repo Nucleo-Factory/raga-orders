@@ -113,8 +113,16 @@ class CreatePucharseOrder extends Component
     public $hubsArray = [];
     public $billToArray = [];
 
+    // Material type options
+    public $materialTypeOptions = [
+        'dangerous' => 'Peligroso',
+        'general' => 'General',
+        'exclusive' => 'Exclusivo',
+        'estibable' => 'Estibable'
+    ];
+
     // New fields
-    public $material_type;
+    public $material_type = [];
     public $ensurence_type;
     public $mode;
     public $tracking_id;
@@ -159,7 +167,8 @@ class CreatePucharseOrder extends Component
         $this->loadHubs();
         $this->loadBillTo();
 
-        $this->material_type = 'general';
+        // Initialize with empty array for new records
+        $this->material_type = ['general'];
         $this->ensurence_type = 'pending';
 
         if ($this->id) {
@@ -199,6 +208,25 @@ class CreatePucharseOrder extends Component
                 $this->payment_terms = $this->purchaseOrder->payment_terms;
                 $this->order_place = $this->purchaseOrder->order_place;
                 $this->email_agent = $this->purchaseOrder->email_agent;
+
+                // Special handling for material_type which is now JSON
+                if ($this->purchaseOrder->material_type) {
+                    try {
+                        // If it's a JSON string, decode it
+                        if (is_string($this->purchaseOrder->material_type)) {
+                            $this->material_type = json_decode($this->purchaseOrder->material_type, true) ?? ['general'];
+                        } else {
+                            // If it's already an array (Laravel might have auto-cast it)
+                            $this->material_type = (array) $this->purchaseOrder->material_type;
+                        }
+                    } catch (\Exception $e) {
+                        // Fallback to default if there's an error
+                        $this->material_type = ['general'];
+                    }
+                } else {
+                    // Default value if nothing is stored
+                    $this->material_type = ['general'];
+                }
 
                 // Totals
                 $this->net_total = $this->purchaseOrder->net_total;
@@ -501,6 +529,7 @@ class CreatePucharseOrder extends Component
             'largo_cm' => 'required',
             'ancho_cm' => 'required',
             'alto_cm' => 'required',
+            'material_type' => 'required|array|min:1',
         ], [
             'order_number.required' => 'El número de orden es requerido',
             'currency.required' => 'La moneda es requerida',
@@ -516,6 +545,8 @@ class CreatePucharseOrder extends Component
             'largo.required' => 'El largo es requerido',
             'alto.required' => 'El alto es requerido',
             'volumen.required' => 'El volumen es requerido',
+            'material_type.required' => 'Debe seleccionar al menos un tipo de material',
+            'material_type.min' => 'Debe seleccionar al menos un tipo de material',
         ]);
 
         // Validar que tenga al menos un producto
@@ -572,7 +603,7 @@ class CreatePucharseOrder extends Component
                 'date_consolidation' => $this->date_consolidation,
                 'release_date' => $this->release_date,
                 // Otros campos
-                'material_type' => $this->material_type,
+                'material_type' => json_encode($this->material_type),
                 'ensurence_type' => $this->ensurence_type,
                 'mode' => $this->mode,
                 'tracking_id' => $this->tracking_id,
@@ -743,6 +774,8 @@ class CreatePucharseOrder extends Component
                 'weight_lb' => $this->peso_lb,
                 'planned_hub_id' => $this->planned_hub_id,
                 'actual_hub_id' => $this->actual_hub_id,
+                // Material type is now a JSON array
+                'material_type' => json_encode($this->material_type),
                 // Fechas
                 'date_required_in_destination' => $this->date_required_in_destination,
                 'date_planned_pickup' => $this->date_planned_pickup,
@@ -756,7 +789,6 @@ class CreatePucharseOrder extends Component
                 'date_consolidation' => $this->date_consolidation,
                 'release_date' => $this->release_date,
                 // Otros campos
-                'material_type' => $this->material_type,
                 'ensurence_type' => $this->ensurence_type,
                 'mode' => $this->mode,
                 'tracking_id' => $this->tracking_id,

@@ -335,8 +335,31 @@
             <div class="w-full space-y-6">
                 <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
-                    <x-form-select label="Tipo de Material" name="material_type" wire:model="material_type" :options="['dangerous' => 'Peligroso', 'general' => 'General', 'exclusive' => 'Exclusivo', 'estibable' => 'Estibable']" />
 
+                    <div>
+                        <label class="text-sm font-medium text-[#565AFF]">
+                            Tipo de Material
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            @foreach($materialTypeOptions as $value => $label)
+                                <div class="flex items-center">
+                                    <input
+                                        id="material_type_{{ $value }}"
+                                        type="checkbox"
+                                        value="{{ $value }}"
+                                        wire:model="material_type"
+                                        class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                    >
+                                    <label for="material_type_{{ $value }}" class="block ml-2 text-sm text-gray-700">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('material_type')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     <x-form-select label="Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
                     <x-form-input>

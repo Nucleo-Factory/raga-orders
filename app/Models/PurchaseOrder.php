@@ -105,6 +105,7 @@ class PurchaseOrder extends Model implements HasMedia
         'weight_lb' => 'integer',
         'insurance_cost' => 'decimal:2',
         'order_date' => 'date',
+        'material_type' => 'array',
         'date_required_in_destination' => 'datetime',
         'date_planned_pickup' => 'datetime',
         'date_actual_pickup' => 'datetime',
