@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
                 CompanySeeder::class,     // Companies must be created first
                 KanbanBoardSeeder::class, // Usar KanbanBoardSeeder en lugar de KanbanSeeder
                 HubSeeder::class,
+                NotificationTypeSeeder::class, // Added notification types seeder
             ]);
         } finally {
             // Asegurarse de que las restricciones de clave foránea se reactiven

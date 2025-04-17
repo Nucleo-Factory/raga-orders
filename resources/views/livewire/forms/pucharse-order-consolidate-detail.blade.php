@@ -556,43 +556,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @php
-                            // Variables para acumular los totales de ahorro
-                            $totalSavingsOfrFcl = 0;
-                            $totalSavingPickup = 0;
-                            $totalSavingExecuted = 0;
-                            $totalSavingNotExecuted = 0;
-
-                            // Arreglo para almacenar los datos de todas las POs
-                            $poSavingsData = [];
-
-                            // Obtener datos de todas las POs asociadas al shipping document
-                            if (isset($relatedPurchaseOrders) && count($relatedPurchaseOrders) > 0) {
-                                foreach ($relatedPurchaseOrders as $po) {
-                                    // Usar el ID para obtener el modelo completo
-                                    $poModel = App\Models\PurchaseOrder::find($po['id']);
-                                    if ($poModel) {
-                                        // Añadir datos al arreglo
-                                        $poSavingsData[] = [
-                                            'id' => $poModel->id,
-                                            'order_number' => $poModel->order_number,
-                                            'savings_ofr_fcl' => $poModel->savings_ofr_fcl ?? 0,
-                                            'saving_pickup' => $poModel->saving_pickup ?? 0,
-                                            'saving_executed' => $poModel->saving_executed ?? 0,
-                                            'saving_not_executed' => $poModel->saving_not_executed ?? 0
-                                        ];
-
-                                        // Actualizar totales
-                                        $totalSavingsOfrFcl += $poModel->savings_ofr_fcl ?? 0;
-                                        $totalSavingPickup += $poModel->saving_pickup ?? 0;
-                                        $totalSavingExecuted += $poModel->saving_executed ?? 0;
-                                        $totalSavingNotExecuted += $poModel->saving_not_executed ?? 0;
-                                    }
-                                }
-                            }
-                        @endphp
-
-                        @foreach($poSavingsData as $poData)
+                        @forelse($poSavingsData as $poData)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $poData['order_number'] }}</div>
@@ -610,15 +574,13 @@
                                     <div class="text-sm font-medium text-gray-900">{{ number_format($poData['saving_not_executed'], 2) }}</div>
                                 </td>
                             </tr>
-                        @endforeach
-
-                        @if(count($poSavingsData) == 0)
+                        @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-4 text-center text-gray-500">
                                     No se encontraron órdenes de compra para este documento de embarque
                                 </td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                     <tfoot>
                         <tr class="font-bold bg-gray-50">

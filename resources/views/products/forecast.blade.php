@@ -2,11 +2,11 @@
     <div class="flex items-center justify-between">
         <x-view-title>
             <x-slot:title>
-                Gestión de productos
+                Gestión de Forecast
             </x-slot:title>
 
             <x-slot:content>
-                Cree y monitoree las ordenes de adquisición de productos
+                Revisa y actualiza el forecast de productos
             </x-slot:content>
         </x-view-title>
     </div>

@@ -38,6 +38,11 @@ class PucharseOrderConsolidateDetail extends Component {
     public $showUploadModal = false;
     public $currentStage = 'shipping_document';
     public $selectedPoId;
+    public $poSavingsData = [];
+    public $totalSavingsOfrFcl = 0;
+    public $totalSavingPickup = 0;
+    public $totalSavingExecuted = 0;
+    public $totalSavingNotExecuted = 0;
 
     public function mount($id = null) {
         $this->shippingDocumentId = $id;
@@ -46,6 +51,7 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->loadComments();
         $this->loadAttachedFiles();
         $this->loadHubLocation();
+        $this->loadSavingsData();
 
         // Establecer valores por defecto para variable de ordenamiento
         $this->commentSortField = 'created_at';
@@ -491,6 +497,7 @@ class PucharseOrderConsolidateDetail extends Component {
         try {
             $this->shippingDocument->purchaseOrders()->attach($orderId);
             $this->loadRelatedPurchaseOrders(); // Refresh the list
+            $this->loadSavingsData(); // Recargar datos de ahorros
             $this->searchPO = ''; // Clear search
             $this->searchResults = []; // Clear results
 
@@ -510,6 +517,7 @@ class PucharseOrderConsolidateDetail extends Component {
     public function deleteOrder($id) {
         $this->shippingDocument->purchaseOrders()->detach($id);
         $this->loadRelatedPurchaseOrders();
+        $this->loadSavingsData(); // Recargar datos de ahorros
     }
 
     public function setComments()
@@ -568,6 +576,53 @@ class PucharseOrderConsolidateDetail extends Component {
 
     public function setSelectedPo($poId) {
         $this->selectedPoId = $poId;
+    }
+
+    /**
+     * Cargar datos de ahorros de todas las órdenes de compra asociadas
+     */
+    public function loadSavingsData()
+    {
+        // Reiniciar los datos
+        $this->poSavingsData = [];
+        $this->totalSavingsOfrFcl = 0;
+        $this->totalSavingPickup = 0;
+        $this->totalSavingExecuted = 0;
+        $this->totalSavingNotExecuted = 0;
+
+        // Verificar que tengamos un shipping document cargado con órdenes de compra
+        if (!$this->shippingDocument || count($this->relatedPurchaseOrders) === 0) {
+            return;
+        }
+
+        // Recorrer las órdenes de compra para obtener los datos de ahorros
+        foreach ($this->relatedPurchaseOrders as $po) {
+            // Obtener el modelo completo de la orden de compra
+            $poModel = \App\Models\PurchaseOrder::find($po['id']);
+            if ($poModel) {
+                // Almacenar datos de ahorro para esta orden de compra
+                $this->poSavingsData[] = [
+                    'id' => $poModel->id,
+                    'order_number' => $poModel->order_number,
+                    'savings_ofr_fcl' => $poModel->savings_ofr_fcl ?? 0,
+                    'saving_pickup' => $poModel->saving_pickup ?? 0,
+                    'saving_executed' => $poModel->saving_executed ?? 0,
+                    'saving_not_executed' => $poModel->saving_not_executed ?? 0
+                ];
+
+                // Actualizar los totales
+                $this->totalSavingsOfrFcl += $poModel->savings_ofr_fcl ?? 0;
+                $this->totalSavingPickup += $poModel->saving_pickup ?? 0;
+                $this->totalSavingExecuted += $poModel->saving_executed ?? 0;
+                $this->totalSavingNotExecuted += $poModel->saving_not_executed ?? 0;
+            }
+        }
+
+        // Log para depuración
+        Log::info('Datos de ahorros cargados', [
+            'num_pos' => count($this->poSavingsData),
+            'total_saving_executed' => $this->totalSavingExecuted
+        ]);
     }
 
     public function render() {
