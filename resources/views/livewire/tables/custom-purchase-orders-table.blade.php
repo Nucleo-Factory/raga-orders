@@ -139,16 +139,7 @@
                     </th>
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('total')">
-                            <span>Total</span>
-                            @if ($sortField === 'total')
-                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    @if ($sortDirection === 'asc')
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                    @else
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    @endif
-                                </svg>
-                            @endif
+                            <span>Peso total</span>
                         </div>
                     </th>
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
@@ -191,7 +182,7 @@
                             {{ $order->order_date ? $order->order_date->format('d/m/Y') : 'N/A' }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {{ $order->total ? number_format($order->total, 2) : 'N/A' }}
+                            {{ $order->total_weight ? number_format($order->total_weight, 0) : 'N/A' }} kg
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                             <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
