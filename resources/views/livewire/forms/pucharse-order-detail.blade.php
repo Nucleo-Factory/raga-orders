@@ -1,5 +1,6 @@
 @php
     $travelMethod = 'aéreo';
+    $materialType = $purchaseOrder->material_type;
 @endphp
 
 <div class="space-y-8">
@@ -41,7 +42,7 @@
 
     <div class="flex max-w-[600px] justify-between gap-5 rounded-[0.625rem] bg-white p-4 text-xs">
         <div class="flex flex-col justify-between space-y-[0.875rem]">
-            @if ($purchaseOrder->material_type == 'dangerous')
+            @if (str_contains($materialType, 'dangerous'))
             <x-label class="bg-danger">
                 <span>Producto peligroso</span>
 
@@ -50,6 +51,51 @@
                         fill="none">
                         <path
                             d="M9.99979 6.50019V9.83353M9.99979 13.1669H10.0081M8.84588 2.24329L1.99181 14.0821C1.61164 14.7388 1.42156 15.0671 1.44965 15.3366C1.47416 15.5716 1.5973 15.7852 1.78843 15.9242C2.00756 16.0835 2.38695 16.0835 3.14572 16.0835H16.8539C17.6126 16.0835 17.992 16.0835 18.2111 15.9242C18.4023 15.7852 18.5254 15.5716 18.5499 15.3366C18.578 15.0671 18.3879 14.7388 18.0078 14.0821L11.1537 2.24329C10.7749 1.58899 10.5855 1.26184 10.3384 1.15196C10.1228 1.05612 9.87675 1.05612 9.6612 1.15196C9.4141 1.26184 9.22469 1.58899 8.84588 2.24329Z"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
+            @if (str_contains($materialType, 'general'))
+            <x-label class="bg-gray-500">
+                <span>Producto general</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M9 2.25H3C2.17157 2.25 1.5 2.92157 1.5 3.75V14.25C1.5 15.0784 2.17157 15.75 3 15.75H17C17.8284 15.75 18.5 15.0784 18.5 14.25V7.5C18.5 6.67157 17.8284 6 17 6H10.5L9 2.25Z"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
+            @if (str_contains($materialType, 'estibable'))
+            <x-label class="bg-success">
+                <span>Producto estibable</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M1 13.5L1 14.25C1 15.4926 2.00736 16.5 3.25 16.5H16.75C17.9926 16.5 19 15.4926 19 14.25V13.5M14.5 9L10 13.5M10 13.5L5.5 9M10 13.5V1.5"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
+            @if (str_contains($materialType, 'exclusive'))
+            <x-label class="bg-warning">
+                <span>Producto exclusivo</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M6 16.5V8.25M6 8.25V1.5L14 8.25L10 10.5L6 8.25Z"
                             stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </x-slot:icon>

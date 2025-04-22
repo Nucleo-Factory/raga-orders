@@ -55,6 +55,51 @@
             </x-label>
             @endif
 
+            @if (str_contains($materialType, 'general'))
+            <x-label class="bg-gray-500">
+                <span>Producto general</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M9 2.25H3C2.17157 2.25 1.5 2.92157 1.5 3.75V14.25C1.5 15.0784 2.17157 15.75 3 15.75H17C17.8284 15.75 18.5 15.0784 18.5 14.25V7.5C18.5 6.67157 17.8284 6 17 6H10.5L9 2.25Z"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
+            @if (str_contains($materialType, 'estibable'))
+            <x-label class="bg-success">
+                <span>Producto estibable</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M1 13.5L1 14.25C1 15.4926 2.00736 16.5 3.25 16.5H16.75C17.9926 16.5 19 15.4926 19 14.25V13.5M14.5 9L10 13.5M10 13.5L5.5 9M10 13.5V1.5"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
+            @if (str_contains($materialType, 'exclusive'))
+            <x-label class="bg-warning">
+                <span>Producto exclusivo</span>
+
+                <x-slot:icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18"
+                        fill="none">
+                        <path
+                            d="M6 16.5V8.25M6 8.25V1.5L14 8.25L10 10.5L6 8.25Z"
+                            stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </x-slot:icon>
+            </x-label>
+            @endif
+
             <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
                 <p class="text-base">Hub: <span>{{ $hub }}</span></p>
 

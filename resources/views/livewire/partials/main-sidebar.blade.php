@@ -73,7 +73,7 @@
             <li>
                 <x-sidebar-link href="{{ route('dashboard') }}"
                     class="{{ request()->routeIs('dashboard') ? 'bg-[#E0E5FF]' : '' }}">
-                    <div class="flex items-center justify-center w-5 h-5">
+                    <div class="flex items-center justify-center w-5 h-5" onclick="document.querySelector('.main-sidebar').classList.toggle('sidebar-expanded'); localStorage.setItem('sidebarExpanded', document.querySelector('.main-sidebar').classList.contains('sidebar-expanded'));">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 17"
                             fill="none">
                             <path
@@ -93,7 +93,7 @@
             <li>
                 <x-sidebar-dropdown active="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') }}" route="{{ route('purchase-orders.index') }}">
                     <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 16 20"
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 16 20 "
                             fill="none">
                             <path
                                 d="M4.66667 7.49998C4.20643 7.49998 3.83333 7.87308 3.83333 8.33331C3.83333 8.79355 4.20643 9.16665 4.66667 9.16665H11.3333C11.7936 9.16665 12.1667 8.79355 12.1667 8.33331C12.1667 7.87308 11.7936 7.49998 11.3333 7.49998H4.66667Z"

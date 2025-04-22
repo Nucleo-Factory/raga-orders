@@ -13,6 +13,7 @@
         } else {
             // Si el sidebar no está expandido, redirigir a /$route
             window.location.href = '{{ $path }}';
+            document.querySelector('.main-sidebar').classList.toggle('sidebar-expanded'); localStorage.setItem('sidebarExpanded', document.querySelector('.main-sidebar').classList.contains('sidebar-expanded'));
         }
     },
     init() {

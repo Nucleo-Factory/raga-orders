@@ -163,7 +163,7 @@
             :searchable="$searchable"
             :filterable="$filterable"
             :filterOptions="$filterOptions"
-            :actions="true"
+            :actions="false"
             :actionsView="true"
             :actionsEdit="false"
             :actionsDelete="false"
