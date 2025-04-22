@@ -10,6 +10,7 @@ class Users extends Component
 {
     public $id;
     public $user;
+    public $search = '';
     public $headers = [
         'user' => 'Usuario',
         'date' => 'Fecha',
@@ -17,6 +18,12 @@ class Users extends Component
         'role_type' => 'Tipo de Rol',
         'actions' => 'Acciones'
     ];
+
+    // Refresh the table when search input changes
+    public function updatedSearch()
+    {
+        $this->render();
+    }
 
     public function deleteUser($userId)
     {
@@ -36,7 +43,12 @@ class Users extends Component
 
     public function render()
     {
-        $users = User::with('roles')->get();
+        $users = User::with('roles')
+            ->when($this->search, function ($query) {
+                return $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%');
+            })
+            ->get();
 
         return view('livewire.settings.users', [
             'users' => $users

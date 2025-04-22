@@ -22,6 +22,7 @@
         </div>
     @endif
 
+
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'kanban' }" class="mb-6">
         <!-- Kanban View -->
