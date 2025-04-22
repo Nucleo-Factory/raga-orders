@@ -108,67 +108,7 @@ class TrackingService
                 return null;
             }
 
-            // Definir el orden y nombres de las fases
-            $phaseOrder = [
-                '10_ready' => [
-                    'name' => 'Ready for pickup',
-                    'icon' => 'warehouse'
-                ],
-                '20_to_origin_port' => [
-                    'name' => 'In transit origin port',
-                    'icon' => 'truck'
-                ],
-                '30_at_origin_port' => [
-                    'name' => 'At origin port',
-                    'icon' => 'port'
-                ],
-                '40_in_transit' => [
-                    'name' => 'In transit to dest. port',
-                    'icon' => 'ship'
-                ],
-                '50_at_destination_port' => [
-                    'name' => 'At destination port',
-                    'icon' => 'port'
-                ],
-                '60_to_final_destination' => [
-                    'name' => 'In transit to final dest.',
-                    'icon' => 'truck'
-                ],
-                '70_delivered' => [
-                    'name' => 'Delivered',
-                    'icon' => 'check'
-                ]
-            ];
-
-            // Procesar las fases
-            $timeline = [];
-            $currentPhase = $data['phase'];
-
-            foreach ($phaseOrder as $phaseKey => $phaseInfo) {
-                $phase = collect($data['phases'])->firstWhere('name', $phaseKey);
-
-                $status = $this->determinePhaseStatus($phaseKey, $currentPhase, $phase);
-
-                $timeline[] = [
-                    'id' => $phase['id'] ?? null,
-                    'name' => $phaseInfo['name'],
-                    'icon' => $phaseInfo['icon'],
-                    'status' => $status,
-                    'date' => $phase['actualDate'] ?? ($phase['estimatedDates'][0] ?? null),
-                    'is_current' => $phaseKey === $currentPhase,
-                    'is_completed' => $this->isPhaseCompleted($phaseKey, $currentPhase, $phase)
-                ];
-            }
-
-            return [
-                'timeline' => $timeline,
-                'current_phase' => $currentPhase,
-                'estimated_delivery' => $data['eta'] ?? null,
-                'cargo' => $data['cargo'] ?? [],
-                'pol' => $data['polName'] ?? '',
-                'pod' => $data['podName'] ?? '',
-                'carrier' => $data['carrierCode'] ?? ''
-            ];
+            return $this->processPorthTrackingData($data);
 
         } catch (\Exception $e) {
             \Log::error('Error in getPorthTracking:', [
@@ -177,6 +117,122 @@ class TrackingService
             ]);
             return null;
         }
+    }
+
+    /**
+     * Get tracking information by Master Bill of Lading number
+     *
+     * @param string $masterBl The Master Bill of Lading number
+     * @return array|null The tracking data or null if not found/error
+     */
+    public function getPorthTrackingByMasterBl($masterBl)
+    {
+        try {
+            \Log::info('Fetching tracking data by MasterBl', ['masterBl' => $masterBl]);
+
+            $response = Http::withHeaders([
+                'apikey' => $this->porthApiKey,
+                'Accept' => 'application/json'
+            ])->get("https://porth-api.fly.dev/api/shipment/byMasterBl/{$masterBl}");
+
+            if ($response->failed()) {
+                \Log::error('MasterBl API request failed:', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return null;
+            }
+
+            $data = $response->json();
+
+            if (!$data || !isset($data['phases'])) {
+                \Log::warning('Invalid or empty response from Porth API for MasterBl', [
+                    'masterBl' => $masterBl
+                ]);
+                return null;
+            }
+
+            return $this->processPorthTrackingData($data);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in getPorthTrackingByMasterBl:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'masterBl' => $masterBl
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Process the raw data from Porth API into a standardized format
+     *
+     * @param array $data Raw data from Porth API
+     * @return array Processed tracking data
+     */
+    private function processPorthTrackingData($data)
+    {
+        // Definir el orden y nombres de las fases
+        $phaseOrder = [
+            '10_ready' => [
+                'name' => 'Ready for pickup',
+                'icon' => 'warehouse'
+            ],
+            '20_to_origin_port' => [
+                'name' => 'In transit origin port',
+                'icon' => 'truck'
+            ],
+            '30_at_origin_port' => [
+                'name' => 'At origin port',
+                'icon' => 'port'
+            ],
+            '40_in_transit' => [
+                'name' => 'In transit to dest. port',
+                'icon' => 'ship'
+            ],
+            '50_at_destination_port' => [
+                'name' => 'At destination port',
+                'icon' => 'port'
+            ],
+            '60_to_final_destination' => [
+                'name' => 'In transit to final dest.',
+                'icon' => 'truck'
+            ],
+            '70_delivered' => [
+                'name' => 'Delivered',
+                'icon' => 'check'
+            ]
+        ];
+
+        // Procesar las fases
+        $timeline = [];
+        $currentPhase = $data['phase'];
+
+        foreach ($phaseOrder as $phaseKey => $phaseInfo) {
+            $phase = collect($data['phases'])->firstWhere('name', $phaseKey);
+
+            $status = $this->determinePhaseStatus($phaseKey, $currentPhase, $phase);
+
+            $timeline[] = [
+                'id' => $phase['id'] ?? null,
+                'name' => $phaseInfo['name'],
+                'icon' => $phaseInfo['icon'],
+                'status' => $status,
+                'date' => $phase['actualDate'] ?? ($phase['estimatedDates'][0] ?? null),
+                'is_current' => $phaseKey === $currentPhase,
+                'is_completed' => $this->isPhaseCompleted($phaseKey, $currentPhase, $phase)
+            ];
+        }
+
+        return [
+            'timeline' => $timeline,
+            'current_phase' => $currentPhase,
+            'estimated_delivery' => $data['eta'] ?? null,
+            'cargo' => $data['cargo'] ?? [],
+            'pol' => $data['polName'] ?? '',
+            'pod' => $data['podName'] ?? '',
+            'carrier' => $data['carrierCode'] ?? ''
+        ];
     }
 
     private function determinePhaseStatus($phaseKey, $currentPhase, $phase)
@@ -283,23 +339,36 @@ class TrackingService
         ];
     }
 
-    public function getTracking($trackingId = null)
+    public function getTracking($trackingId = null, $mblNumber = null)
     {
-        \Log::info('TrackingService::getTracking called with ID:', ['tracking_id' => $trackingId]);
+        \Log::info('TrackingService::getTracking called:', [
+            'tracking_id' => $trackingId,
+            'mbl_number' => $mblNumber
+        ]);
 
-        // Si no hay tracking_id, devolver datos de prueba
-        if (!$trackingId) {
-            \Log::info('No tracking ID provided, returning mock data');
+        // Si no hay tracking_id ni mbl_number, devolver datos de prueba
+        if (!$trackingId && !$mblNumber) {
+            \Log::info('No tracking ID or MBL provided, returning mock data');
             return $this->getMockTrackingData();
         }
 
-        // Para shipping documents, usar Porth
-        \Log::info('Attempting to get Porth tracking data for shipping document');
-        $trackingData = $this->getPorthTracking($trackingId);
+        $trackingData = null;
 
-        // Si Porth falla, devolver datos de prueba como fallback
+        // Primero intentamos con el tracking ID si está disponible
+        if ($trackingId) {
+            \Log::info('Attempting to get Porth tracking data using ID', ['id' => $trackingId]);
+            $trackingData = $this->getPorthTracking($trackingId);
+        }
+
+        // Si no tenemos datos por tracking ID o no se proporcionó, intentamos con MBL
+        if (!$trackingData && $mblNumber) {
+            \Log::info('Attempting to get Porth tracking data using Master BL', ['mbl' => $mblNumber]);
+            $trackingData = $this->getPorthTrackingByMasterBl($mblNumber);
+        }
+
+        // Si ambos métodos fallan, devolver datos de prueba como fallback
         if (!$trackingData) {
-            \Log::info('Porth API call failed, returning mock data');
+            \Log::info('All API calls failed, returning mock data');
             return $this->getMockTrackingData();
         }
 

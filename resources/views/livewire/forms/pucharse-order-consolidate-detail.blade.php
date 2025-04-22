@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    @if($shippingDocument->tracking_id)
+    @if($shippingDocument->tracking_id || $shippingDocument->mbl_number)
     <div class="mb-8">
         <h3 class="mb-6 text-lg font-bold">Estado del Envío</h3>
 

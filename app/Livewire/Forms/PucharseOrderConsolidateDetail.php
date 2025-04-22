@@ -154,13 +154,15 @@ class PucharseOrderConsolidateDetail extends Component {
         $this->loadingTracking = true;
 
         $trackingId = $this->shippingDocument->tracking_id ?? null;
+        $mblNumber = $this->shippingDocument->mbl_number ?? null;
         Log::info('Loading tracking data for document:', [
             'shipping_document_id' => $this->shippingDocument->id ?? null,
-            'tracking_id' => $trackingId
+            'tracking_id' => $trackingId,
+            'mbl_number' => $mblNumber
         ]);
 
         $trackingService = new TrackingService();
-        $this->trackingData = $trackingService->getTracking($trackingId);
+        $this->trackingData = $trackingService->getTracking($trackingId, $mblNumber);
 
         $this->loadingTracking = false;
     }

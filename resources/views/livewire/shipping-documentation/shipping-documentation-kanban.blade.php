@@ -1,16 +1,16 @@
 <div>
     <div class="w-full px-0 mx-0">
         @if($hasActiveFilters)
-        <div class="mb-4 flex items-center justify-between rounded-md bg-blue-50 p-3">
+        <div class="flex items-center justify-between p-3 mb-4 rounded-md bg-blue-50">
             <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
                 </svg>
                 <span class="text-sm font-medium text-blue-700">Mostrando documentos filtrados. Los resultados que estás viendo están limitados por los filtros activos.</span>
             </div>
             <button
                 wire:click="$dispatch('clearShippingDocumentationFilters')"
-                class="ml-3 rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                class="px-3 py-1 ml-3 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200"
             >
                 Limpiar filtros
             </button>
@@ -155,7 +155,42 @@
                 </div>
 
                 <!-- Campos para la columna 2 -->
-                <div class="{{ $newColumnId == $columns[1]['id'] ? '' : 'hidden' }}">
+                <div class="{{ $newColumnId == $columns[1]['id'] ? '' : 'hidden' }}"
+                     x-data="{ validating: false }"
+                     x-init="
+                        $watch('validating', value => {
+                            console.log('Estado local de validación cambiado:', value);
+                            $wire.setIsValidating(value);
+                        });
+                        // Sincronizar con el estado de Livewire inicialmente
+                        validating = {{ $isValidating ? 'true' : 'false' }};
+
+                        // Escuchar cambios en el estado de Livewire
+                        window.addEventListener('validating-state-changed', (event) => {
+                            validating = event.detail.isValidating;
+                            console.log('Estado de Livewire cambió a:', validating);
+                        });
+                     ">
+                    <!-- Alerta informativa para validación de códigos -->
+                    <div class="p-3 mb-4 border border-blue-200 rounded-md bg-blue-50" x-show="!validating">
+                        <p class="text-sm text-blue-700">
+                            <i class="mr-1 fa fa-info-circle"></i>
+                            Debe proporcionar al menos un código de seguimiento (ID de tracking o Master BL).
+                            Ambos códigos serán validados antes de mover el documento.
+                        </p>
+                    </div>
+
+                    <!-- Indicador de validación en curso -->
+                    <div class="p-3 mb-4 border border-yellow-200 rounded-md bg-yellow-50" x-show="validating">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-yellow-600 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="text-sm text-yellow-700">Validando código(s) de seguimiento...</p>
+                        </div>
+                    </div>
+
                     <x-form-input class="mb-4">
                         <x-slot:label>
                             Ingrese ID tracking
@@ -278,12 +313,103 @@
             <x-primary-button
                 wire:click="saveAndMoveDocument"
                 wire:loading.attr="disabled"
-                class="w-full">
-                <span wire:loading.remove>Continuar</span>
-                <span wire:loading>Guardando...</span>
+                class="w-full"
+                x-on:click="validating = true"
+                wire:target="saveAndMoveDocument">
+                <span wire:loading.remove wire:target="saveAndMoveDocument">Continuar</span>
+                <span wire:loading wire:target="saveAndMoveDocument">Procesando...</span>
             </x-primary-button>
         </div>
     </x-modal>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función auxiliar para resetear el estado de validación en todos los componentes Alpine
+            function resetValidatingState() {
+                document.querySelectorAll('[x-data]').forEach(function(el) {
+                    if (typeof el.__x !== 'undefined' &&
+                        el.__x.$data &&
+                        'validating' in el.__x.$data) {
+                        el.__x.$data.validating = false;
+                    }
+                });
+            }
+
+            // Función para actualizar de forma segura la propiedad Livewire
+            function safeUpdateLivewireProperty(property, value) {
+                try {
+                    const wireElement = document.querySelector('[wire\\:id]');
+                    if (wireElement) {
+                        const componentId = wireElement.getAttribute('wire:id');
+                        const component = Livewire.find(componentId);
+                        if (component) {
+                            // Verificar que el componente tenga la propiedad antes de intentar actualizarla
+                            // Esto evita el error cuando se intenta actualizar propiedades en componentes que no las tienen
+                            if (property in component.serverMemo.data) {
+                                component.set(property, value);
+                            } else {
+                                console.warn(`El componente ${component.fingerprint.name} no tiene la propiedad ${property}`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error al actualizar propiedad Livewire:', e);
+                }
+            }
+
+            // Escuchar el evento validating-state-changed que viene del backend
+            window.addEventListener('validating-state-changed', function(event) {
+                console.log('Evento recibido validating-state-changed:', event.detail);
+                resetValidatingState();
+            });
+
+            Livewire.on('notify', function(data) {
+                // Si el mensaje es de error, restablecer el estado de validación
+                if (data.type === 'error') {
+                    resetValidatingState();
+                    // También actualizamos la propiedad Livewire
+                    safeUpdateLivewireProperty('isValidating', false);
+                }
+
+                // Mostrar la notificación (asumiendo que tienes alguna biblioteca de notificaciones)
+                if (typeof Toast !== 'undefined') {
+                    Toast.fire({
+                        icon: data.type,
+                        title: data.message
+                    });
+                } else {
+                    // Fallback si no está disponible Toast
+                    console.log(data.type + ': ' + data.message);
+                    console.log(data.message);
+                }
+            });
+
+            // Cuando el documento se mueve exitosamente, resetear el estado de validación
+            Livewire.on('document-moved-successfully', function() {
+                resetValidatingState();
+                // También actualizamos la propiedad Livewire
+                safeUpdateLivewireProperty('isValidating', false);
+            });
+
+            // Si ocurre un error, resetear el estado de validación
+            Livewire.on('error', function(data) {
+                resetValidatingState();
+                // También actualizamos la propiedad Livewire
+                safeUpdateLivewireProperty('isValidating', false);
+
+                // Mostrar el mensaje de error
+                if (typeof Toast !== 'undefined') {
+                    Toast.fire({
+                        icon: 'error',
+                        title: data.message
+                    });
+                } else {
+                    console.error(data.message);
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
 
     <style>
         .kanban-container {

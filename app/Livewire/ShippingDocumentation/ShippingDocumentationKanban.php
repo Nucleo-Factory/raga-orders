@@ -39,6 +39,7 @@ class ShippingDocumentationKanban extends Component
     public $comentario_documento;
     public $attachment = null;
     public $originalColumnId;
+    public $isValidating = false;
 
     // Filtros activos
     public $activeFilters = [];
@@ -47,8 +48,36 @@ class ShippingDocumentationKanban extends Component
     // Listeners
     protected $listeners = [
         'refreshKanban' => 'loadData',
-        'shippingDocumentFiltersChanged' => 'applyFilters'
+        'shippingDocumentFiltersChanged' => 'applyFilters',
+        'setIsValidating' => 'setIsValidating'
     ];
+
+    // Reglas de validación
+    protected function rules()
+    {
+        return [
+            'tracking_id' => 'nullable|string|max:50',
+            'mbl_number' => 'nullable|string|max:50',
+            'booking_code' => 'nullable|string|max:50',
+            'container_number' => 'nullable|string|max:50',
+            'comment' => 'nullable|string',
+            'attachment' => 'nullable|file|max:5120', // 5MB max
+            'release_date' => 'nullable|date',
+            'instruction_date' => 'nullable|date',
+        ];
+    }
+
+    // Mensajes de validación personalizados
+    protected function messages()
+    {
+        return [
+            'tracking_id.max' => 'El ID de tracking no debe exceder los 50 caracteres',
+            'mbl_number.max' => 'El Master BL no debe exceder los 50 caracteres',
+            'booking_code.max' => 'El código de booking no debe exceder los 50 caracteres',
+            'container_number.max' => 'El número de contenedor no debe exceder los 50 caracteres',
+            'attachment.max' => 'El archivo no debe exceder los 5MB',
+        ];
+    }
 
     public function mount($boardId = null)
     {
@@ -547,6 +576,11 @@ class ShippingDocumentationKanban extends Component
             if ($this->mbl_number) {
                 $shippingDoc->mbl_number = $this->mbl_number;
             }
+
+            // Validate that at least one tracking field is provided when needed
+            if ($this->newColumnId == $this->columns[1]['id'] && !$this->tracking_id && !$this->mbl_number) {
+                throw new \Exception('Debe proporcionar al menos un código de seguimiento (ID o Master BL)');
+            }
         } elseif ($this->newColumnId == 14 && $this->instruction_date) { // Column "Digitaciones" (ID 14)
             $shippingDoc->instruction_date = $this->instruction_date;
         }
@@ -554,10 +588,144 @@ class ShippingDocumentationKanban extends Component
         return $shippingDoc;
     }
 
+    /**
+     * Valida los códigos de tracking antes de mover el documento
+     *
+     * @return array|false Retorna los datos de tracking si son válidos, false en caso contrario
+     */
+    private function validateTrackingCodes()
+    {
+        try {
+            $this->isValidating = true;
+            $this->dispatch('validating-state-changed', isValidating: true);
+
+            // Verificamos que estamos en la columna que requiere validación
+            if ($this->newColumnId != $this->columns[1]['id']) {
+                $this->isValidating = false;
+                $this->dispatch('validating-state-changed', isValidating: false);
+                return true; // No se requiere validación para otras columnas
+            }
+
+            // Validamos los formatos de los campos
+            $this->validate([
+                'tracking_id' => 'nullable|string|max:50',
+                'mbl_number' => 'nullable|string|max:50',
+            ]);
+
+            // Verificamos que hay al menos un código de tracking
+            if (!$this->tracking_id && !$this->mbl_number) {
+                $this->isValidating = false;
+                $this->dispatch('validating-state-changed', isValidating: false);
+                $this->dispatch('notify', [
+                    'type' => 'error',
+                    'message' => 'Debe proporcionar al menos un código de seguimiento (ID o Master BL)'
+                ]);
+                return false;
+            }
+
+            $trackingService = new TrackingService();
+            $trackingData = null;
+
+            $this->dispatch('notify', [
+                'type' => 'info',
+                'message' => 'Validando códigos de seguimiento...'
+            ]);
+
+            // Si tenemos un tracking_id, intentamos validarlo primero
+            if ($this->tracking_id) {
+                \Log::info('Validando tracking_id', ['id' => $this->tracking_id]);
+                $trackingData = $trackingService->getPorthTracking($this->tracking_id);
+
+                if ($trackingData) {
+                    \Log::info('Tracking ID válido', ['id' => $this->tracking_id]);
+                    $this->dispatch('notify', [
+                        'type' => 'success',
+                        'message' => 'ID de tracking validado correctamente'
+                    ]);
+                    $this->isValidating = false;
+                    $this->dispatch('validating-state-changed', isValidating: false);
+                    return $trackingData;
+                } else {
+                    \Log::warning('Tracking ID inválido', ['id' => $this->tracking_id]);
+                }
+            }
+
+            // Si no se validó por tracking_id o no se proporcionó, intentamos con mbl_number
+            if ($this->mbl_number) {
+                \Log::info('Validando mbl_number', ['mbl' => $this->mbl_number]);
+                $trackingData = $trackingService->getPorthTrackingByMasterBl($this->mbl_number);
+
+                if ($trackingData) {
+                    \Log::info('Master BL válido', ['mbl' => $this->mbl_number]);
+                    $this->dispatch('notify', [
+                        'type' => 'success',
+                        'message' => 'Master BL validado correctamente'
+                    ]);
+                    $this->isValidating = false;
+                    $this->dispatch('validating-state-changed', isValidating: false);
+                    return $trackingData;
+                } else {
+                    \Log::warning('Master BL inválido', ['mbl' => $this->mbl_number]);
+                }
+            }
+
+            // Si llegamos aquí, ninguno de los códigos es válido
+            $errorMessage = '';
+            if ($this->tracking_id && $this->mbl_number) {
+                $errorMessage = 'Ninguno de los códigos proporcionados es válido. Verifique e intente nuevamente.';
+            } elseif ($this->tracking_id) {
+                $errorMessage = 'El ID de tracking proporcionado no es válido. Verifique e intente nuevamente.';
+            } elseif ($this->mbl_number) {
+                $errorMessage = 'El Master BL proporcionado no es válido. Verifique e intente nuevamente.';
+            }
+
+            $this->isValidating = false;
+            $this->dispatch('validating-state-changed', isValidating: false);
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => $errorMessage
+            ]);
+            return false;
+
+        } catch (\Exception $e) {
+            \Log::error('Error validando códigos de tracking', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $this->isValidating = false;
+            $this->dispatch('validating-state-changed', isValidating: false);
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Error al validar los códigos: ' . $e->getMessage()
+            ]);
+            return false;
+        } finally {
+            // Asegurarnos de que isValidating se resetea al final de la función
+            $this->isValidating = false;
+            $this->dispatch('validating-state-changed', isValidating: false);
+        }
+    }
+
     // First, add a method that handles everything in one go
     public function saveAndMoveDocument()
     {
         try {
+            // Primero validamos los códigos de tracking si es necesario
+            if ($this->newColumnId == $this->columns[1]['id']) {
+                // Activar indicador de validación
+                $this->isValidating = true;
+                $this->dispatch('validating-state-changed', isValidating: true);
+
+                $validationResult = $this->validateTrackingCodes();
+                if ($validationResult === false) {
+                    // La validación falló, no proceder con el guardado
+                    $this->isValidating = false;
+                    $this->dispatch('validating-state-changed', isValidating: false);
+                    return;
+                }
+            }
+
             DB::beginTransaction();
 
             $shippingDocId = str_replace('DOC-', '', $this->currentDocumentId);
@@ -571,7 +739,17 @@ class ShippingDocumentationKanban extends Component
             // Actualizar el documento
             $shippingDoc->status = $newStatus;
             $shippingDoc->notes = $this->updateKanbanNotes($shippingDoc->notes, $this->newColumnId);
-            $this->updateDocumentFields($shippingDoc);
+
+            try {
+                $this->updateDocumentFields($shippingDoc);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $this->dispatch('error', [
+                    'message' => $e->getMessage()
+                ]);
+                return;
+            }
+
             $shippingDoc->save();
 
             // 2. Crear comentario si existe
@@ -623,6 +801,10 @@ class ShippingDocumentationKanban extends Component
             $this->dispatch('error', [
                 'message' => 'Error al actualizar el documento: ' . $e->getMessage()
             ]);
+        } finally {
+            // Asegurarnos de que isValidating se resetea al final de la función
+            $this->isValidating = false;
+            $this->dispatch('validating-state-changed', isValidating: false);
         }
     }
 
@@ -676,6 +858,22 @@ class ShippingDocumentationKanban extends Component
         $this->release_date = null;
         $this->instruction_date = null;
         $this->attachment = null;
+        $this->isValidating = false;
+    }
+
+    // Este método se ejecuta después de cada actualización de Livewire
+    public function hydrate()
+    {
+        // Aseguramos que el estado de validación se mantiene controlado
+        if ($this->isValidating && !$this->newColumnId == $this->columns[1]['id']) {
+            $this->isValidating = false;
+        }
+    }
+
+    // Método para actualizar la propiedad isValidating desde JavaScript
+    public function setIsValidating($value)
+    {
+        $this->isValidating = $value;
     }
 
     public function render()
