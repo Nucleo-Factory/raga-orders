@@ -21,7 +21,7 @@
 
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'table' }" class="mb-6">
-        <div class="flex items-center justify-between gap-6 mb-3 text-lg font-bold">
+        <div class="flex items-center justify-start gap-6 mb-3 text-lg font-bold">
             <div class="flex items-center gap-6">
                 <button @click="activeTab = 'table'"
                     :class="activeTab === 'table' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
