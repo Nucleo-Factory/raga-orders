@@ -34,7 +34,7 @@
 
     <div class="" x-data="{activeTab: 'tab1'}">
         <!-- Selector de pestañas -->
-        <div class="flex items-center justify-between gap-6 mb-3 text-lg font-bold">
+        <div class="flex items-center justify-start gap-6 mb-3 text-lg font-bold">
             <div class="flex items-center gap-6">
                 <button @click="activeTab = 'tab1'"
                     :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
@@ -46,6 +46,10 @@
                     class="border-b-2 py-[0.625rem]">
                     Reporte
                 </button>
+            </div>
+
+            <div class="flex gap-4">
+                <livewire:kanban.kanban-filters />
             </div>
         </div>
 

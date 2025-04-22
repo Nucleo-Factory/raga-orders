@@ -40,11 +40,15 @@ class KanbanBoard extends Component {
     public $comment = '';
     public $attachment = null;
 
+    // Filtros activos
+    public $activeFilters = [];
+
     // Agregar los listeners para los eventos
     protected $listeners = [
         'refreshKanban' => 'loadData',
         'purchaseOrderStatusUpdated' => '$refresh',
-        'notificationsUpdated' => '$refresh'
+        'notificationsUpdated' => '$refresh',
+        'kanbanFiltersChanged' => 'applyFilters'
     ];
 
     public function mount($boardId = null) {
@@ -121,9 +125,13 @@ class KanbanBoard extends Component {
 
         // Cargar las órdenes de compra de la compañía del usuario
         $companyId = auth()->user()->company_id ?? null;
-        $purchaseOrders = PurchaseOrder::with(['company', 'kanbanStatus'])
-            ->where('company_id', $companyId)
-            ->get();
+        $query = PurchaseOrder::with(['company', 'kanbanStatus'])
+            ->where('company_id', $companyId);
+
+        // Aplicar filtros si están activos
+        $this->applyQueryFilters($query);
+
+        $purchaseOrders = $query->get();
 
         // Limpiar el array de tareas
         $this->tasks = [];
@@ -151,8 +159,54 @@ class KanbanBoard extends Component {
                 'total' => $order->total,
                 'company' => $order->company->name ?? 'N/A',
                 'created_at' => $order->created_at,
+                'currency' => $order->currency,
+                'incoterms' => $order->incoterms,
+                'planned_hub_id' => $order->planned_hub_id,
+                'actual_hub_id' => $order->actual_hub_id,
+                'material_type' => $order->material_type,
             ];
         }
+    }
+
+    protected function applyQueryFilters($query)
+    {
+        if (empty($this->activeFilters)) {
+            return;
+        }
+
+        if (isset($this->activeFilters['currency'])) {
+            $query->where('currency', $this->activeFilters['currency']);
+        }
+
+        if (isset($this->activeFilters['incoterms'])) {
+            $query->where('incoterms', $this->activeFilters['incoterms']);
+        }
+
+        if (isset($this->activeFilters['planned_hub_id'])) {
+            $query->where('planned_hub_id', $this->activeFilters['planned_hub_id']);
+        }
+
+        if (isset($this->activeFilters['actual_hub_id'])) {
+            $query->where('actual_hub_id', $this->activeFilters['actual_hub_id']);
+        }
+
+        if (isset($this->activeFilters['material_type'])) {
+            $materialType = $this->activeFilters['material_type'];
+            $query->where(function($q) use ($materialType) {
+                // Para manejar material_type como array (JSON)
+                $q->whereJsonContains('material_type', $materialType)
+                  ->orWhere('material_type', $materialType);
+            });
+        }
+    }
+
+    public function applyFilters($filters = [])
+    {
+        $this->activeFilters = $filters;
+        $this->loadData();
+
+        // Notificar a otros componentes que los datos han sido actualizados
+        $this->dispatch('refreshKanban');
     }
 
     public function organizeTasksByColumn() {
@@ -384,7 +438,8 @@ class KanbanBoard extends Component {
     {
         return view('livewire.kanban.kanban-board', [
             'tasksByColumn' => $this->tasksByColumn,
-            'boardType' => $this->boardType
+            'boardType' => $this->boardType,
+            'hasActiveFilters' => !empty($this->activeFilters)
         ])->layout('layouts.app');
     }
 }
