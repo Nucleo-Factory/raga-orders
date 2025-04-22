@@ -1,5 +1,5 @@
-<div>
-    <div class="mt-8 space-y-4">
+<div class="p-[32px] bg-white rounded-lg mt-8">
+    <div class="space-y-4">
         <!-- Filtros -->
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
