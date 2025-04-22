@@ -26,6 +26,30 @@ class ShippingDocumentationTable extends Component
         'statusFilter' => ['except' => ''],
     ];
 
+    protected $listeners = ['refresh' => '$refresh'];
+
+    protected $updatesQueryString = ['search', 'sortField', 'sortDirection', 'statusFilter'];
+
+    public function mount()
+    {
+        $this->search = request()->query('search', '');
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
@@ -35,16 +59,6 @@ class ShippingDocumentationTable extends Component
         }
 
         $this->sortField = $field;
-    }
-
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
-    {
-        $this->resetPage();
     }
 
     /**
