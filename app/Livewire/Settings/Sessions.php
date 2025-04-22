@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 class Sessions extends Component {
 
     public $sessions;
+    public $search = '';
     public $headers = [
         'Usuario',
         'Dispositivo',
@@ -23,11 +24,7 @@ class Sessions extends Component {
 
     public function mount()
     {
-        // Obtener las sesiones activas
-        $this->sessions = DB::table('sessions')
-            ->join('users', 'sessions.user_id', '=', 'users.id')
-            ->select('sessions.*', 'users.name as user_name')
-            ->get();
+        $this->loadSessions();
         $this->users = User::all();
     }
 
@@ -37,6 +34,28 @@ class Sessions extends Component {
             'sessions' => $this->sessions,
             'users' => $this->users,
         ])->layout('layouts.settings.user-management');
+    }
+
+    public function updatedSearch()
+    {
+        $this->loadSessions();
+    }
+
+    private function loadSessions()
+    {
+        $query = DB::table('sessions')
+            ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->select('sessions.*', 'users.name as user_name');
+
+        if (!empty($this->search)) {
+            $query->where(function($q) {
+                $q->where('users.name', 'ILIKE', '%' . $this->search . '%')
+                  ->orWhere('sessions.ip_address', 'LIKE', '%' . $this->search . '%')
+                  ->orWhere('sessions.user_agent', 'ILIKE', '%' . $this->search . '%');
+            });
+        }
+
+        $this->sessions = $query->get();
     }
 
     public function getDeviceType($userAgent)
@@ -72,10 +91,7 @@ class Sessions extends Component {
             $this->dispatch('open-modal', 'modal-session-closed');
 
             // Recargar las sesiones
-            $this->sessions = DB::table('sessions')
-                ->join('users', 'sessions.user_id', '=', 'users.id')
-                ->select('sessions.*', 'users.name as user_name')
-                ->get();
+            $this->loadSessions();
 
         } catch (\Exception $e) {
             session()->flash('error', 'No se pudo cerrar la sesión');
