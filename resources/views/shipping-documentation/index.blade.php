@@ -34,6 +34,11 @@
                     Vista de Tabla
                 </button>
             </div>
+
+            {{-- TODO: añadir filtro de etapas --}}
+            <div>
+                <livewire:shipping-documentation.shipping-documentation-filter />
+            </div>
         </div>
 
         <!-- Table View -->

@@ -1,5 +1,22 @@
 <div>
     <div class="w-full px-0 mx-0">
+        @if($hasActiveFilters)
+        <div class="mb-4 flex items-center justify-between rounded-md bg-blue-50 p-3">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm font-medium text-blue-700">Mostrando documentos filtrados. Los resultados que estás viendo están limitados por los filtros activos.</span>
+            </div>
+            <button
+                wire:click="$dispatch('clearShippingDocumentationFilters')"
+                class="ml-3 rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+            >
+                Limpiar filtros
+            </button>
+        </div>
+        @endif
+
         <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
             @if(!$board)
                 <div class="p-6 bg-white rounded-lg shadow-md">

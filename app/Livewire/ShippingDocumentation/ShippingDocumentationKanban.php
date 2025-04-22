@@ -40,6 +40,15 @@ class ShippingDocumentationKanban extends Component
     public $attachment = null;
     public $originalColumnId;
 
+    // Filtros activos
+    public $activeFilters = [];
+    public $hasActiveFilters = false;
+
+    // Listeners
+    protected $listeners = [
+        'refreshKanban' => 'loadData',
+        'shippingDocumentFiltersChanged' => 'applyFilters'
+    ];
 
     public function mount($boardId = null)
     {
@@ -167,6 +176,17 @@ class ShippingDocumentationKanban extends Component
                 'hub_location' => $doc->hub_location ?? 'N/A',
                 'status' => $doc->status,
                 'kanban_status_id' => $kanbanStatusId,
+                'purchase_orders' => $doc->purchaseOrders->map(function ($po) {
+                    return [
+                        'id' => $po->id,
+                        'order_number' => $po->order_number,
+                        'currency' => $po->currency,
+                        'incoterms' => $po->incoterms,
+                        'planned_hub_id' => $po->planned_hub_id,
+                        'actual_hub_id' => $po->actual_hub_id,
+                        'material_type' => $po->material_type,
+                    ];
+                })->toArray(),
             ];
         })->toArray();
     }
@@ -181,8 +201,11 @@ class ShippingDocumentationKanban extends Component
             $this->documentsByColumn[$column['id']] = [];
         }
 
+        // Filter documents based on active filters
+        $filteredDocuments = $this->filterDocuments();
+
         // Organize documents by column
-        foreach ($this->documents as $document) {
+        foreach ($filteredDocuments as $document) {
             $statusId = $document['kanban_status_id'];
             \Log::info("organizeDocumentsByColumn: Document {$document['id']} has kanban_status_id: $statusId");
 
@@ -205,6 +228,96 @@ class ShippingDocumentationKanban extends Component
             $count = count($this->documentsByColumn[$column['id']]);
             \Log::info("organizeDocumentsByColumn: Column {$column['id']} ({$column['name']}) has $count documents");
         }
+    }
+
+    /**
+     * Filter documents based on active filters
+     */
+    protected function filterDocuments()
+    {
+        if (empty($this->activeFilters)) {
+            return $this->documents;
+        }
+
+        \Log::info("Applying filters: " . json_encode($this->activeFilters));
+
+        return array_filter($this->documents, function ($document) {
+            // Obtenemos todas las órdenes de compra asociadas para verificar si alguna coincide con los filtros
+            $purchaseOrders = $document['purchase_orders'] ?? [];
+
+            if (empty($purchaseOrders)) {
+                return false;
+            }
+
+            // Para cada orden de compra, verificar si cumple con los filtros
+            foreach ($purchaseOrders as $po) {
+                $matchesFilters = true;
+
+                // Filtrar por moneda
+                if (isset($this->activeFilters['currency']) && $po['currency'] != $this->activeFilters['currency']) {
+                    $matchesFilters = false;
+                    continue;
+                }
+
+                // Filtrar por incoterms
+                if (isset($this->activeFilters['incoterms']) && $po['incoterms'] != $this->activeFilters['incoterms']) {
+                    $matchesFilters = false;
+                    continue;
+                }
+
+                // Filtrar por hub planificado
+                if (isset($this->activeFilters['planned_hub_id']) && $po['planned_hub_id'] != $this->activeFilters['planned_hub_id']) {
+                    $matchesFilters = false;
+                    continue;
+                }
+
+                // Filtrar por hub real
+                if (isset($this->activeFilters['actual_hub_id']) && $po['actual_hub_id'] != $this->activeFilters['actual_hub_id']) {
+                    $matchesFilters = false;
+                    continue;
+                }
+
+                // Filtrar por tipo de material
+                if (isset($this->activeFilters['material_type'])) {
+                    $materialType = $this->activeFilters['material_type'];
+
+                    // Verificar si el material_type es un array o un string
+                    if (is_array($po['material_type'])) {
+                        if (!in_array($materialType, $po['material_type'])) {
+                            $matchesFilters = false;
+                            continue;
+                        }
+                    } else {
+                        if ($po['material_type'] != $materialType) {
+                            $matchesFilters = false;
+                            continue;
+                        }
+                    }
+                }
+
+                // Si una orden de compra coincide con todos los filtros, incluir el documento
+                if ($matchesFilters) {
+                    return true;
+                }
+            }
+
+            // Si ninguna orden de compra coincide con todos los filtros, no incluir el documento
+            return false;
+        });
+    }
+
+    /**
+     * Apply filters received from the filter component
+     */
+    public function applyFilters($filters = [])
+    {
+        \Log::info("applyFilters called with: " . json_encode($filters));
+
+        $this->activeFilters = $filters;
+        $this->hasActiveFilters = !empty($filters);
+
+        // Reorganizar documentos por columna con los nuevos filtros aplicados
+        $this->organizeDocumentsByColumn();
     }
 
     public function moveDocument($documentId, $newColumnId)
