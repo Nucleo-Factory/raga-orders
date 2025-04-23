@@ -24,6 +24,8 @@ class RequestsTable extends Component {
 
     public $showModal = false;
     public $selectedRequest;
+    public $requestId;
+    public $buttonType = '';
 
     protected $listeners = [
         'refreshRequests' => '$refresh'
@@ -34,11 +36,15 @@ class RequestsTable extends Component {
     }
 
     public function closeModal() {
+        $this->requestId = '';
         $this->selectedRequest = null;
+        $this->buttonType = '';
         $this->dispatch('close-modal', 'modal-requests');
     }
 
-    public function openModal($id) {
+    public function openModal($id, $buttonType) {
+        $this->requestId = $id;
+        $this->buttonType = $buttonType;
         $this->selectedRequest = Authorization::find($id);
         $this->dispatch('open-modal', 'modal-requests');
     }
@@ -91,6 +97,8 @@ class RequestsTable extends Component {
                 'message' => 'Solicitud aprobada correctamente.'
             ]);
         }
+
+        $this->dispatch('close-modal', 'modal-requests');
     }
 
     public function reject($requestId)
@@ -104,6 +112,8 @@ class RequestsTable extends Component {
                 'message' => 'Solicitud rechazada correctamente.'
             ]);
         }
+
+        $this->dispatch('close-modal', 'modal-requests');
     }
 
     public function render() {

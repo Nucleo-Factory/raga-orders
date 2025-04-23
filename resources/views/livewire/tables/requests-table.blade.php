@@ -83,13 +83,10 @@
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 @if($actions && $request->status === 'pending')
                                     <div class="flex gap-3">
-                                        <button wire:click="openModal({{ $request->id }})" class="text-dark-blue hover:text-green-900">
-                                            Ver
-                                        </button> |
-                                        <button wire:click="approve('{{ $request->id }}')" class="text-green-600 hover:text-green-900">
+                                        <button wire:click="openModal('{{ $request->id }}', 'approve')" class="text-green-600 hover:text-green-900">
                                             Aprobar
                                         </button> |
-                                        <button wire:click="reject('{{ $request->id }}')" class="text-red-600 hover:text-red-900">
+                                        <button wire:click="openModal('{{ $request->id }}', 'reject')" class="text-red-600 hover:text-red-900">
                                             Rechazar
                                         </button>
                                     </div>
@@ -282,9 +279,16 @@
         </x-slot>
 
         <x-slot name="actions">
-            <button class="w-full py-3 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700" wire:click="closeModal">
-                Aceptar
-            </button>
+            @if($buttonType === 'reject')
+                <button class="w-full py-3 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700" wire:click="reject('{{ $requestId }}')">
+                    Rechazar
+                </button>
+            @endif
+            @if($buttonType === 'approve')
+                <button class="w-full py-3 font-medium text-white transition duration-200 bg-green-600 rounded-lg hover:bg-green-700" wire:click="approve('{{ $requestId }}')">
+                    Aceptar
+                </button>
+            @endif
         </x-slot>
     </x-modal-requests>
 </div>
