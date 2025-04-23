@@ -141,7 +141,7 @@
             </svg>
 
             <div>
-                <p>Carga total: <span>{{ $totalWeight }}</span></p>
+                <p>Peso total: <span>{{ $totalWeight }}</span></p>
             </div>
         </div>
     </div>
