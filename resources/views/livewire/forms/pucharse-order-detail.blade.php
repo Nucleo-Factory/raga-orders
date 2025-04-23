@@ -307,7 +307,7 @@
                             <th scope="col"
                                 class="px-6 py-5 text-xs font-medium font-bold tracking-wider text-left text-black uppercase cursor-pointer"
                                 wire:click="sortBy('quantity')">
-                                Cantidad
+                                Carga (kg)
                                 @if ($sortField === 'quantity')
                                     @if ($sortDirection === 'asc')
                                         <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"

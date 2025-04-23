@@ -596,7 +596,7 @@
                                     Precio unitario</th>
                                 <th scope="col"
                                     class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
-                                    Cantidad</th>
+                                    Carga (kg)</th>
                                 <th scope="col"
                                     class="bg-[#E0E5FF] px-6 py-3 text-left text-lg font-bold text-[#171717]">
                                     Subtotal</th>
