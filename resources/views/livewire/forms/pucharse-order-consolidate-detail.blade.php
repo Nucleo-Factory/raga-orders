@@ -449,7 +449,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
-                                            {{ number_format($order['total_amount'], 2) }}
+                                            $ {{ number_format($order['total_amount'], 2) }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -566,16 +566,16 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ number_format($poData['savings_ofr_fcl'], 2) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">$ {{ number_format($poData['savings_ofr_fcl'], 2) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ number_format($poData['saving_pickup'], 2) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">$ {{ number_format($poData['saving_pickup'], 2) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ number_format($poData['saving_executed'], 2) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">$ {{ number_format($poData['saving_executed'], 2) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ number_format($poData['saving_not_executed'], 2) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">$ {{ number_format($poData['saving_not_executed'], 2) }}</div>
                                 </td>
                             </tr>
                         @empty
@@ -592,16 +592,16 @@
                                 TOTAL
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                                {{ number_format($totalSavingsOfrFcl, 2) }}
+                                $ {{ number_format($totalSavingsOfrFcl, 2) }}
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                                {{ number_format($totalSavingPickup, 2) }}
+                                $ {{ number_format($totalSavingPickup, 2) }}
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                                {{ number_format($totalSavingExecuted, 2) }}
+                                $ {{ number_format($totalSavingExecuted, 2) }}
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                                {{ number_format($totalSavingNotExecuted, 2) }}
+                                $ {{ number_format($totalSavingNotExecuted, 2) }}
                             </td>
                         </tr>
                     </tfoot>

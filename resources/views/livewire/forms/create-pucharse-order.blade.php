@@ -458,7 +458,7 @@
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Otros Costos
+                            Costo de Seguro
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="other_costs" placeholder="0.00" wire:model="other_costs">
                         </x-slot:input>
@@ -612,7 +612,7 @@
                                         {{ $product['material_id'] }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $product['short_text'] ?? 'Sin descripción' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                        {{ number_format($product['price_per_unit'], 2) }}</td>
+                                        $ {{ number_format($product['price_per_unit'], 2) }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         <input type="number"
                                             wire:model.live="orderProducts.{{ $index }}.quantity"
@@ -621,7 +621,7 @@
                                             class="block w-20 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                        {{ number_format($product['subtotal'], 2) }}</td>
+                                        $ {{ number_format($product['subtotal'], 2) }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                         <button type="button" wire:click="removeProduct({{ $index }})"
                                             class="text-red-600 hover:text-red-900">
@@ -641,7 +641,7 @@
                                 <td colspan="4" class="px-6 py-4 text-sm font-medium text-right text-gray-900">
                                     Total Neto:</td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
-                                    {{ number_format($net_total, 2) }}</td>
+                                    $ {{ number_format($net_total, 2) }}</td>
                                 <td></td>
                             </tr>
                             <tr>
@@ -666,7 +666,7 @@
                                 <td colspan="4" class="px-6 py-4 text-sm font-bold text-right text-gray-900">TOTAL:
                                 </td>
                                 <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
-                                    {{ number_format($total, 2) }}
+                                    $ {{ number_format($total, 2) }}
                                 </td>
                                 <td></td>
                             </tr>

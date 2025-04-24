@@ -384,12 +384,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
-                                        {{ number_format($product['price_per_unit'], 2) }}
+                                        $ {{ number_format($product['price_per_unit'], 2) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
-                                        {{ number_format($product['subtotal'], 2) }}
+                                        $ {{ number_format($product['subtotal'], 2) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
@@ -410,7 +410,7 @@
                                 Subtotal:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                {{ number_format($net_total, 2) }}
+                                $ {{ number_format($net_total, 2) }}
                             </td>
                             <td></td>
                         </tr>
@@ -419,7 +419,7 @@
                                 Costos adicionales:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                {{ number_format($additional_cost, 2) }}
+                                $ {{ number_format($additional_cost, 2) }}
                             </td>
                             <td></td>
                         </tr>
@@ -428,7 +428,7 @@
                                 Seguro:
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                {{ number_format($insurance_cost, 2) }}
+                                $ {{ number_format($insurance_cost, 2) }}
                             </td>
                             <td></td>
                         </tr>
@@ -437,7 +437,7 @@
                                 Total:
                             </td>
                             <td class="px-6 py-4 text-sm font-bold text-gray-900">
-                                {{ number_format($total, 2) }}
+                                $ {{ number_format($total, 2) }}
                             </td>
                             <td></td>
                         </tr>
@@ -551,16 +551,16 @@
                         @endphp
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingsOfrFcl, 2) }}</div>
+                                <div class="text-sm font-medium text-gray-900">$ {{ number_format($totalSavingsOfrFcl, 2) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingPickup, 2) }}</div>
+                                <div class="text-sm font-medium text-gray-900">$ {{ number_format($totalSavingPickup, 2) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingExecuted, 2) }}</div>
+                                <div class="text-sm font-medium text-gray-900">$ {{ number_format($totalSavingExecuted, 2) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ number_format($totalSavingNotExecuted, 2) }}</div>
+                                <div class="text-sm font-medium text-gray-900">$ {{ number_format($totalSavingNotExecuted, 2) }}</div>
                             </td>
                         </tr>
                     </tbody>
