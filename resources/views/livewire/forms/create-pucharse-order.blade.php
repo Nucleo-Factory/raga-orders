@@ -460,7 +460,7 @@
                         <x-slot:label>
                             Costo de Seguro
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="other_costs" placeholder="0.00" wire:model="other_costs">
+                        <x-slot:input type="number" step="0.01" name="insurance_cost" placeholder="0.00" wire:model="insurance_cost">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -658,7 +658,7 @@
                                     Costo de Seguro:</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="insurance_cost" step="0.01"
-                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
                                 </td>
                                 <td></td>
                             </tr>

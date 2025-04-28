@@ -19,9 +19,13 @@ class CreateProducts extends Component {
     public $vendor_code;
     public $title;
     public $subtitle;
+    public $btn_text;
     public $vendors = [];
     public $product;
     public $vendor_id;
+    public $price_per_unit;
+    public $is_editing = false;
+    public $qty_unit;
 
     // Arrays for select options
     public $qtyUnitOptions = ["kg" => "Kilogramos", "pcs" => "Piezas", "lt" => "Litros", "m" => "Metros"];
@@ -31,7 +35,7 @@ class CreateProducts extends Component {
     {
         $vendors = Vendor::all();
         $this->vendors = $vendors->mapWithKeys(function ($vendor) {
-            return [$vendor->id => $vendor->name];
+            return [$vendor->vendo_code => $vendor->name];
         });
 
         if ($product) {
@@ -41,13 +45,17 @@ class CreateProducts extends Component {
             $this->supplying_plant = $product->supplying_plant;
             $this->unit_of_measure = $product->unit_of_measure;
             $this->plant = $product->plant;
-            $this->vendor_name = $product->vendor_name;
-            $this->vendor_code = $product->vendor_code;
+            $this->vendor_code = $product->vendo_code;
+            $this->price_per_unit = $product->price_per_unit;
             $this->title = "Editar Producto";
             $this->subtitle = "Ingrese los datos para editar el producto";
+            $this->btn_text = "Editar Producto";
+            $this->is_editing = true;
         } else {
             $this->title = "Crear Producto";
             $this->subtitle = "Ingrese los datos para crear un nuevo producto";
+            $this->btn_text = "Crear Producto";
+            $this->is_editing = false;
         }
     }
 
@@ -69,7 +77,8 @@ class CreateProducts extends Component {
             'supplying_plant' => $this->supplying_plant,
             'unit_of_measure' => $this->unit_of_measure,
             'plant' => $this->plant,
-            'vendor_id' => $this->vendor_id,
+            'vendo_code' => $this->vendor_code,
+            'price_per_unit' => $this->price_per_unit,
         ]);
 
         // Reset form
@@ -79,20 +88,36 @@ class CreateProducts extends Component {
         $this->dispatch('open-modal', 'modal-product-created');
     }
 
+    public function updateProduct()
+    {
+        $this->product->update([
+            'material_id' => $this->material_id,
+            'short_text' => $this->short_text,
+            'supplying_plant' => $this->supplying_plant,
+            'unit_of_measure' => $this->unit_of_measure,
+            'plant' => $this->plant,
+            'vendo_code' => $this->vendor_code,
+            'price_per_unit' => $this->price_per_unit,
+        ]);
+
+        // Dispatch event to open modal
+        $this->dispatch('open-modal', 'modal-product-created');
+    }
+
     // Calculate net value when price or quantity changes
     public function updatedOrderQuantity()
     {
-        $this->calculateNetValue();
+        //$this->calculateNetValue();
     }
 
     public function updatedPricePerUnit()
     {
-        $this->calculateNetValue();
+        //$this->calculateNetValue();
     }
 
     public function updatedVatRate()
     {
-        $this->calculateVatValue();
+        //$this->calculateVatValue();
     }
 
     private function calculateNetValue()

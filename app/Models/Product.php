@@ -22,7 +22,8 @@ class Product extends Model
         'unit_of_measure',
         'plant',
         'vendor_name',
-        'vendor_code',
+        'vendo_code',
+        'price_per_unit',
     ];
 
     /**
@@ -44,5 +45,10 @@ class Product extends Model
         return $this->belongsToMany(PurchaseOrder::class, 'purchase_order_product')
             ->withPivot('quantity', 'unit_price')
             ->withTimestamps();
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
     }
 }

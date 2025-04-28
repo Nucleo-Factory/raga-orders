@@ -11,13 +11,19 @@
         </x-view-title>
 
         <div class="flex gap-4">
-            <x-primary-button wire:click="createProduct" class="w-[209px]">
-                Crear producto
-            </x-primary-button>
+            @if ($is_editing)
+                <x-primary-button wire:click="updateProduct" class="w-[209px]">
+                    {{ $btn_text }}
+                </x-primary-button>
+            @else
+                <x-primary-button wire:click="createProduct" class="w-[209px]">
+                    {{ $btn_text }}
+                </x-primary-button>
+            @endif
         </div>
     </div>
 
-    <x-form wire:submit.prevent="createProduct">
+    <x-form wire:submit.prevent="{{ $is_editing ? 'updateProduct' : 'createProduct' }}">
         <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
                 <div class="w-full space-y-6">
@@ -54,15 +60,7 @@
                     <x-slot:input name="supplying_plant" placeholder="Ingrese supplying plant" wire:model="supplying_plant">
                     </x-slot:input>
                 </x-form-input>
-
-                <x-form-input>
-                    <x-slot:label>
-                        Unit of Measure
-                    </x-slot:label>
-                    <x-slot:input name="unit_of_measure" placeholder="Ingrese unidad de medida" wire:model="unit_of_measure">
-                    </x-slot:input>
-                </x-form-input>
-                <x-form-select label="QTY Unit" name="qty_unit" :options="$qtyUnitOptions" wire:model="qty_unit" />
+                <x-form-select label="QTY Unit" name="qty_unit" :options="$qtyUnitOptions" wire:model="unit_of_measure" />
                 <x-form-input>
                     <x-slot:label>
                         Plant
@@ -70,7 +68,15 @@
                     <x-slot:input name="plant" placeholder="Ingrese planta" wire:model="plant">
                     </x-slot:input>
                 </x-form-input>
-                <x-form-select label="Vendor" name="vendor_name" :options="$vendors" wire:model="vendor_name" />
+                <x-form-select label="Vendor" name="vendor_name" :options="$vendors" wire:model="vendor_code" />
+
+                <x-form-input>
+                    <x-slot:label>
+                        Precio Unitario
+                    </x-slot:label>
+                    <x-slot:input name="price_per_unit" placeholder="Ingrese precio unitario" wire:model="price_per_unit">
+                    </x-slot:input>
+                </x-form-input>
             </div>
         </div>
 
@@ -83,11 +89,11 @@
 
     <x-modal-success name="modal-product-created">
         <x-slot:title>
-            Producto creado correctamente
+            Producto {{ $is_editing ? 'editado' : 'creado' }} correctamente
         </x-slot:title>
 
         <x-slot:description>
-            El producto ha sido creado correctamente
+            El producto ha sido {{ $is_editing ? 'editado' : 'creado' }} correctamente
         </x-slot:description>
 
         <x-primary-button wire:click="$dispatch('close-modal', 'modal-product-created')" class="w-full">
