@@ -485,6 +485,7 @@ class CreatePucharseOrder extends Component
     public function updatedInsuranceCost()
     {
         $this->calculateTotals();
+        $this->calculateSavings();
     }
 
     protected function prepareDateFields()

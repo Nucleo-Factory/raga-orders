@@ -460,7 +460,7 @@
                         <x-slot:label>
                             Costo de Seguro
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="insurance_cost" placeholder="0.00" wire:model="insurance_cost">
+                        <x-slot:input type="number" step="0.01" name="insurance_cost" placeholder="0.00" wire:model.live="insurance_cost">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
