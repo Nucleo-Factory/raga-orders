@@ -467,7 +467,7 @@
                         <x-slot:label>
                             Otros Gastos
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="other_expenses" placeholder="0.00" wire:model="other_expenses">
+                        <x-slot:input type="number" step="0.01" name="other_expenses" placeholder="0.00" wire:model.live="other_expenses">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
@@ -622,10 +622,12 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         $ {{ number_format($product['subtotal'], 2) }}</td>
-                                    <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm font-medium text-left whitespace-nowrap">
                                         <button type="button" wire:click="removeProduct({{ $index }})"
                                             class="text-red-600 hover:text-red-900">
-                                            Eliminar
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                                    <path d="M5 1H9M1 3H13M11.6667 3L11.1991 10.0129C11.129 11.065 11.0939 11.5911 10.8667 11.99C10.6666 12.3412 10.3648 12.6235 10.0011 12.7998C9.58798 13 9.06073 13 8.00623 13H5.99377C4.93927 13 4.41202 13 3.99889 12.7998C3.63517 12.6235 3.33339 12.3412 3.13332 11.99C2.90607 11.5911 2.871 11.065 2.80086 10.0129L2.33333 3" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-red-900"></path>
+                                                </svg>
                                         </button>
                                     </td>
                                 </tr>

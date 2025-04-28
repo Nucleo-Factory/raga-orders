@@ -468,7 +468,7 @@ class CreatePucharseOrder extends Component
         }
 
         // Calcular el additional_cost como Costo OFR Real + Total Neto
-        $this->additional_cost = floatval($this->cost_ofr_real) + floatval($this->net_total);
+        $this->additional_cost = floatval($this->cost_ofr_real) + floatval($this->other_expenses);
 
         // Calcular el total final (neto + adicionales)
         $this->total = floatval($this->net_total) + floatval($this->additional_cost) + floatval($this->insurance_cost);
@@ -897,6 +897,12 @@ class CreatePucharseOrder extends Component
     }
 
     public function updatedPalletQuantityReal()
+    {
+        $this->calculateTotals();
+        $this->calculateSavings();
+    }
+
+    public function updatedOtherExpenses()
     {
         $this->calculateTotals();
         $this->calculateSavings();
