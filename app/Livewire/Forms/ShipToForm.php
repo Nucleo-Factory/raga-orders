@@ -42,12 +42,12 @@ class ShipToForm extends Component
     public function mount($id = null)
     {
         if ($id) {
-            $this->shipToId = $shipToId;
+            $this->shipToId = $id;
             $this->isEdit = true;
             $this->title = 'Editar Dirección de Envío';
             $this->subtitle = 'Modificar información de la dirección de envío';
 
-            $shipTo = ShipTo::findOrFail($shipToId);
+            $shipTo = ShipTo::findOrFail($id);
 
             $this->company_id = $shipTo->company_id;
             $this->name = $shipTo->name;

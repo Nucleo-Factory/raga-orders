@@ -39,7 +39,7 @@
                 <button @click="activeTab = 'tab1'"
                     :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
-                    Por Etapas
+                    Etapas
                 </button>
                 <button @click="activeTab = 'tab2'"
                     :class="activeTab === 'tab2' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"

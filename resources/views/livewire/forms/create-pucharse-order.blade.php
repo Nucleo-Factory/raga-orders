@@ -374,9 +374,9 @@
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            ID de Seguimiento
+                            Tracking ID
                         </x-slot:label>
-                        <x-slot:input name="tracking_id" placeholder="Ingrese ID de seguimiento" wire:model="tracking_id">
+                        <x-slot:input name="tracking_id" placeholder="Ingrese Tracking ID" wire:model="tracking_id">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>

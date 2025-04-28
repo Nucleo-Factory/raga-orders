@@ -89,9 +89,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('ship-to/create', 'ship-to.create')
         ->name('ship-to.create');
 
-    Route::get('ship-to/{shipTo}/edit', function ($shipTo) {
-        return view('ship-to.edit', ['shipTo' => \App\Models\ShipTo::findOrFail($shipTo)]);
-    })->name('ship-to.edit');
+    Route::view('ship-to/{id}/edit', 'ship-to.edit')->name('ship-to.edit');
 
     Route::view('shipping-documentation/requests', 'shipping-documentation.requests')
         ->name('shipping-documentation.requests');

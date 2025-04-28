@@ -26,12 +26,12 @@
                 <button @click="activeTab = 'table'"
                     :class="activeTab === 'table' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
-                    Vista Kanban
+                    Etapas
                 </button>
                 <button @click="activeTab = 'kanban'"
                     :class="activeTab === 'kanban' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
-                    Vista de Tabla
+                    Reporte
                 </button>
             </div>
 
