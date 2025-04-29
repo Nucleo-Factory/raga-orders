@@ -15,6 +15,14 @@ class ListPurchaseOrders extends Component
     public $sortDirection = 'desc';
     public $perPage = 10;
     public $statusFilter = '';
+    public $visibleColumns = [
+        'order_number' => true,
+        'vendor' => true,
+        'status' => true,
+        'order_date' => true,
+        'total' => true,
+        'actions' => true,
+    ];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -22,6 +30,13 @@ class ListPurchaseOrders extends Component
         'sortDirection' => ['except' => 'desc'],
         'statusFilter' => ['except' => ''],
     ];
+
+    public function toggleColumn($columnName)
+    {
+        if (isset($this->visibleColumns[$columnName])) {
+            $this->visibleColumns[$columnName] = !$this->visibleColumns[$columnName];
+        }
+    }
 
     public function sortBy($field)
     {

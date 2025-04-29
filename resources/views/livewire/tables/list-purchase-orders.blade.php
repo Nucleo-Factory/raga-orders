@@ -26,6 +26,57 @@
                         <option value="delivered">Entregada</option>
                     </select>
                 </div>
+
+                <!-- Columnas visibles -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 -ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                        Columnas visibles
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute right-0 z-10 mt-2 origin-top-right bg-white rounded-md shadow-lg w-60">
+                        <div class="py-1">
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.order_number" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Número de Orden</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.vendor" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Vendor</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.status" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Estado</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.order_date" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Fecha de Orden</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.total" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Total</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.actions" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Acciones</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -44,6 +95,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-[#E0E5FF]">
                     <tr>
+                        @if($visibleColumns['order_number'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_number')">
                                 <span>Número de Orden</span>
@@ -58,6 +110,9 @@
                                 @endif
                             </div>
                         </th>
+                        @endif
+
+                        @if($visibleColumns['vendor'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('vendor_id')">
                                 <span>Vendor</span>
@@ -72,6 +127,9 @@
                                 @endif
                             </div>
                         </th>
+                        @endif
+
+                        @if($visibleColumns['status'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('status')">
                                 <span>Estado</span>
@@ -86,6 +144,9 @@
                                 @endif
                             </div>
                         </th>
+                        @endif
+
+                        @if($visibleColumns['order_date'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('order_date')">
                                 <span>Fecha de Orden</span>
@@ -100,6 +161,9 @@
                                 @endif
                             </div>
                         </th>
+                        @endif
+
+                        @if($visibleColumns['total'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
                             <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('total')">
                                 <span>Total</span>
@@ -114,20 +178,31 @@
                                 @endif
                             </div>
                         </th>
+                        @endif
+
+                        @if($visibleColumns['actions'])
                         <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
                             Acciones
                         </th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($purchaseOrders as $order)
                         <tr>
+                            @if($visibleColumns['order_number'])
                             <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                 {{ $order->order_number }}
                             </td>
+                            @endif
+
+                            @if($visibleColumns['vendor'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 {{ $order->vendor_id ?? 'N/A' }}
                             </td>
+                            @endif
+
+                            @if($visibleColumns['status'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
                                     {{ $order->status === 'draft' ? 'bg-gray-100 text-gray-800' : '' }}
@@ -139,20 +214,30 @@
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
+                            @endif
+
+                            @if($visibleColumns['order_date'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 {{ $order->order_date ? $order->order_date->format('d/m/Y') : 'N/A' }}
                             </td>
+                            @endif
+
+                            @if($visibleColumns['total'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 {{ $order->total ? number_format($order->total, 2) : 'N/A' }}
                             </td>
+                            @endif
+
+                            @if($visibleColumns['actions'])
                             <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                 <a href="{{ route('purchase-orders.detail', $order->id) }}" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                                 <a href="{{ route('purchase-orders.edit', $order->id) }}" class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
                             </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">
+                            <td colspan="{{ count(array_filter($visibleColumns)) }}" class="px-6 py-4 text-sm text-center text-gray-500">
                                 No se encontraron órdenes de compra
                             </td>
                         </tr>
