@@ -18,6 +18,16 @@ class ShippingDocumentationTable extends Component
     public $sortDirection = 'desc';
     public $perPage = 10;
     public $statusFilter = '';
+    public $visibleColumns = [
+        'document_number' => true,
+        'purchase_orders' => true,
+        'status' => true,
+        'modality' => true,
+        'incoterms' => true,
+        'vendor' => true,
+        'hub' => true,
+        'actions' => true,
+    ];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -48,6 +58,13 @@ class ShippingDocumentationTable extends Component
     public function updatedPerPage()
     {
         $this->resetPage();
+    }
+
+    public function toggleColumn($columnName)
+    {
+        if (isset($this->visibleColumns[$columnName])) {
+            $this->visibleColumns[$columnName] = !$this->visibleColumns[$columnName];
+        }
     }
 
     public function sortBy($field)

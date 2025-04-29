@@ -25,6 +25,70 @@
                 <option value="in_transit">En Tránsito</option>
                 <option value="delivered">Entregado</option>
             </select>
+
+            <div class="relative ml-4">
+                <button id="dropdownToggleBtn" class="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <span>Columnas</span>
+                    <svg class="w-5 h-5 ml-2 -mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="dropdownMenu" class="absolute right-0 z-10 hidden w-56 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <span class="text-sm font-medium text-gray-900">Mostrar/Ocultar columnas</span>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.document_number" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Documento</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.purchase_orders" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Órdenes de Compra</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.status" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Estado</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.modality" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Modalidad</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.incoterms" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Incoterms</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.vendor" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Vendedor</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.hub" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Hub</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" wire:model.live="visibleColumns.actions" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm text-gray-700">Acciones</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div>
             <select
@@ -43,6 +107,7 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-[#E0E5FF]">
                 <tr>
+                    @if($visibleColumns['document_number'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('document_number')">
                         Documento
                         @if ($sortField === 'document_number')
@@ -57,35 +122,55 @@
                             @endif
                         @endif
                     </th>
+                    @endif
+
+                    @if($visibleColumns['purchase_orders'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         Órdenes de Compra
                     </th>
+                    @endif
+
+                    @if($visibleColumns['status'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('weight_kg')">
                         Estado
                     </th>
+                    @endif
+
+                    @if($visibleColumns['modality'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('creation_date')">
                         Modalidad
                     </th>
+                    @endif
+
+                    @if($visibleColumns['incoterms'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">
                         Incoterms
                     </th>
+                    @endif
 
+                    @if($visibleColumns['vendor'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">
                         Vendedor
                     </th>
+                    @endif
 
+                    @if($visibleColumns['hub'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer" wire:click="sortBy('status')">
                         Hub
                     </th>
+                    @endif
 
+                    @if($visibleColumns['actions'])
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         Acciones
                     </th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($shippingDocuments as $document)
                     <tr>
+                        @if($visibleColumns['document_number'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">
                                 <a href="{{ route('purchase-orders.consolidated-order-detail', $document->id) }}" class="text-blue-600 underline hover:text-blue-900">
@@ -93,6 +178,9 @@
                                 </a>
                             </div>
                         </td>
+                        @endif
+
+                        @if($visibleColumns['purchase_orders'])
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-900">
                                 @if(isset($groupedPurchaseOrders[$document->id]))
@@ -104,6 +192,9 @@
                                 @endif
                             </div>
                         </td>
+                        @endif
+
+                        @if($visibleColumns['status'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">
                                 @if($document->status === 'pending')
@@ -137,6 +228,9 @@
                                 @endif
                             </div>
                         </td>
+                        @endif
+
+                        @if($visibleColumns['modality'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             <!-- Terrestre -->
                             <div class="flex items-center bg-[#565AFF] text-white px-3 py-1.5 rounded-md gap-2">
@@ -147,18 +241,27 @@
 
                             </div>
                         </td>
+                        @endif
+
+                        @if($visibleColumns['incoterms'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             {{ $groupedPurchaseOrders[$document->id]->first()->incoterms }}
                         </td>
+                        @endif
 
+                        @if($visibleColumns['vendor'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             {{ $groupedPurchaseOrders[$document->id]->first()->vendor->name }}
                         </td>
+                        @endif
 
+                        @if($visibleColumns['hub'])
                         <td class="px-6 py-4 whitespace-nowrap">
                             {{ $groupedPurchaseOrders[$document->id]->first()->shipTo->name }}
                         </td>
+                        @endif
 
+                        @if($visibleColumns['actions'])
                         <td class="text-sm font-medium whitespace-nowrap">
                             <a href="{{ route('purchase-orders.consolidated-order-detail', $document->id) }}" class="flex items-center justify-center text-indigo-600 hover:text-indigo-900">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -167,10 +270,11 @@
                                 </svg>
                             </a>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                             No se encontraron documentos de embarque
                         </td>
                     </tr>
@@ -183,3 +287,22 @@
         {{ $shippingDocuments->links() }}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.getElementById('dropdownToggleBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        // Toggle dropdown visibility
+        dropdownToggle.addEventListener('click', function() {
+            dropdownMenu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+    });
+</script>
