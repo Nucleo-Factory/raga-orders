@@ -108,7 +108,7 @@ class PucharseOrderDetail extends Component
             $this->orderProducts[] = [
                 'id' => $product->id,
                 'material_id' => $product->material_id,
-                'description' => $product->description,
+                'short_text' => $product->short_text,
                 'price_per_unit' => $product->pivot->unit_price,
                 'quantity' => $product->pivot->quantity,
                 'subtotal' => $product->pivot->unit_price * $product->pivot->quantity

@@ -88,6 +88,11 @@ class CreateProducts extends Component {
         $this->dispatch('open-modal', 'modal-product-created');
     }
 
+    public function closeModal() {
+        $this->dispatch('close-modal', 'modal-product-created');
+        return redirect()->route('products.index');
+    }
+
     public function updateProduct()
     {
         $this->product->update([

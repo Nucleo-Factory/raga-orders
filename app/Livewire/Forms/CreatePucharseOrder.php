@@ -104,6 +104,9 @@ class CreatePucharseOrder extends Component
     public $searchResults = [];
     public $selectedProduct = null;
     public $quantity = 1;
+    public $length_cm = 0;
+    public $width_cm = 0;
+    public $height_cm = 0;
 
     public $id;
     public $purchaseOrder;
@@ -272,6 +275,9 @@ class CreatePucharseOrder extends Component
 
                 $this->planned_hub_id = $this->purchaseOrder->planned_hub_id;
                 $this->actual_hub_id = $this->purchaseOrder->actual_hub_id;
+                $this->length_cm = $this->purchaseOrder->length_cm;
+                $this->width_cm = $this->purchaseOrder->width_cm;
+                $this->height_cm = $this->purchaseOrder->height_cm;
 
                 // Cargar productos
                 $this->orderProducts = [];
@@ -627,6 +633,9 @@ class CreatePucharseOrder extends Component
                 'saving_executed' => $this->saving_executed,
                 'saving_not_executed' => $this->saving_not_executed,
                 'comments' => $this->comments,
+                'length_cm' => $this->length_cm,
+                'width_cm' => $this->width_cm,
+                'height_cm' => $this->height_cm,
             ];
 
             // Filtrar valores nulos o vacíos para evitar errores
@@ -812,6 +821,9 @@ class CreatePucharseOrder extends Component
                 'saving_executed' => $this->saving_executed,
                 'saving_not_executed' => $this->saving_not_executed,
                 'comments' => $this->comments,
+                'length_cm' => $this->length_cm,
+                'width_cm' => $this->width_cm,
+                'height_cm' => $this->height_cm,
             ];
 
             try {

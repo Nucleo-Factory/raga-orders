@@ -84,6 +84,9 @@ class PurchaseOrder extends Model implements HasMedia
         'bill_of_lading',
         'pallets',
         'kanban_status_id',
+        'length_cm',
+        'width_cm',
+        'height_cm',
     ];
 
     /**

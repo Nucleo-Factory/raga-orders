@@ -377,7 +377,7 @@
                                     <div class="text-sm font-medium text-gray-900">{{ $product['material_id'] }}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ $product['description'] }}</div>
+                                    <div class="text-sm text-gray-900">{{ $product['short_text'] }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $product['quantity'] }}</div>

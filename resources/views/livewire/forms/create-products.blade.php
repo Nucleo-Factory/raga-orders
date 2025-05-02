@@ -42,7 +42,7 @@
                         </div>
                         <x-form-input class="grow">
                             <x-slot:label>
-                                Short Text
+                                Descripción
                             </x-slot:label>
                             <x-slot:input name="short_text" placeholder="Ingrese short text"
                                 wire:model="short_text">
@@ -96,7 +96,7 @@
             El producto ha sido {{ $is_editing ? 'editado' : 'creado' }} correctamente
         </x-slot:description>
 
-        <x-primary-button wire:click="$dispatch('close-modal', 'modal-product-created')" class="w-full">
+        <x-primary-button wire:click="closeModal" class="w-full">
             Cerrar
         </x-primary-button>
     </x-modal-success>
