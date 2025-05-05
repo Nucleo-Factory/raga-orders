@@ -121,7 +121,7 @@
                         <x-slot:label>
                             Largo (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="length_cm" name="largo_cm" placeholder="0.00" class="pr-10 {{ $errors->has('largo_cm') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="length_cm" name="largo_cm" placeholder="0.00" class="pr-10 {{ $errors->has('length_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
@@ -132,7 +132,7 @@
                         <x-slot:label>
                             Ancho (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="width_cm" name="ancho_cm" placeholder="0.00" class="pr-10 {{ $errors->has('ancho_cm') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="width_cm" name="ancho_cm" placeholder="0.00" class="pr-10 {{ $errors->has('width_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
@@ -143,7 +143,7 @@
                         <x-slot:label>
                             Alto (cm)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="height_cm" name="alto_cm" placeholder="0.00" class="pr-10 {{ $errors->has('alto_cm') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="height_cm" name="alto_cm" placeholder="0.00" class="pr-10 {{ $errors->has('height_cm') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>

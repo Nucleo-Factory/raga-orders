@@ -533,9 +533,9 @@ class CreatePucharseOrder extends Component
             'planned_hub_id' => 'required',
             'mode' => 'required',
             'peso_kg' => 'required',
-            'largo_cm' => 'required',
-            'ancho_cm' => 'required',
-            'alto_cm' => 'required',
+            'length_cm' => 'required',
+            'width_cm' => 'required',
+            'height_cm' => 'required',
             'material_type' => 'required|array|min:1',
         ], [
             'order_number.required' => 'El número de orden es requerido',
