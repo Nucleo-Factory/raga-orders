@@ -16,12 +16,14 @@ class Product extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'description',
-        'price',
-        'sku',
-        'stock',
-        'status',
+        'material_id',
+        'short_text',
+        'supplying_plant',
+        'unit_of_measure',
+        'plant',
+        'vendor_name',
+        'vendo_code',
+        'price_per_unit',
     ];
 
     /**
@@ -30,9 +32,9 @@ class Product extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'price' => 'decimal:2',
-        'stock' => 'integer',
-        'status' => 'string',
+        'order_quantity' => 'decimal:2',
+        'price_per_unit' => 'decimal:2',
+        'price_per_uon' => 'decimal:2',
     ];
 
     /**
@@ -43,5 +45,10 @@ class Product extends Model
         return $this->belongsToMany(PurchaseOrder::class, 'purchase_order_product')
             ->withPivot('quantity', 'unit_price')
             ->withTimestamps();
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
     }
 }

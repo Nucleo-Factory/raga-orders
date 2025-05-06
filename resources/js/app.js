@@ -1,23 +1,23 @@
-import './bootstrap';
-import Sortable from 'sortablejs';
+import "./bootstrap";
+import Sortable from "sortablejs";
 
 window.Sortable = Sortable;
 
-const sidebarEl = document.querySelector('.main-sidebar');
-const sidebarLinkText = sidebarEl.querySelectorAll('.link-text');
+// Solo restaurar el estado guardado cuando carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.main-sidebar');
+    if (!sidebar) return;
 
-sidebarLinkText.forEach(link => {
-    link.style.width = '0'
-});
+    // Aplicar el estado guardado
+    if (localStorage.getItem('sidebarExpanded') === 'true') {
+        sidebar.classList.add('sidebar-expanded');
+    } else {
+        sidebar.classList.remove('sidebar-expanded');
+    }
 
-sidebarEl.addEventListener('mouseenter', function() {
-    sidebarLinkText.forEach(link => {
-        link.style.width = link.scrollWidth + 'px';
-    });
-});
-
-sidebarEl.addEventListener('mouseleave', function() {
-    sidebarLinkText.forEach(link => {
-        link.style.width = '0'
-    });
+    // Función global para compatibilidad
+    window.toggleSidebarSimple = function() {
+        sidebar.classList.toggle('sidebar-expanded');
+        localStorage.setItem('sidebarExpanded', sidebar.classList.contains('sidebar-expanded'));
+    };
 });

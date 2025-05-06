@@ -10,29 +10,31 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|inter:400,500,600" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,700|inter:400,500,600|lato:300,400,700,900" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         @stack('styles')
+
         @livewireStyles
     </head>
 
-    <body class="bg-[#EDEDED] sm:flex">
+    <body class="bg-[#F7F7F7] grid grid-cols-[auto,1fr]">
         <!-- Aqui debe ir el componente sidebar -->
         <livewire:partials.main-sidebar />
         <!-- Aqui debe ir el componente sidebar -->
 
         <!-- Static sidebar for desktop -->
 
-        <div class="h-full transition-all duration-500 pl-14 lg:pl-20 grow" :class="{ 'w-6rem': isCollapsed }">
+        <div class="h-full overflow-y-auto transition-all duration-500 grow">
             <!-- Aqui debe ir el componente header -->
             <livewire:partials.main-header />
             <!-- Aqui debe ir el componente header -->
 
-            <main class="relative flex w-full justify-between px-4 pb-[150px] pt-10 sm:px-0">
-                <div class="w-full space-y-5 px-10">
+            <main class="relative flex justify-between w-full px-4 sm:px-0">
+                <div class="w-full px-10 space-y-5">
                     {{ $slot }}
                 </div>
             </main>
@@ -42,5 +44,4 @@
     </body>
 
     @stack("scripts")
-
 </html>

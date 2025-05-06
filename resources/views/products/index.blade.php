@@ -1,51 +1,76 @@
-@php
-    $etapaArray = ["e1" => "Etapa 1", "e2" => "Etapa 2"];
-@endphp
-
 <x-app-layout>
     <div class="flex items-center justify-between">
-        <x-view-title title="Lista de productos" subtitle="Cree y monitoree sus productos" />
+        <x-view-title>
+            <x-slot:title>
+                Productos
+            </x-slot:title>
 
-        <a href="{{ route("products.create") }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Cargar nuevo producto
-        </a>
+            <x-slot:content>
+                Cree y monitoree los productos
+            </x-slot:content>
+        </x-view-title>
+
+        <div class="flex items-center gap-4">
+            <a href="{{ route('products.create') }}">
+                <x-secondary-button class="group flex items-center gap-[0.625rem]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1V15M1 8H15" stroke="#565AFF" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="transition-colors duration-500 group-hover:stroke-dark-blue group-active:stroke-neutral-blue group-disabled:stroke-[#C2C2C2]" />
+                    </svg>
+                    <span>Nuevo producto</span>
+                </x-secondary-button>
+            </a>
+        </div>
     </div>
 
-    <div x-data="{ open: false }" class="relative">
-        <button x-on:click="open = ! open" class="ml-auto block rounded-[0.375rem] bg-[#DDDDDD] px-2 py-4">
-            <span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="4" viewBox="0 0 18 4" fill="none">
-                    <path
-                        d="M4 2C4 2.53043 3.78929 3.03914 3.41421 3.41421C3.03914 3.78929 2.53043 4 2 4C1.46957 4 0.960859 3.78929 0.585786 3.41421C0.210714 3.03914 0 2.53043 0 2C0 1.46957 0.210714 0.96086 0.585786 0.585787C0.960859 0.210714 1.46957 0 2 0C2.53043 0 3.03914 0.210714 3.41421 0.585787C3.78929 0.96086 4 1.46957 4 2ZM11 2C11 2.53043 10.7893 3.03914 10.4142 3.41421C10.0391 3.78929 9.53043 4 9 4C8.46957 4 7.96086 3.78929 7.58579 3.41421C7.21071 3.03914 7 2.53043 7 2C7 1.46957 7.21071 0.96086 7.58579 0.585787C7.96086 0.210714 8.46957 0 9 0C9.53043 0 10.0391 0.210714 10.4142 0.585787C10.7893 0.96086 11 1.46957 11 2ZM18 2C18 2.53043 17.7893 3.03914 17.4142 3.41421C17.0391 3.78929 16.5304 4 16 4C15.4696 4 14.9609 3.78929 14.5858 3.41421C14.2107 3.03914 14 2.53043 14 2C14 1.46957 14.2107 0.96086 14.5858 0.585787C14.9609 0.210714 15.4696 0 16 0C16.5304 0 17.0391 0.210714 17.4142 0.585787C17.7893 0.96086 18 1.46957 18 2Z"
-                        fill="black" />
-                </svg>
-            </span>
-        </button>
+    <div class="flex hidden gap-4">
+        <x-search-input />
 
-        <ul x-show="open"
-            class="absolute right-0 top-full mt-[0.375rem] space-y-1 bg-white p-2 font-inter font-medium shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
-            <li>
-                <button x-data="" x-on:click="$dispatch('open-modal', 'change-oc-stage'); open = false"
-                    class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]">
-                    Cambiar etapa
-                </button>
-            </li>
-            <li>
-                <button class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]"
-                    x-on:click="$dispatch('open-modal', 'modify-oc'); open = false">
-                    Editar producto
-                </button>
-            </li>
-            <li>
-                <button class="w-full rounded-md px-2 py-1 text-left hover:bg-[#E9E9E9]"
-                    x-on:click="$dispatch('open-modal', 'delete-oc'); open = false">
-                    Eliminar producto
-                </button>
-            </li>
-        </ul>
+        <x-primary-button class="group flex items-center gap-[0.625rem]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 22 20" fill="none">
+                <path
+                    d="M1 2.6C1 2.03995 1 1.75992 1.10899 1.54601C1.20487 1.35785 1.35785 1.20487 1.54601 1.10899C1.75992 1 2.03995 1 2.6 1H19.4C19.9601 1 20.2401 1 20.454 1.10899C20.6422 1.20487 20.7951 1.35785 20.891 1.54601C21 1.75992 21 2.03995 21 2.6V3.26939C21 3.53819 21 3.67259 20.9672 3.79756C20.938 3.90831 20.8901 4.01323 20.8255 4.10776C20.7526 4.21443 20.651 4.30245 20.4479 4.4785L14.0521 10.0215C13.849 10.1975 13.7474 10.2856 13.6745 10.3922C13.6099 10.4868 13.562 10.5917 13.5328 10.7024C13.5 10.8274 13.5 10.9618 13.5 11.2306V16.4584C13.5 16.6539 13.5 16.7517 13.4685 16.8363C13.4406 16.911 13.3953 16.9779 13.3363 17.0315C13.2695 17.0922 13.1787 17.1285 12.9971 17.2012L9.59711 18.5612C9.22957 18.7082 9.0458 18.7817 8.89827 18.751C8.76927 18.7242 8.65605 18.6476 8.58325 18.5377C8.5 18.4122 8.5 18.2142 8.5 17.8184V11.2306C8.5 10.9618 8.5 10.8274 8.46715 10.7024C8.43805 10.5917 8.39014 10.4868 8.32551 10.3922C8.25258 10.2856 8.15102 10.1975 7.94789 10.0215L1.55211 4.4785C1.34898 4.30245 1.24742 4.21443 1.17449 4.10776C1.10986 4.01323 1.06195 3.90831 1.03285 3.79756C1 3.67259 1 3.53819 1 3.26939V2.6Z"
+                    stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="transition-colors duration-500 group-disabled:stroke-[#C2C2C2]" />
+            </svg>
+            <span>Filtros</span>
+        </x-primary-button>
     </div>
 
-    <div class="flex max-h-[587px] w-full gap-x-10 overflow-auto">
-        <livewire:kanban.kanban-board />
+    @if (session('message'))
+        <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    <!-- Tabs for switching between views -->
+    <div x-data="{ activeTab: 'kanban' }" class="mb-6">
+        <!-- Kanban View -->
+        <div x-show="activeTab === 'kanban'" class="mt-4">
+            @php
+                $headers = [
+                    'material_id' => 'ID',
+                    'short_text' => 'Descripción',
+                    'supplying_plant' => 'Planta',
+                    'unit_of_measure' => 'Unidad de Medida',
+                    'plant' => 'Planta',
+                    'vendor_name' => 'Proveedor',
+                    'vendor_code' => 'Código Proveedor',
+                    'actions' => 'Acciones',
+                    'actions_html' => '',
+                ];
+
+                $sortable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
+                $searchable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
+                $filterable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
+                $filterOptions = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+            @endphp
+
+
+            <livewire:components.reusable-table :headers="$headers" :sortable="$sortable" :searchable="$searchable" :filterable="$filterable"
+                :filterOptions="$filterOptions" :actions="true" :actionsView="false" :actionsEdit="true" :actionsDelete="true"
+                :baseRoute="'products'" :model="\App\Models\Product::class" />
+        </div>
     </div>
 </x-app-layout>

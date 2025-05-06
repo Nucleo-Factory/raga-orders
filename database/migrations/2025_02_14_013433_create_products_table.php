@@ -12,22 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            // Primary key
             $table->id();
-
-            // Columns
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->string('sku')->unique();
-            $table->integer('stock')->default(0);
-            $table->enum('status', ['active', 'inactive'])->default('active');
-
-            // Timestamps
+            $table->string('material_id')->nullable();
+            $table->string('short_text')->nullable();
+            $table->string('supplying_plant')->nullable();
+            $table->string('unit_of_measure')->nullable();
+            $table->string('plant')->nullable();
+            $table->string('vendor_name')->nullable();
+            $table->string('vendo_code')->nullable();
+            $table->decimal('price_per_unit', 10, 2)->nullable();
             $table->timestamps();
-
-            // Indexes
-            $table->index('name');
         });
     }
 

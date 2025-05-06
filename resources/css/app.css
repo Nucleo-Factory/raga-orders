@@ -118,7 +118,6 @@ th, td {
     font-size: 14px;
 }
 th {
-    background-color: #F2F4F8;
     font-size: 14px;
 }
 .status {
@@ -172,11 +171,180 @@ th {
         border: none;
     }
 
-    .main-sidebar {
-        transition: all 0.5s ease-in-out;
+    .main-sidebar .sidebar-link,
+    .main-sidebar .logout-btn,
+    .main-sidebar .profile-container,
+    .main-sidebar .sidebar-dropdown,
+    .main-sidebar .sidebar-dropdown-text-container {
+        @apply gap-0 transition-all duration-500;
     }
 
-    .main-sidebar .link-text {
-        @apply text-nowrap overflow-hidden transition-all duration-500;
+    .main-sidebar .link-text,
+    .main-sidebar .profile-name,
+    .main-sidebar .sidebar-dropdown-text,
+    .main-sidebar .sidebar-dropdown .icon {
+        @apply text-nowrap overflow-hidden [transition:_opacity_0.3s,_width_0.5s] w-0 opacity-0;
+    }
+
+    .main-sidebar .sidebar-toggler-btn {
+        @apply rotate-180 transition-[transform_0.3s_ease];
     }
 }
+
+@layer utilities {
+    .dashed-util {
+        background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='30' ry='30' stroke='%23C9CFFFFF' stroke-width='4' stroke-dasharray='25' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+    }
+}
+
+/* Estilos personalizados para la tabla de órdenes de compra */
+.livewire-table {
+    @apply overflow-hidden rounded-lg shadow-md;
+}
+
+.livewire-table table {
+    @apply min-w-full divide-y divide-gray-200;
+}
+
+.livewire-table thead {
+    @apply bg-gray-50;
+}
+
+.livewire-table th {
+    @apply px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase;
+}
+
+.livewire-table tbody {
+    @apply bg-white divide-y divide-gray-200;
+}
+
+.livewire-table td {
+    @apply px-6 py-4 text-sm text-gray-500 whitespace-nowrap;
+}
+
+.livewire-table tr:hover {
+    @apply bg-gray-50;
+}
+
+/* Kanban Board Styles */
+.kanban-board {
+    display: flex;
+    overflow-x: auto;
+    padding: 1rem;
+    gap: 1rem;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+}
+
+.kanban-container {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+}
+
+.kanban-column {
+    flex: 0 0 400px;
+    width: 420px;
+    min-width: 420px;
+    max-width: 420px;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 0;
+}
+
+.kanban-card {
+    min-height: 180px;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kanban-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sortable.js custom styles */
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-fallback {
+    transform: rotate(2deg);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    min-height: 180px !important;
+    width: 320px !important;
+}
+
+/* Sidebar styles - Simple and clean approach */
+.main-sidebar {
+    width: 93px;
+    transition: width 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded {
+    width: 270px;
+}
+
+/* Elementos de texto que se ocultan/muestran */
+.main-sidebar .link-text,
+.main-sidebar .profile-name,
+.main-sidebar .sidebar-dropdown-text,
+.main-sidebar .sidebar-dropdown .icon,
+.main-sidebar .dropdown-item-text {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+/* Cuando el sidebar está expandido */
+.main-sidebar.sidebar-expanded .link-text,
+.main-sidebar.sidebar-expanded .profile-name,
+.main-sidebar.sidebar-expanded .sidebar-dropdown-text,
+.main-sidebar.sidebar-expanded .sidebar-dropdown .icon,
+.main-sidebar.sidebar-expanded .dropdown-item-text {
+    width: auto;
+    opacity: 1;
+}
+
+/* Espaciado de elementos */
+.main-sidebar .sidebar-link,
+.main-sidebar .logout-btn,
+.main-sidebar .profile-container,
+.main-sidebar .sidebar-dropdown,
+.main-sidebar .sidebar-dropdown-text-container {
+    gap: 0;
+    transition: gap 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded .sidebar-link,
+.main-sidebar.sidebar-expanded .sidebar-dropdown {
+    gap: 0.75rem;
+}
+
+.main-sidebar.sidebar-expanded .logout-btn,
+.main-sidebar.sidebar-expanded .profile-container,
+.main-sidebar.sidebar-expanded .sidebar-dropdown-text-container {
+    gap: 0.625rem;
+}
+
+/* Rotación del botón toggler */
+.sidebar-toggler-btn {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.main-sidebar.sidebar-expanded .sidebar-toggler-btn {
+    transform: rotate(0deg);
+}
+

@@ -30,12 +30,15 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'form.email' => trans('auth.failed'),
+        try {
+            Auth::attempt([
+                'email' => $this->email,
+                'password' => $this->password,
             ]);
+        } catch (\Exception $e) {
+            // Si ocurre un error, personalizamos el mensaje
+            session()->flash('error', 'La contraseña ingresada no coincide');
+            return;
         }
 
         RateLimiter::clear($this->throttleKey());

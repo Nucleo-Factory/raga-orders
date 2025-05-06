@@ -16,37 +16,25 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $price = $this->faker->randomFloat(2, 5, 500);
+        $quantity = $this->faker->randomFloat(2, 1, 100);
+        $netValue = $price * $quantity;
+        $vatRate = 16.00;
+        $vatValue = $netValue * ($vatRate / 100);
+
         return [
-            'name' => fake()->words(3, true),
-            'description' => fake()->paragraph(),
-            'price' => fake()->randomFloat(2, 10, 1000),
-            'sku' => fake()->unique()->bothify('PRD-####-????'),
-            'stock' => fake()->numberBetween(0, 1000),
-            'status' => fake()->randomElement(['active', 'inactive']),
-            'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => function (array $attributes) {
-                return fake()->dateTimeBetween($attributes['created_at'], 'now');
-            },
+            'material_id' => 'MAT-' . $this->faker->unique()->numberBetween(1000, 9999),
+            'description' => $this->faker->paragraph(),
+            'legacy_material' => $this->faker->optional(0.7)->bothify('LEG-####'),
+            'contract' => $this->faker->optional(0.8)->bothify('CONT-####-##'),
+            'order_quantity' => $quantity,
+            'qty_unit' => $this->faker->randomElement(['pcs', 'kg', 'lt', 'm']),
+            'price_per_unit' => $price,
+            'price_per_uon' => $price,
+            'net_value' => $netValue,
+            'vat_rate' => $vatRate,
+            'vat_value' => $vatValue,
+            'delivery_date' => $this->faker->dateTimeBetween('now', '+3 months'),
         ];
-    }
-
-    /**
-     * Indicate that the product is active.
-     */
-    public function active(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'active',
-        ]);
-    }
-
-    /**
-     * Indicate that the product is inactive.
-     */
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'inactive',
-        ]);
     }
 }
