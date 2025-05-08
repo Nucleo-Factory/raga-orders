@@ -27,15 +27,24 @@ class PurchaseOrderController extends Controller
      */
     public function createFromApi(Request $request): JsonResponse
     {
-        $data = $request->all();
-        $results = [];
-
         try {
             DB::beginTransaction();
 
-            Log::info('Iniciando creación de órdenes de compra desde API', ['count' => count($data)]);
+            $data = $request->all();
+            $results = [];
 
-            foreach ($data as $orderData) {
+            // Verificar si el JSON es un array o un objeto simple
+            if (!isset($data['general'])) {
+                // Es un array de órdenes
+                Log::info('Recibido array de órdenes', ['count' => count($data)]);
+                $orders = $data;
+            } else {
+                // Es una sola orden
+                Log::info('Recibida una sola orden', ['order' => $data['general']['order_number'] ?? 'unknown']);
+                $orders = [$data];
+            }
+
+            foreach ($orders as $orderData) {
                 $general = $orderData['general'];
 
                 // Find vendor by vendor_code
@@ -65,14 +74,14 @@ class PurchaseOrderController extends Controller
                 // Parse date
                 $requiredDate = Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination']);
 
-                // Calculate total for items
-                $netTotal = 0;
+                // Calcular el peso total a partir de los items
                 $totalWeight = 0;
-
                 foreach ($orderData['items'] as $item) {
-                    $netTotal += $item['netValue'];
                     $totalWeight += $item['peso_kg'];
                 }
+
+                // Obtener el netValue directamente del JSON
+                $netTotal = $general['netValue'];
 
                 // Valores por defecto
                 $companyId = $vendor->company_id;
@@ -109,8 +118,8 @@ class PurchaseOrderController extends Controller
                     'order_date' => now(),
                     'currency' => $general['currency'],
                     'incoterms' => $general['incoterms'],
-                    'net_total' => $netTotal,
-                    'total' => $netTotal,
+                    'net_total' => $netTotal, // Usar el valor exacto del JSON
+                    'total' => $netTotal, // El total también es el mismo valor
                     'weight_kg' => $totalWeight,
                     'date_required_in_destination' => $requiredDate,
                     'planned_hub_id' => $hub->id,
@@ -143,32 +152,74 @@ class PurchaseOrderController extends Controller
                     return $value !== null && $value !== '' || $value === 0 || $value === 0.0;
                 });
 
-                Log::info('Datos preparados para crear la PO', ['order_number' => $general['order_number']]);
+                Log::info('Datos preparados para crear la PO', [
+                    'order_number' => $general['order_number'],
+                    'net_total' => $netTotal
+                ]);
 
                 // Crear la orden de compra
                 $purchaseOrder = PurchaseOrder::create($poData);
 
-                Log::info('Orden creada', ['id' => $purchaseOrder->id, 'order_number' => $purchaseOrder->order_number]);
+                Log::info('Orden creada', [
+                    'id' => $purchaseOrder->id,
+                    'order_number' => $purchaseOrder->order_number,
+                    'net_total' => $purchaseOrder->net_total
+                ]);
 
                 // Procesar y asociar los productos
                 foreach ($orderData['items'] as $itemData) {
-                    // Encontrar o crear el producto por código de material
-                    $product = Product::firstOrCreate(
-                        ['material_id' => $itemData['material']],
-                        [
+                    // Buscar el producto por material_id
+                    $product = Product::where('material_id', $itemData['material'])->first();
+
+                    $newPrice = (float) $itemData['price_per_unit'];
+                    $priceUpdated = false;
+
+                    if ($product) {
+                        // Verificar si el precio ha cambiado
+                        $currentPrice = (float) $product->price_per_unit;
+
+                        if (abs($currentPrice - $newPrice) > 0.0001) { // Comparar con margen para evitar problemas de redondeo
+                            // Actualizar el precio si es diferente
+                            Log::info("Actualizando precio del producto {$product->material_id}", [
+                                'old_price' => $currentPrice,
+                                'new_price' => $newPrice
+                            ]);
+
+                            $product->price_per_unit = $newPrice;
+                            $product->save();
+                            $priceUpdated = true;
+                        }
+                    } else {
+                        // Si el producto no existe, crearlo
+                        $product = Product::create([
+                            'material_id' => $itemData['material'],
                             'short_text' => 'Product ' . $itemData['material'],
                             'unit_of_measure' => 'KG',
-                            'price_per_unit' => $itemData['netValue'] / $itemData['orderQuantity'],
-                        ]
-                    );
+                            'price_per_unit' => $newPrice,
+                        ]);
 
-                    // Convertir la cantidad a entero - PostgreSQL espera un entero para la columna quantity
-                    $quantity = (int)round($itemData['orderQuantity']);
+                        Log::info("Producto creado con ID {$product->id}", [
+                            'material_id' => $itemData['material'],
+                            'price' => $newPrice
+                        ]);
+
+                        $priceUpdated = true; // Consideramos que un producto nuevo también tiene "precio actualizado"
+                    }
+
+                    // Usar peso_kg como la cantidad del producto
+                    $quantity = (int) round($itemData['peso_kg']);
 
                     // Adjuntar producto a la orden de compra
                     $purchaseOrder->products()->attach($product->id, [
                         'quantity' => $quantity,
-                        'unit_price' => $itemData['netValue'] / $itemData['orderQuantity'],
+                        'unit_price' => $newPrice, // Usar el nuevo precio para esta orden
+                    ]);
+
+                    Log::info("Producto asociado a la orden", [
+                        'product_id' => $product->id,
+                        'material_id' => $product->material_id,
+                        'quantity' => $quantity,
+                        'unit_price' => $newPrice
                     ]);
                 }
 

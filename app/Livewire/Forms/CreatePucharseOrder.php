@@ -169,6 +169,7 @@ class CreatePucharseOrder extends Component
         $this->id = $id;
         $this->loadHubs();
         $this->loadBillTo();
+        $this->calculateTotals();
 
         // Initialize with empty array for new records
         $this->material_type = ['general'];
