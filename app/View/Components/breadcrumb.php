@@ -27,9 +27,9 @@ class breadcrumb extends Component
         'products.index' => 'Productos',
         'products.create' => 'Nuevo producto',
         'products.edit' => 'Editar producto',
-        'products.forecast' => 'Pronóstico',
-        'products.forecast-graph' => 'Gráfico de pronóstico',
-        'products.forecast.edit' => 'Editar pronóstico',
+        'products.forecast' => 'Forecast',
+        'products.forecast-graph' => 'Gráfico de Forecast',
+        'products.forecast.edit' => 'Editar Forecast',
         'vendors.index' => 'Proveedores',
         'vendors.create' => 'Nuevo proveedor',
         'vendors.edit' => 'Editar proveedor',
@@ -132,7 +132,22 @@ class breadcrumb extends Component
     public function __construct()
     {
         $this->currentPath = request()->path();
+
+        // Añadir debug para ver qué método se está utilizando
+        $routeName = Route::currentRouteName();
+
+        // Log para diagnóstico
+        \Illuminate\Support\Facades\Log::info('Breadcrumb Debug', [
+            'currentPath' => $this->currentPath,
+            'routeName' => $routeName
+        ]);
+
         $this->buildBreadcrumb();
+
+        // Log después de construir
+        \Illuminate\Support\Facades\Log::info('Breadcrumb Result', [
+            'segments' => $this->segments
+        ]);
     }
 
     /**
@@ -142,10 +157,18 @@ class breadcrumb extends Component
     {
         $currentRouteName = Route::currentRouteName();
 
-        if ($currentRouteName) {
+        if ($currentRouteName && $currentRouteName !== '') {
             $this->buildFromRoute($currentRouteName);
         } else {
-            $this->buildFromPath();
+            // Intenta obtener la ruta basada en el path actual
+            $path = trim($this->currentPath, '/');
+            if (in_array($path, array_keys($this->pathGroups)) || isset($this->translations[$path . '.index'])) {
+                // Si el path coincide con un grupo conocido o tiene una entrada en traducciones
+                $this->buildFromPath();
+            } else {
+                // Por defecto, usar buildFromPath
+                $this->buildFromPath();
+            }
         }
 
         // Finally, translate each segment name
@@ -162,6 +185,28 @@ class breadcrumb extends Component
     {
         $routeParts = explode('.', $routeName);
         $segments = [];
+
+        // Special case for shipping-documentation routes
+        if (strpos($routeName, 'shipping-documentation') === 0) {
+            $url = route('shipping-documentation.index', [], false);
+            $segments[] = [
+                'name' => 'Documentación de envío',
+                'url' => $url
+            ];
+
+            // If it's not just the index, add the additional segment
+            if ($routeName !== 'shipping-documentation.index') {
+                $lastPart = end($routeParts);
+                $lastSegmentName = $this->translations[$routeName] ?? ucfirst(str_replace(['-', '_', '.'], ' ', $lastPart));
+                $segments[] = [
+                    'name' => $lastSegmentName,
+                    'url' => request()->path()
+                ];
+            }
+
+            $this->segments = $segments;
+            return;
+        }
 
         foreach ($routeParts as $index => $part) {
             // Skip the last part if it's 'index'
@@ -213,12 +258,22 @@ class breadcrumb extends Component
             $segment = $pathParts[$i];
             $urlPath .= ($i > 0 ? '/' : '') . $segment;
 
+            // Special case for shipping-documentation
+            if ($segment === 'shipping-documentation') {
+                $name = 'Documentación de envío';
+            }
             // For first segment (section)
-            if ($i === 0) {
+            else if ($i === 0) {
                 if (isset($this->pathGroups[$segment])) {
                     $name = $this->pathGroups[$segment];
                 } else {
-                    $name = ucfirst(str_replace(['-', '_'], ' ', $segment));
+                    // Check if this segment has a direct match in translations
+                    $possibleRouteName = $segment . '.index';
+                    if (isset($this->translations[$possibleRouteName])) {
+                        $name = $this->translations[$possibleRouteName];
+                    } else {
+                        $name = ucfirst(str_replace(['-', '_'], ' ', $segment));
+                    }
                 }
             } else {
                 $name = ucfirst(str_replace(['-', '_'], ' ', $segment));
@@ -243,12 +298,24 @@ class breadcrumb extends Component
             return $this->translations[$text];
         }
 
+        // Check if adding '.index' helps
+        if (isset($this->translations[$text . '.index'])) {
+            return $this->translations[$text . '.index'];
+        }
+
         // Case insensitive match
         $lowerText = strtolower($text);
         foreach ($this->translations as $key => $value) {
             if (strtolower($key) === $lowerText) {
                 return $value;
             }
+        }
+
+        // Attempt to clean and normalize the text for matching
+        $normalizedText = str_replace(['-', '_'], ' ', $text);
+        $normalizedText = ucfirst(strtolower($normalizedText));
+        if (isset($this->translations[$normalizedText])) {
+            return $this->translations[$normalizedText];
         }
 
         return $text;

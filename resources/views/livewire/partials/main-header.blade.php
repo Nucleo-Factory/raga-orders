@@ -1,7 +1,7 @@
 <header x-data="{ open: false }">
     <div class="flex justify-between items-center py-6 px-2 sm:pt-[2.625rem] sm:pb-5 sm:px-10">
         <div class="text-left grow">
-            {{-- <x-breadcrumb /> --}}
+            <x-breadcrumb />
         </div>
 
         <!-- Settings Dropdown -->
