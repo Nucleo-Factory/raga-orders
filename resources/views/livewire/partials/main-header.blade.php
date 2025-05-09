@@ -1,15 +1,10 @@
 <header x-data="{ open: false }">
     <div class="flex justify-between items-center py-6 px-2 sm:pt-[2.625rem] sm:pb-5 sm:px-10">
         <div class="text-left grow">
-            @if(class_exists('\App\View\Components\Breadcrumb'))
+            @if(file_exists(app_path('View/Components/Breadcrumb.php')))
                 <x-breadcrumb />
             @else
-                <!-- Breadcrumb no disponible -->
-                <div class="flex items-center p-3 text-gray-500 rounded">
-                    <a href="{{ url('/') }}" class="hover:text-gray-700">
-                        Inicio
-                    </a>
-                </div>
+                <x-simple-breadcrumb />
             @endif
         </div>
 
