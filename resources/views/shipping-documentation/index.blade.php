@@ -1,4 +1,12 @@
 @php
+// Registrar acceso a la vista shipping-documentation.index
+\Illuminate\Support\Facades\Log::info('Acceso a shipping-documentation.index', [
+    'route' => \Illuminate\Support\Facades\Route::currentRouteName(),
+    'url' => request()->url(),
+    'path' => request()->path(),
+    'user' => auth()->check() ? auth()->user()->id : 'guest'
+]);
+
     $etapaArray = ["e1" => "Etapa 1", "e2" => "Etapa 2"];
 @endphp
 

@@ -22,7 +22,6 @@ class UserCreate extends Component
     {
         $rules = [
             'name' => 'required|min:3',
-            'role_id' => 'required|exists:roles,id'
         ];
 
         // Reglas diferentes para email dependiendo si es creación o edición
@@ -57,19 +56,14 @@ class UserCreate extends Component
 
     public function save()
     {
-        $this->validate([
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'role_id' => 'required|exists:roles,id'
-        ], [
+        $this->validate($this->rules(), [
             'name.required' => 'El nombre es requerido',
             'name.min' => 'El nombre debe tener al menos 3 caracteres',
             'email.required' => 'El email es requerido',
             'email.email' => 'El email debe ser una dirección de correo válida',
             'email.unique' => 'El email ya está en uso',
-            'role_id.required' => 'El rol es requerido',
-            'role_id.exists' => 'El rol seleccionado no es válido',
+            'password.required' => 'La contraseña es requerida',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres',
         ]);
 
         if ($this->id) {
@@ -86,10 +80,14 @@ class UserCreate extends Component
 
             $user->update($userData);
 
-            $role = Role::findById($this->role_id);
-            $user->syncRoles([$role->name]);
+            if (!empty($this->role_id)) {
+                $role = Role::findById($this->role_id);
+                $user->syncRoles([$role->name]);
+            } else {
+                $user->syncRoles([]);
+            }
 
-            session()->flash('message', 'Usuario actualizado correctamente.');
+            $this->dispatch('open-modal', 'modal-user-created');
         } else {
             $user = User::create([
                 'name' => $this->name,
@@ -97,8 +95,10 @@ class UserCreate extends Component
                 'password' => bcrypt($this->password),
             ]);
 
-            $role = Role::findById($this->role_id);
-            $user->assignRole($role->name);
+            if (!empty($this->role_id)) {
+                $role = Role::findById($this->role_id);
+                $user->assignRole($role->name);
+            }
 
             $this->dispatch('open-modal', 'modal-user-created');
         }
