@@ -84,11 +84,11 @@
 
     <x-modal-success name="modal-user-created">
         <x-slot:title>
-            Usuario creado correctamente
+            {{ $id ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente' }}
         </x-slot:title>
 
         <x-slot:description>
-            El usuario ha sido creado correctamente
+            {{ $id ? 'El usuario ha sido actualizado correctamente' : 'El usuario ha sido creado correctamente' }}
         </x-slot:description>
 
         <x-primary-button wire:click="closeModal" class="w-full">

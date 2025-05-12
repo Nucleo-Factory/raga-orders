@@ -234,7 +234,7 @@ class PurchaseOrder extends Model implements HasMedia
     public function isConsolidable(): bool
     {
         $weight = $this->weight_kg ?? 0;
-        return $weight > 5000 && $weight <= 15000;
+        return $weight > 1 && $weight <= 20000;
     }
 
     /**
@@ -264,7 +264,7 @@ class PurchaseOrder extends Model implements HasMedia
 
         // Check if the total weight of all orders is within the consolidable range
         $totalWeight = $orders->sum('weight_kg');
-        return $totalWeight > 5000 && $totalWeight <= 15000;
+        return $totalWeight > 1 && $totalWeight <= 20000;
     }
 
     /**
