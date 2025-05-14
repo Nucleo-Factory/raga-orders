@@ -157,12 +157,13 @@
                 <div class="absolute h-[2px] top-6 left-0 right-0 bg-gray-200"></div>
 
                 <!-- Timeline events -->
-                <div class="relative flex justify-between">
+                <div class="relative flex justify-between w-full overflow-x-scroll">
                     @foreach($trackingData['raw_data']['events'] as $event)
                         @php
-                            // Determinar estado basado en el statusMilestone
-                            $isCompleted = in_array($event['statusMilestone'], ['delivered', 'out_for_delivery']);
-                            $isActive = $isCompleted && $event['statusMilestone'] == 'in_transit';
+                            // Determinar estado basado en la fecha de ocurrencia
+                            $eventDate = \Carbon\Carbon::parse($event['occurrenceDatetime'] ?? now());
+                            $isCompleted = $eventDate->isPast();
+                            $isActive = $eventDate->isToday();
                             $status = $isCompleted ? 'completed' : ($isActive ? 'active' : 'pending');
                         @endphp
                         <div class="flex flex-col items-center">
@@ -182,7 +183,7 @@
                                     {{ $event['status'] }}
                                 </p>
                                 @if(isset($event['occurrenceDatetime']))
-                                    <p class="mb-1 text-xs font-medium {{ $status == 'completed' || $status == 'active' ? 'text-gray-600' : 'text-gray-400' }}">
+                                    <p class="mb-1 text-xs font-medium {{ $status == 'completed' || $status == 'active' ? 'text-dark-blue font-bold' : 'text-gray-400' }}">
                                         {{ \Carbon\Carbon::parse($event['occurrenceDatetime'])->format('d/m/Y') }}
                                         <span class="{{ $status == 'completed' || $status == 'active' ? 'text-dark-blue font-bold' : 'text-gray-400' }}">
                                             {{ \Carbon\Carbon::parse($event['occurrenceDatetime'])->format('H:i') }}
@@ -190,7 +191,7 @@
                                     </p>
                                 @endif
                                 @if(isset($event['location']))
-                                    <p class="text-xs {{ $status == 'completed' || $status == 'active' ? 'text-gray-600' : 'text-gray-400' }}">
+                                    <p class="text-xs {{ $status == 'completed' || $status == 'active' ? 'text-dark-blue font-bold' : 'text-gray-400' }}">
                                         {{ $event['location'] }}
                                     </p>
                                 @endif
