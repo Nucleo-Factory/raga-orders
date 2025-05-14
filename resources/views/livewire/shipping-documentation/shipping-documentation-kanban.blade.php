@@ -175,7 +175,7 @@
                     <div class="p-3 mb-4 border border-blue-200 rounded-md bg-blue-50" x-show="!validating">
                         <p class="text-sm text-blue-700">
                             <i class="mr-1 fa fa-info-circle"></i>
-                            Debe proporcionar al menos un código de seguimiento (ID de tracking o Master BL).
+                            Debe proporcionar al menos un código de seguimiento (ID de tracking o Master BL o Container).
                             Ambos códigos serán validados antes de mover el documento.
                         </p>
                     </div>
@@ -405,7 +405,7 @@
                     });
                 } else {
                     console.error(data.message);
-                    alert(data.message);
+                    console.log(data.message);
                 }
             });
         });
