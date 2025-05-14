@@ -164,11 +164,12 @@
                 <p>Carga total: <span>{{ number_format($totalWeight, 0) }} kg</span></p>
                 <p>Compañía: <span>{{ $shippingDocument->company->name ?? 'N/A' }}</span></p>
                 <p>Master BL: <span>{{ $shippingDocument->mbl_number ?? 'N/A' }}</span></p>
+                <p>Container: <span>{{ $shippingDocument->container_number ?? 'N/A' }}</span></p>
             </div>
         </div>
     </div>
 
-    @if($shippingDocument->tracking_id || $shippingDocument->mbl_number)
+    @if($shippingDocument->tracking_id || $shippingDocument->mbl_number || $shippingDocument->container_number)
     <div class="mb-8">
         <h3 class="mb-6 text-lg font-bold">Estado del Envío</h3>
 

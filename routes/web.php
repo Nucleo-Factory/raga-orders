@@ -68,6 +68,9 @@ Route::middleware(['auth'])->group(function () {
     Route::view('shipping-documentation', 'shipping-documentation.index')
         ->name('shipping-documentation.index');
 
+    // Agregamos un log de información separado en lugar de usar middleware anónimo
+    \Illuminate\Support\Facades\Log::info('Ruta shipping-documentation.index registrada');
+
     Route::view('shipping-documentation/create', 'shipping-documentation.create')
         ->name('shipping-documentation.create');
 

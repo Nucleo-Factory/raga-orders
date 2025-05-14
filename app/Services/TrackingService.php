@@ -119,12 +119,6 @@ class TrackingService
         }
     }
 
-    /**
-     * Get tracking information by Master Bill of Lading number
-     *
-     * @param string $masterBl The Master Bill of Lading number
-     * @return array|null The tracking data or null if not found/error
-     */
     public function getPorthTrackingByMasterBl($masterBl)
     {
         try {
@@ -164,12 +158,6 @@ class TrackingService
         }
     }
 
-    /**
-     * Process the raw data from Porth API into a standardized format
-     *
-     * @param array $data Raw data from Porth API
-     * @return array Processed tracking data
-     */
     private function processPorthTrackingData($data)
     {
         // Definir el orden y nombres de las fases
@@ -263,7 +251,6 @@ class TrackingService
         return $phaseNumber < $currentNumber;
     }
 
-    // Método para obtener datos de prueba para el frontend
     public function getMockTrackingData()
     {
         return [
@@ -339,6 +326,45 @@ class TrackingService
         ];
     }
 
+    public function getPorthTrackingByContainerNumber($containerNumber)
+    {
+        try {
+            \Log::info('Fetching tracking data by container number', ['containerNumber' => $containerNumber]);
+
+            $response = Http::withHeaders([
+                'apikey' => $this->porthApiKey,
+                'Accept' => 'application/json'
+            ])->get("https://porth-api.fly.dev/api/shipment/byContainer/{$containerNumber}");
+
+            if ($response->failed()) {
+                \Log::error('Container number API request failed:', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return null;
+            }
+
+            $data = $response->json();
+
+            if (!$data || !isset($data['phases'])) {
+                \Log::warning('Invalid or empty response from Porth API for container number', [
+                    'containerNumber' => $containerNumber
+                ]);
+                return null;
+            }
+
+            return $this->processPorthTrackingData($data);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in getPorthTrackingByContainerNumber:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'containerNumber' => $containerNumber
+            ]);
+            return null;
+        }
+    }
+
     public function getTracking($trackingId = null, $mblNumber = null)
     {
         \Log::info('TrackingService::getTracking called:', [
@@ -376,6 +402,7 @@ class TrackingService
         if (!isset($trackingData['timeline'])) {
             $trackingData['timeline'] = [];
         }
+
 
         \Log::info('Successfully retrieved Porth tracking data');
         return $trackingData;
