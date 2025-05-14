@@ -577,8 +577,12 @@ class ShippingDocumentationKanban extends Component
                 $shippingDoc->mbl_number = $this->mbl_number;
             }
 
+            if ($this->container_number) {
+                $shippingDoc->container_number = $this->container_number;
+            }
+
             // Validate that at least one tracking field is provided when needed
-            if ($this->newColumnId == $this->columns[1]['id'] && !$this->tracking_id && !$this->mbl_number) {
+            if ($this->newColumnId == $this->columns[1]['id'] && !$this->tracking_id && !$this->mbl_number && !$this->container_number) {
                 throw new \Exception('Debe proporcionar al menos un código de seguimiento (ID o Master BL)');
             }
         } elseif ($this->newColumnId == 14 && $this->instruction_date) { // Column "Digitaciones" (ID 14)
@@ -610,10 +614,11 @@ class ShippingDocumentationKanban extends Component
             $this->validate([
                 'tracking_id' => 'nullable|string|max:50',
                 'mbl_number' => 'nullable|string|max:50',
+                'container_number' => 'nullable|string|max:50',
             ]);
 
             // Verificamos que hay al menos un código de tracking
-            if (!$this->tracking_id && !$this->mbl_number) {
+            if (!$this->tracking_id && !$this->mbl_number && !$this->container_number) {
                 $this->isValidating = false;
                 $this->dispatch('validating-state-changed', isValidating: false);
                 $this->dispatch('notify', [
@@ -669,6 +674,25 @@ class ShippingDocumentationKanban extends Component
                 }
             }
 
+            // Si no se validó por tracking_id o mbl_number, intentamos con container_number
+            if ($this->container_number) {
+                \Log::info('Validando container_number', ['container' => $this->container_number]);
+                $trackingData = $trackingService->getPorthTrackingByContainerNumber($this->container_number);
+
+                if ($trackingData) {
+                    \Log::info('Container válido', ['container' => $this->container_number]);
+                    $this->dispatch('notify', [
+                        'type' => 'success',
+                        'message' => 'Contenedor válido'
+                    ]);
+                    $this->isValidating = false;
+                    $this->dispatch('validating-state-changed', isValidating: false);
+                    return $trackingData;
+                } else {
+                    \Log::warning('Container inválido', ['container' => $this->container_number]);
+                }
+            }
+
             // Si llegamos aquí, ninguno de los códigos es válido
             $errorMessage = '';
             if ($this->tracking_id && $this->mbl_number) {
@@ -677,6 +701,8 @@ class ShippingDocumentationKanban extends Component
                 $errorMessage = 'El ID de tracking proporcionado no es válido. Verifique e intente nuevamente.';
             } elseif ($this->mbl_number) {
                 $errorMessage = 'El Master BL proporcionado no es válido. Verifique e intente nuevamente.';
+            } elseif ($this->container_number) {
+                $errorMessage = 'El contendor proporcionado no es válido. Verifique e intente nuevamente.';
             }
 
             $this->isValidating = false;
