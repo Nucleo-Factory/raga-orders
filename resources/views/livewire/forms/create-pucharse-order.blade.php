@@ -150,6 +150,19 @@
                             {{ $errors->first('alto') }}
                         </x-slot:error>
                     </x-form-input>
+
+                    <x-form-input>
+                        <x-slot:label>
+                            Volumen (ft³)
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="volumen" placeholder="0.00"
+                            wire:model="volumen" disabled class="pr-10 {{ $errors->has('volumen') ? 'border-red-500' : '' }}">
+                        </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('volumen') }}
+                        </x-slot:error>
+                    </x-form-input>
                 </div>
             </div>
 
@@ -190,18 +203,6 @@
 
                         <x-slot:error>
                             {{ $errors->first('height_cm') }}
-                        </x-slot:error>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
-                            Volumen (m³)
-                        </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="volumen" placeholder="0.00"
-                            wire:model="volumen" disabled class="pr-10 {{ $errors->has('volumen') ? 'border-red-500' : '' }}">
-                        </x-slot:input>
-
-                        <x-slot:error>
-                            {{ $errors->first('volumen') }}
                         </x-slot:error>
                     </x-form-input>
                     <x-form-input>
@@ -771,23 +772,23 @@
                 heightCm: heightCm.toFixed(2)
             });
 
-            // Calcular volumen después de actualizar las dimensiones
-            calculateVolume(lengthCm, widthCm, heightCm);
+            // Calcular volumen usando las dimensiones en pulgadas
+            calculateVolume(lengthIn, widthIn, heightIn);
         }
 
-        // Función para calcular el volumen en metros cúbicos usando cm
-        function calculateVolume(lengthCm, widthCm, heightCm) {
-            console.log('Calculando volumen con dimensiones en cm');
+        // Función para calcular el volumen en pies cúbicos usando pulgadas
+        function calculateVolume(lengthIn, widthIn, heightIn) {
+            console.log('Calculando volumen con dimensiones en pulgadas');
 
-            if (lengthCm && widthCm && heightCm) {
-                // Fórmula para convertir cm cúbicos a metros cúbicos: (L × W × H) ÷ 1,000,000
-                const volume = (lengthCm * widthCm * heightCm) / 1000000;
+            if (lengthIn && widthIn && heightIn) {
+                // Fórmula para convertir pulgadas cúbicas a pies cúbicos: (L × W × H) ÷ 1,728
+                const volume = (lengthIn * widthIn * heightIn) / 1728;
                 if (volumeField) {
                     volumeField.value = volume.toFixed(3);
                     // Disparar evento de cambio para que Livewire detecte el cambio
                     volumeField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
-                console.log('Volumen calculado en metros cúbicos:', volume.toFixed(3));
+                console.log('Volumen calculado en pies cúbicos:', volume.toFixed(3));
             }
         }
 
