@@ -79,7 +79,7 @@
                     </div>
                 </div>
 
-                <x-form-input-file class="space-y-6">
+                <x-form-input-file class="hidden space-y-6">
                     <x-slot:label class="!text-lg !font-bold">
                         Adjunte la orden para autocompletar
                     </x-slot:label>
@@ -119,49 +119,9 @@
                 <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
                         <x-slot:label>
-                            Largo (cm)
-                        </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="length_cm" name="largo_cm" placeholder="0.00" class="pr-10 {{ $errors->has('length_cm') ? 'border-red-500' : '' }}">
-                        </x-slot:input>
-
-                        <x-slot:error>
-                            {{ $errors->first('largo_cm') }}
-                        </x-slot:error>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
-                            Ancho (cm)
-                        </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="width_cm" name="ancho_cm" placeholder="0.00" class="pr-10 {{ $errors->has('width_cm') ? 'border-red-500' : '' }}">
-                        </x-slot:input>
-
-                        <x-slot:error>
-                            {{ $errors->first('ancho_cm') }}
-                        </x-slot:error>
-                    </x-form-input>
-                    <x-form-input>
-                        <x-slot:label>
-                            Alto (cm)
-                        </x-slot:label>
-                        <x-slot:input type="number" step="0.01" wire:model="height_cm" name="alto_cm" placeholder="0.00" class="pr-10 {{ $errors->has('height_cm') ? 'border-red-500' : '' }}">
-                        </x-slot:input>
-
-                        <x-slot:error>
-                            {{ $errors->first('alto_cm') }}
-                        </x-slot:error>
-                    </x-form-input>
-                </div>
-            </div>
-
-            <div class="w-full space-y-6">
-                <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones</h3>
-                <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
-                    <x-form-input>
-                        <x-slot:label>
                             Largo (in)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="largo" placeholder="0.00"
-                            wire:model="largo" disabled class="pr-10 {{ $errors->has('largo') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="largo" name="largo" placeholder="0.00" class="pr-10 {{ $errors->has('largo') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
@@ -172,8 +132,7 @@
                         <x-slot:label>
                             Ancho (in)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="ancho" placeholder="0.00"
-                            wire:model="ancho" disabled class="pr-10 {{ $errors->has('ancho') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="ancho" name="ancho" placeholder="0.00" class="pr-10 {{ $errors->has('ancho') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
@@ -184,17 +143,58 @@
                         <x-slot:label>
                             Alto (in)
                         </x-slot:label>
-                        <x-slot:input type="number" step="0.01" name="alto" placeholder="0.00"
-                            wire:model="alto" disabled class="pr-10 {{ $errors->has('alto') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" wire:model="alto" name="alto" placeholder="0.00" class="pr-10 {{ $errors->has('alto') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
                             {{ $errors->first('alto') }}
                         </x-slot:error>
                     </x-form-input>
+                </div>
+            </div>
+
+            <div class="w-full space-y-6">
+                <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones</h3>
+                <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
                         <x-slot:label>
-                            Volumen (ft³)
+                            Largo (cm)
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="largo" placeholder="0.00"
+                            wire:model="length_cm" disabled class="pr-10 {{ $errors->has('length_cm') ? 'border-red-500' : '' }}">
+                        </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('length_cm') }}
+                        </x-slot:error>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Ancho (cm)
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="ancho" placeholder="0.00"
+                            wire:model="width_cm" disabled class="pr-10 {{ $errors->has('width_cm') ? 'border-red-500' : '' }}">
+                        </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('width_cm') }}
+                        </x-slot:error>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Alto (cm)
+                        </x-slot:label>
+                        <x-slot:input type="number" step="0.01" name="alto" placeholder="0.00"
+                            wire:model="height_cm" disabled class="pr-10 {{ $errors->has('height_cm') ? 'border-red-500' : '' }}">
+                        </x-slot:input>
+
+                        <x-slot:error>
+                            {{ $errors->first('height_cm') }}
+                        </x-slot:error>
+                    </x-form-input>
+                    <x-form-input>
+                        <x-slot:label>
+                            Volumen (m³)
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="volumen" placeholder="0.00"
                             wire:model="volumen" disabled class="pr-10 {{ $errors->has('volumen') ? 'border-red-500' : '' }}">
@@ -362,16 +362,8 @@
                     </div>
 
                     <x-form-select label="Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
-                    <x-form-input>
-                        <x-slot:label>
-                            Modo
-                        </x-slot:label>
-                        <x-slot:input name="mode" placeholder="Ingrese modo" wire:model="mode" class="pr-10 {{ $errors->has('mode') ? 'border-red-500' : '' }}">
-                        </x-slot:input>
-                        <x-slot:error>
-                            {{ $errors->first('mode') }}
-                        </x-slot:error>
-                    </x-form-input>
+
+                    <x-form-select label="Modo de transporte" name="mode" wire:model.live="mode" :options="['maritimo' => 'Marítimo', 'aereo' => 'Aéreo']" />
                     <x-form-input>
                         <x-slot:label>
                             Tracking ID
@@ -705,15 +697,15 @@
 <script>
     // Ejecutar cuando el DOM esté completamente cargado
     document.addEventListener('DOMContentLoaded', function() {
-        // Función para encontrar un campo por su nombre
-        function findField(name) {
-            return document.querySelector(`input[name="${name}"]`);
+        // Función para encontrar un campo por su wire:model
+        function findField(wireModel) {
+            return document.querySelector(`[wire\\:model="${wireModel}"], [wire\\:model\\.live="${wireModel}"]`);
         }
 
         // Obtener referencias a los campos
-        const lengthCmField = findField('largo_cm');
-        const widthCmField = findField('ancho_cm');
-        const heightCmField = findField('alto_cm');
+        const lengthCmField = findField('length_cm');
+        const widthCmField = findField('width_cm');
+        const heightCmField = findField('height_cm');
         const lengthInField = findField('largo');
         const widthInField = findField('ancho');
         const heightInField = findField('alto');
@@ -733,76 +725,84 @@
             weightLb: weightLbField
         });
 
-        // Constante de conversión: 1 cm = 0.393701 pulgadas
-        const CM_TO_INCH = 0.393701;
+        // Constante de conversión: 1 pulgada = 2.54 cm
+        const INCH_TO_CM = 2.54;
 
-        // Función para convertir cm a pulgadas
-        function convertCmToInch(value) {
-            return value * CM_TO_INCH;
+        // Función para convertir pulgadas a cm
+        function convertInchToCm(value) {
+            return value * INCH_TO_CM;
         }
 
-        // Función para convertir cm a pulgadas y actualizar campos
+        // Función para convertir pulgadas a cm y actualizar campos
         function updateDimensions() {
             console.log('Actualizando dimensiones');
 
-            const lengthCm = parseFloat(lengthCmField.value) || 0;
-            const widthCm = parseFloat(widthCmField.value) || 0;
-            const heightCm = parseFloat(heightCmField.value) || 0;
+            const lengthIn = parseFloat(lengthInField?.value) || 0;
+            const widthIn = parseFloat(widthInField?.value) || 0;
+            const heightIn = parseFloat(heightInField?.value) || 0;
 
-            // Convertir a pulgadas
-            const lengthIn = convertCmToInch(lengthCm);
-            const widthIn = convertCmToInch(widthCm);
-            const heightIn = convertCmToInch(heightCm);
+            // Convertir a centímetros
+            const lengthCm = convertInchToCm(lengthIn);
+            const widthCm = convertInchToCm(widthIn);
+            const heightCm = convertInchToCm(heightIn);
 
-            // Actualizar campos de pulgadas
-            lengthInField.value = lengthIn.toFixed(2);
-            widthInField.value = widthIn.toFixed(2);
-            heightInField.value = heightIn.toFixed(2);
+            console.log('Valores en pulgadas:', { lengthIn, widthIn, heightIn });
+            console.log('Valores convertidos a cm:', { lengthCm, widthCm, heightCm });
 
-            // Disparar eventos para que Livewire detecte los cambios
-            lengthInField.dispatchEvent(new Event('input', { bubbles: true }));
-            widthInField.dispatchEvent(new Event('input', { bubbles: true }));
-            heightInField.dispatchEvent(new Event('input', { bubbles: true }));
+            // Actualizar campos de centímetros
+            if (lengthCmField) {
+                lengthCmField.value = lengthCm.toFixed(2);
+                lengthCmField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
 
-            console.log('Dimensiones convertidas a pulgadas:', {
-                lengthIn: lengthIn.toFixed(2),
-                widthIn: widthIn.toFixed(2),
-                heightIn: heightIn.toFixed(2)
+            if (widthCmField) {
+                widthCmField.value = widthCm.toFixed(2);
+                widthCmField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            if (heightCmField) {
+                heightCmField.value = heightCm.toFixed(2);
+                heightCmField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            console.log('Dimensiones convertidas a centímetros:', {
+                lengthCm: lengthCm.toFixed(2),
+                widthCm: widthCm.toFixed(2),
+                heightCm: heightCm.toFixed(2)
             });
 
             // Calcular volumen después de actualizar las dimensiones
-            calculateVolume();
+            calculateVolume(lengthCm, widthCm, heightCm);
         }
 
-        // Función para calcular el volumen en pies cúbicos
-        function calculateVolume() {
-            console.log('Calculando volumen');
-            const lengthIn = parseFloat(lengthInField.value) || 0;
-            const widthIn = parseFloat(widthInField.value) || 0;
-            const heightIn = parseFloat(heightInField.value) || 0;
+        // Función para calcular el volumen en metros cúbicos usando cm
+        function calculateVolume(lengthCm, widthCm, heightCm) {
+            console.log('Calculando volumen con dimensiones en cm');
 
-            if (lengthIn && widthIn && heightIn) {
-                // Fórmula para convertir pulgadas cúbicas a pies cúbicos: (L × W × H) ÷ 1728
-                const volume = (lengthIn * widthIn * heightIn) / 1728;
-                volumeField.value = volume.toFixed(3);
-
-                // Disparar evento de cambio para que Livewire detecte el cambio
-                volumeField.dispatchEvent(new Event('input', { bubbles: true }));
-                console.log('Volumen calculado en pies cúbicos:', volume.toFixed(3));
+            if (lengthCm && widthCm && heightCm) {
+                // Fórmula para convertir cm cúbicos a metros cúbicos: (L × W × H) ÷ 1,000,000
+                const volume = (lengthCm * widthCm * heightCm) / 1000000;
+                if (volumeField) {
+                    volumeField.value = volume.toFixed(3);
+                    // Disparar evento de cambio para que Livewire detecte el cambio
+                    volumeField.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                console.log('Volumen calculado en metros cúbicos:', volume.toFixed(3));
             }
         }
 
         // Función para convertir kg a lb
         function convertKgToLb() {
             console.log('Convirtiendo kg a lb');
-            const kg = parseFloat(weightKgField.value) || 0;
+            const kg = parseFloat(weightKgField?.value) || 0;
 
             if (kg) {
                 const lb = kg * 2.20462;
-                weightLbField.value = Math.round(lb);
-
-                // Disparar evento de cambio para que Livewire detecte el cambio
-                weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
+                if (weightLbField) {
+                    weightLbField.value = Math.round(lb);
+                    // Disparar evento de cambio para que Livewire detecte el cambio
+                    weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 console.log('Peso convertido a lb:', Math.round(lb));
             }
         }
@@ -810,32 +810,33 @@
         // Función para convertir lb a kg
         function convertLbToKg() {
             console.log('Convirtiendo lb a kg');
-            const lb = parseFloat(weightLbField.value) || 0;
+            const lb = parseFloat(weightLbField?.value) || 0;
 
             if (lb) {
                 const kg = lb * 0.453592;
-                weightKgField.value = Math.round(kg);
-
-                // Disparar evento de cambio para que Livewire detecte el cambio
-                weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
+                if (weightKgField) {
+                    weightKgField.value = Math.round(kg);
+                    // Disparar evento de cambio para que Livewire detecte el cambio
+                    weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 console.log('Peso convertido a kg:', Math.round(kg));
             }
         }
 
-        // Agregar event listeners para los campos en cm
-        if (lengthCmField) {
-            lengthCmField.addEventListener('input', updateDimensions);
-            console.log('Event listener agregado a lengthCm');
+        // Agregar event listeners para los campos en pulgadas
+        if (lengthInField) {
+            lengthInField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a lengthIn');
         }
 
-        if (widthCmField) {
-            widthCmField.addEventListener('input', updateDimensions);
-            console.log('Event listener agregado a widthCm');
+        if (widthInField) {
+            widthInField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a widthIn');
         }
 
-        if (heightCmField) {
-            heightCmField.addEventListener('input', updateDimensions);
-            console.log('Event listener agregado a heightCm');
+        if (heightInField) {
+            heightInField.addEventListener('input', updateDimensions);
+            console.log('Event listener agregado a heightIn');
         }
 
         // Mantener los event listeners para peso
