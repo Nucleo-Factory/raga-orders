@@ -27,74 +27,84 @@ Route::view('/', 'welcome')
     ->name('welcome');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'permission:has_view_dashboard'])
     ->name('dashboard');
 
 Route::view('profile', 'profile')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'permission:has_view_profile'])
     ->name('profile');
 
 Route::view('new-purchase-order', 'new-purchase-order')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'permission:has_create_orders'])
     ->name('new-purchase-order');
 
 Route::middleware(['auth'])->group(function () {
     // Vista principal de Productos
     Route::view('products', 'products.index')
+        ->middleware('permission:has_view_products')
         ->name('products.index');
 
     // Formulario creación de productos
     Route::view('products/create', 'products.create')
+        ->middleware('permission:has_create_products')
         ->name('products.create');
 
     Route::get('products/{product}/edit', function ($product) {
         return view('products.edit', ['product' => \App\Models\Product::findOrFail($product)]);
-    })->name('products.edit');
+    })->middleware('permission:has_edit_products')->name('products.edit');
 
     Route::view('products/forecast', 'products.forecast')
+        ->middleware('permission:has_view_forecast_table')
         ->name('products.forecast');
 
     Route::view('products/forecast-graph', 'products.forecast-graph')
+        ->middleware('permission:has_view_forecast_graph')
         ->name('products.forecast-graph');
 
     Route::get('products/forecast-edit/{id}', function ($id) {
         return view('products.forecast-edit', ['forecast' => \App\Models\Forecast::findOrFail($id)]);
-    })->name('products.forecast.edit');
+    })->middleware('permission:has_edit_forecast')->name('products.forecast.edit');
 });
 
 // Rutas para documentación de envío
 Route::middleware(['auth'])->group(function () {
     // Vista principal de documentación de envío
     Route::view('shipping-documentation', 'shipping-documentation.index')
+        ->middleware('permission:has_view_shipping_docs')
         ->name('shipping-documentation.index');
 
-    // Agregamos un log de información separado en lugar de usar middleware anónimo
-    \Illuminate\Support\Facades\Log::info('Ruta shipping-documentation.index registrada');
-
     Route::view('shipping-documentation/create', 'shipping-documentation.create')
+        ->middleware('permission:has_create_shipping_docs')
         ->name('shipping-documentation.create');
 
     // Rutas para proveedores
     Route::view('vendors', 'vendors.index')
+        ->middleware('permission:has_view_vendors')
         ->name('vendors.index');
 
     Route::view('vendors/create', 'vendors.create')
+        ->middleware('permission:has_create_vendors')
         ->name('vendors.create');
 
     Route::get('vendors/{vendor}/edit', function ($vendor) {
         return view('vendors.edit', ['vendor' => \App\Models\Vendor::findOrFail($vendor)]);
-    })->name('vendors.edit');
+    })->middleware('permission:has_edit_vendors')->name('vendors.edit');
 
     // Rutas para direcciones de envío (ship-to)
     Route::view('ship-to', 'ship-to.index')
+        ->middleware('permission:has_view_ship-to')
         ->name('ship-to.index');
 
     Route::view('ship-to/create', 'ship-to.create')
+        ->middleware('permission:has_create_ship-to')
         ->name('ship-to.create');
 
-    Route::view('ship-to/{id}/edit', 'ship-to.edit')->name('ship-to.edit');
+    Route::view('ship-to/{id}/edit', 'ship-to.edit')
+        ->middleware('permission:has_edit_ship-to')
+        ->name('ship-to.edit');
 
     Route::view('shipping-documentation/requests', 'shipping-documentation.requests')
+        ->middleware('permission:has_view_shipping_docs')
         ->name('shipping-documentation.requests');
 
     // Rutas para órdenes de compra (si no existen ya)
@@ -155,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para configuraciones
 Route::middleware(['auth'])->group(function () {
     Route::get('settings', Index::class)
+        ->middleware('permission:has_view_settings')
         ->name('settings.index');
 
     Route::get('settings/notifications', Notifications::class)
@@ -196,20 +207,20 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', function() {
         return view('profile.index');
-    })->name('settings.profile');
+    })->middleware('permission:has_view_profile')->name('settings.profile');
 
     Route::get('settings/sessions', Sessions::class)
         ->name('settings.sessions');
 
-    Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->name('bill-to.index');
-    Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->name('bill-to.create');
-    Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->name('bill-to.edit');
+    Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->middleware('permission:has_view_bill-to')->name('bill-to.index');
+    Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->middleware('permission:has_create_bill-to')->name('bill-to.create');
+    Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->middleware('permission:has_edit_bill-to')->name('bill-to.edit');
 
     // Rutas para autorizaciones
-    Route::get('/authorizations', [AuthorizationController::class, 'index'])->name('authorizations.index');
-    Route::get('/authorizations/{request}', [AuthorizationController::class, 'show'])->name('authorizations.show');
-    Route::post('/authorizations/{request}/approve', [AuthorizationController::class, 'approve'])->name('authorizations.approve');
-    Route::post('/authorizations/{request}/reject', [AuthorizationController::class, 'reject'])->name('authorizations.reject');
+    Route::get('/authorizations', [AuthorizationController::class, 'index'])->middleware('permission:has_view_authorizations')->name('authorizations.index');
+    Route::get('/authorizations/{request}', [AuthorizationController::class, 'show'])->middleware('permission:has_view_authorizations')->name('authorizations.show');
+    Route::post('/authorizations/{request}/approve', [AuthorizationController::class, 'approve'])->middleware('permission:has_approve_authorizations')->name('authorizations.approve');
+    Route::post('/authorizations/{request}/reject', [AuthorizationController::class, 'reject'])->middleware('permission:has_reject_authorizations')->name('authorizations.reject');
 
     Route::post('logout-session', function (Request $request) {
         Auth::logout();

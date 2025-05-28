@@ -70,6 +70,7 @@
         <span class="text-[0.625rem] font-medium uppercase hidden">Main</span>
 
         <ul class="w-full space-y-2">
+            @can('has_view_dashboard')
             <li>
                 <x-sidebar-link href="{{ route('dashboard') }}"
                     class="{{ request()->routeIs('dashboard') ? 'bg-[#E0E5FF]' : '' }}">
@@ -89,7 +90,9 @@
                     </div>
                 </x-sidebar-link>
             </li>
+            @endcan
 
+            @if(auth()->user()->can('has_view_orders') || auth()->user()->can('has_create_orders') || auth()->user()->can('has_view_products') || auth()->user()->can('has_view_forecast'))
             <li>
                 <x-sidebar-dropdown active="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') }}" route="{{ route('purchase-orders.index') }}">
                     <x-slot:icon>
@@ -114,54 +117,71 @@
 
                     <ul
                         class="{{ request()->is('purchase-orders') || request()->is('purchase-orders/*') ? 'border-[#565AFF]' : 'border-gray-200' }} ml-[0.625rem] mt-2 flex flex-col space-y-1 border-l-2 pl-2.5">
+                        @can('has_create_orders')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('purchase-orders.create') }}" :active="request()->routeIs('purchase-orders.create')">
                                 Generar Órdenes
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
+
+                        @can('has_view_orders')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('purchase-orders.index') }}" :active="request()->routeIs('purchase-orders.index')">
                                 Seguimiento Órdenes
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
+
+                        @can('has_view_consolidated_orders')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('shipping-documentation.index') }}"
                                 :active="request()->routeIs('shipping-documentation.index')">
                                 Órdenes Consolidadas
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
 
+                        @can('has_view_forecast_graph')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('products.forecast-graph') }}"
                                 :active="request()->routeIs('products.forecast-graph')">
                                 Forecast de materiales
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
 
+                        @can('has_view_forecast_table')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('products.forecast') }}"
                                 :active="request()->routeIs('products.forecast')">
                                 Tabla de forecast
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
 
+                        @can('has_view_products')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('products.index') }}"
                                 :active="request()->routeIs('products.index')">
                                 Productos
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
 
+                        @can('has_view_requests')
                         <li>
                             <x-sidebar-dropdown-item href="{{ route('purchase-orders.requests') }}"
                                 :active="request()->routeIs('purchase-orders.requests')">
                                 Solicitudes y aprobaciones
                             </x-sidebar-dropdown-item>
                         </li>
+                        @endcan
                     </ul>
                 </x-sidebar-dropdown>
             </li>
-
+            @endif
+            @can('has_view_settings')
             <li>
                 <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}" route="{{ route('settings.index') }}">
                     <x-slot:icon>
@@ -244,7 +264,9 @@
                     </ul>
                 </x-sidebar-dropdown>
             </li>
+            @endcan
 
+            @can('has_view_support')
             <li>
                 <x-sidebar-dropdown active="{{ request()->is('support') || request()->is('support/*') }}" route="{{ route('support.index') }}">
                     <x-slot:icon>
@@ -268,6 +290,7 @@
                     </ul>
                 </x-sidebar-dropdown>
             </li>
+            @endcan
         </ul>
     </nav>
 

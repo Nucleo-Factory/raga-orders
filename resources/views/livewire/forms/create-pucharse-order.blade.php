@@ -12,7 +12,7 @@
 
         <div class="space-x-4">
             @if($id)
-                <a href="{{ route('purchase-orders.index') }}">
+                <a href="{{ route('purchase-orders.detail', $id) }}">
                     <x-secondary-button class="w-[209px]">
                         Cancelar
                     </x-secondary-button>
@@ -209,8 +209,8 @@
                         <x-slot:label>
                             Peso (kg)
                         </x-slot:label>
-                        <x-slot:input type="number" step="1" min="0" name="peso_kg"
-                            placeholder="0" wire:model="peso_kg" class="pr-10 {{ $errors->has('peso_kg') ? 'border-red-500' : '' }}">
+                        <x-slot:input type="number" step="0.01" min="0" name="peso_kg"
+                            placeholder="0.00" wire:model="peso_kg" class="pr-10 {{ $errors->has('peso_kg') ? 'border-red-500' : '' }}">
                         </x-slot:input>
 
                         <x-slot:error>
@@ -221,8 +221,8 @@
                         <x-slot:label>
                             Peso (lb)
                         </x-slot:label>
-                        <x-slot:input type="number" step="1" min="0" name="peso_lb"
-                            placeholder="0" wire:model="peso_lb">
+                        <x-slot:input type="number" step="0.01" min="0" name="peso_lb"
+                            placeholder="0.00" wire:model="peso_lb">
                         </x-slot:input>
                     </x-form-input>
                 </div>
@@ -395,14 +395,14 @@
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Costo Transporte Terrestre 1
+                            Costo Transporte terrestre EWR
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="ground_transport_cost_1" placeholder="0.00" wire:model.live="ground_transport_cost_1">
                         </x-slot:input>
                     </x-form-input>
                     <x-form-input>
                         <x-slot:label>
-                            Costo Transporte Terrestre 2
+                            Costo Transporte terrestre MIA
                         </x-slot:label>
                         <x-slot:input type="number" step="0.01" name="ground_transport_cost_2" placeholder="0.00" wire:model.live="ground_transport_cost_2">
                         </x-slot:input>
@@ -800,11 +800,11 @@
             if (kg) {
                 const lb = kg * 2.20462;
                 if (weightLbField) {
-                    weightLbField.value = Math.round(lb);
+                    weightLbField.value = lb.toFixed(2);
                     // Disparar evento de cambio para que Livewire detecte el cambio
                     weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
-                console.log('Peso convertido a lb:', Math.round(lb));
+                console.log('Peso convertido a lb:', lb.toFixed(2));
             }
         }
 
@@ -816,11 +816,11 @@
             if (lb) {
                 const kg = lb * 0.453592;
                 if (weightKgField) {
-                    weightKgField.value = Math.round(kg);
+                    weightKgField.value = kg.toFixed(2);
                     // Disparar evento de cambio para que Livewire detecte el cambio
                     weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
-                console.log('Peso convertido a kg:', Math.round(kg));
+                console.log('Peso convertido a kg:', kg.toFixed(2));
             }
         }
 

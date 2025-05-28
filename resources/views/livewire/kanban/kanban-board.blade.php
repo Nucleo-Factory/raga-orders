@@ -9,16 +9,16 @@
      x-on:purchaseOrderStatusUpdated.window="$wire.$refresh()">
 
     @if(isset($hasActiveFilters) && $hasActiveFilters)
-    <div class="mb-4 flex items-center justify-between rounded-md bg-blue-50 p-3">
+    <div class="flex items-center justify-between p-3 mb-4 rounded-md bg-blue-50">
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
             </svg>
             <span class="text-sm font-medium text-blue-700">Mostrando órdenes filtradas. Los resultados que estás viendo están limitados por los filtros activos.</span>
         </div>
         <button
             wire:click="$dispatch('clearKanbanFilters')"
-            class="ml-3 rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+            class="px-3 py-1 ml-3 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200"
         >
             Limpiar filtros
         </button>
@@ -41,54 +41,55 @@
                             ({{ count($tasksByColumn[$column['id']]) }})
                         </span>
                     </h3>
+                    <div class="max-h-[600px] overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-gray-transparent scrollbar-track-gray-100">
+                        <div id="column-{{ $column['id'] }}" data-column-id="{{ $column['id'] }}" class="space-y-3 min-h-40"
+                            x-data x-init="new Sortable($el, {
+                                group: 'tasks',
+                                animation: 150,
+                                ghostClass: 'bg-gray-100',
+                                chosenClass: 'bg-gray-200',
+                                dragClass: 'cursor-grabbing',
+                                forceFallback: true,
+                                fallbackClass: 'sortable-fallback',
+                                fallbackOnBody: true,
+                                onEnd: function(evt) {
+                                    const taskId = evt.item.getAttribute('data-task-id');
+                                    const newColumn = evt.to.getAttribute('data-column-id');
 
-                    <div id="column-{{ $column['id'] }}" data-column-id="{{ $column['id'] }}" class="space-y-3 min-h-40"
-                        x-data x-init="new Sortable($el, {
-                            group: 'tasks',
-                            animation: 150,
-                            ghostClass: 'bg-gray-100',
-                            chosenClass: 'bg-gray-200',
-                            dragClass: 'cursor-grabbing',
-                            forceFallback: true,
-                            fallbackClass: 'sortable-fallback',
-                            fallbackOnBody: true,
-                            onEnd: function(evt) {
-                                const taskId = evt.item.getAttribute('data-task-id');
-                                const newColumn = evt.to.getAttribute('data-column-id');
+                                    console.log(taskId, newColumn);
+                                    if (evt.from.getAttribute('data-column-id') !== newColumn) {
+                                        console.log(newColumn);
+                                        if(newColumn == 1) {
+                                            $dispatch('open-modal', 'modal-hub-teorico');
+                                        } else if (newColumn == 2) {
+                                            $dispatch('open-modal', 'modal-hub-teorico');
+                                        } else if (newColumn == 3) {
+                                            $dispatch('open-modal', 'modal-validacion-operativa');
+                                        } else if (newColumn == 4) {
+                                            $dispatch('open-modal', 'modal-pickup');
+                                        } else if (newColumn == 5) {
+                                            $dispatch('open-modal', 'modal-en-transito');
+                                        } else if (newColumn == 6) {
+                                            $dispatch('open-modal', 'modal-llegada-a-hub');
+                                        } else if (newColumn == 7) {
+                                            $dispatch('open-modal', 'modal-validacion-operativa-cliente');
+                                        } else if (newColumn == 8) {
+                                            $dispatch('open-modal', 'modal-consolidacion-hub-real');
+                                        } else if (newColumn == 9) {
+                                            $dispatch('open-modal', 'modal-gestion-documental');
+                                        }
 
-                                console.log(taskId, newColumn);
-                                if (evt.from.getAttribute('data-column-id') !== newColumn) {
-                                    console.log(newColumn);
-                                    if(newColumn == 1) {
-                                        $dispatch('open-modal', 'modal-hub-teorico');
-                                    } else if (newColumn == 2) {
-                                        $dispatch('open-modal', 'modal-hub-teorico');
-                                    } else if (newColumn == 3) {
-                                        $dispatch('open-modal', 'modal-validacion-operativa');
-                                    } else if (newColumn == 4) {
-                                        $dispatch('open-modal', 'modal-pickup');
-                                    } else if (newColumn == 5) {
-                                        $dispatch('open-modal', 'modal-en-transito');
-                                    } else if (newColumn == 6) {
-                                        $dispatch('open-modal', 'modal-llegada-a-hub');
-                                    } else if (newColumn == 7) {
-                                        $dispatch('open-modal', 'modal-validacion-operativa-cliente');
-                                    } else if (newColumn == 8) {
-                                        $dispatch('open-modal', 'modal-consolidacion-hub-real');
-                                    } else if (newColumn == 9) {
-                                        $dispatch('open-modal', 'modal-gestion-documental');
+                                        $wire.setCurrentTask(taskId, newColumn);
                                     }
-
-                                    $wire.setCurrentTask(taskId, newColumn);
                                 }
-                            }
-                        })">
-                        @foreach ($tasksByColumn[$column['id']] as $task)
-                            <div class="cursor-move task-card" data-task-id="{{ $task['id'] }}">
-                                <x-kanban-card :id="$task['id']" :purchaseOrder="$task" :po="$task['po']" :trackingId="$task['id']" :hubLocation="$task['company']" :leadTime="$task['order_date'] ?? 'N/A'"
-                                    :recolectaTime="$task['requested_delivery_date'] ?? 'N/A'" :pickupTime="$task['requested_delivery_date'] ?? 'N/A'" :totalWeight="number_format($task['total'] ?? 0, 2)" />
-                            </div>
-                        @endforeach
+                            })">
+                            @foreach ($tasksByColumn[$column['id']] as $task)
+                                <div class="cursor-move task-card" data-task-id="{{ $task['id'] }}">
+                                    <x-kanban-card :id="$task['id']" :purchaseOrder="$task" :po="$task['po']" :trackingId="$task['id']" :hubLocation="$task['company']" :leadTime="$task['order_date'] ?? 'N/A'"
+                                        :recolectaTime="$task['requested_delivery_date'] ?? 'N/A'" :pickupTime="$task['requested_delivery_date'] ?? 'N/A'" :totalWeight="number_format($task['total'] ?? 0, 2)" />
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             @endforeach
@@ -697,7 +698,7 @@
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             scrollbar-width: thin;
-            max-height: 600px;
+            /* max-height: 600px; */
         }
 
         .kanban-column {

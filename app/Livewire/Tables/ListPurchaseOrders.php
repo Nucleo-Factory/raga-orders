@@ -22,11 +22,12 @@ class ListPurchaseOrders extends Component
         'order_date' => true,
         'total' => true,
         'actions' => true,
+        'updated_at' => true,
     ];
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'sortField' => ['except' => 'created_at'],
+        'sortField' => ['except' => 'created_at', 'updated_at'],
         'sortDirection' => ['except' => 'desc'],
         'statusFilter' => ['except' => ''],
     ];
