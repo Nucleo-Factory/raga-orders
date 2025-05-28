@@ -20,7 +20,8 @@ class CheckPermission
         }
 
         if (!auth()->user()->can($permission)) {
-            return redirect()->route('dashboard');
+            //return redirect()->route('dashboard');
+            return abort(403, 'No tienes permisos para acceder a esta página');
         }
 
         return $next($request);

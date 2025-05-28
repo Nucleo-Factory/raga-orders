@@ -165,7 +165,6 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para configuraciones
 Route::middleware(['auth'])->group(function () {
     Route::get('settings', Index::class)
-        ->middleware('permission:has_view_settings')
         ->name('settings.index');
 
     Route::get('settings/notifications', Notifications::class)

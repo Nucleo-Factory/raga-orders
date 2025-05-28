@@ -181,7 +181,6 @@
                 </x-sidebar-dropdown>
             </li>
             @endif
-            @can('has_view_settings')
             <li>
                 <x-sidebar-dropdown active="{{ request()->is('settings') || request()->is('settings/*') }}" route="{{ route('settings.index') }}">
                     <x-slot:icon>
@@ -264,7 +263,6 @@
                     </ul>
                 </x-sidebar-dropdown>
             </li>
-            @endcan
 
             @can('has_view_support')
             <li>
