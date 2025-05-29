@@ -209,15 +209,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/sessions', Sessions::class)
         ->name('settings.sessions');
 
-    Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->middleware('permission:has_view_bill-to')->name('bill-to.index');
-    Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->middleware('permission:has_create_bill-to')->name('bill-to.create');
-    Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->middleware('permission:has_edit_bill-to')->name('bill-to.edit');
+    Route::get('/bill-to', [App\Http\Controllers\BillToController::class, 'index'])->name('bill-to.index');
+    Route::get('/bill-to/create', [App\Http\Controllers\BillToController::class, 'create'])->name('bill-to.create');
+    Route::get('/bill-to/{billTo}/edit', [App\Http\Controllers\BillToController::class, 'edit'])->name('bill-to.edit');
 
     // Rutas para autorizaciones
-    Route::get('/authorizations', [AuthorizationController::class, 'index'])->middleware('permission:has_view_authorizations')->name('authorizations.index');
-    Route::get('/authorizations/{request}', [AuthorizationController::class, 'show'])->middleware('permission:has_view_authorizations')->name('authorizations.show');
-    Route::post('/authorizations/{request}/approve', [AuthorizationController::class, 'approve'])->middleware('permission:has_approve_authorizations')->name('authorizations.approve');
-    Route::post('/authorizations/{request}/reject', [AuthorizationController::class, 'reject'])->middleware('permission:has_reject_authorizations')->name('authorizations.reject');
+    Route::get('/authorizations', [AuthorizationController::class, 'index'])->name('authorizations.index');
+    Route::get('/authorizations/{request}', [AuthorizationController::class, 'show'])->name('authorizations.show');
+    Route::post('/authorizations/{request}/approve', [AuthorizationController::class, 'approve'])->name('authorizations.approve');
+    Route::post('/authorizations/{request}/reject', [AuthorizationController::class, 'reject'])->name('authorizations.reject');
 
     Route::post('logout-session', function (Request $request) {
         Auth::logout();
