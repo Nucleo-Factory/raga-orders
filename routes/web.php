@@ -93,19 +93,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas para direcciones de envío (ship-to)
     Route::view('ship-to', 'ship-to.index')
-        ->middleware('permission:has_view_ship-to')
         ->name('ship-to.index');
 
     Route::view('ship-to/create', 'ship-to.create')
-        ->middleware('permission:has_create_ship-to')
         ->name('ship-to.create');
 
     Route::view('ship-to/{id}/edit', 'ship-to.edit')
-        ->middleware('permission:has_edit_ship-to')
         ->name('ship-to.edit');
 
     Route::view('shipping-documentation/requests', 'shipping-documentation.requests')
-        ->middleware('permission:has_view_shipping_docs')
         ->name('shipping-documentation.requests');
 
     // Rutas para órdenes de compra (si no existen ya)
