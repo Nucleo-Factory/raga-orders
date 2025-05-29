@@ -80,16 +80,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas para proveedores
     Route::view('vendors', 'vendors.index')
-        ->middleware('permission:has_view_vendors')
         ->name('vendors.index');
 
     Route::view('vendors/create', 'vendors.create')
-        ->middleware('permission:has_create_vendors')
         ->name('vendors.create');
 
     Route::get('vendors/{vendor}/edit', function ($vendor) {
         return view('vendors.edit', ['vendor' => \App\Models\Vendor::findOrFail($vendor)]);
-    })->middleware('permission:has_edit_vendors')->name('vendors.edit');
+    })->name('vendors.edit');
 
     // Rutas para direcciones de envío (ship-to)
     Route::view('ship-to', 'ship-to.index')
