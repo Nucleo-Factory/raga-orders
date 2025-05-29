@@ -43,7 +43,10 @@ class ApiTokens extends Component {
         $this->showNewToken = true;
 
         // Reset form
-        $this->reset(['tokenName', 'expiresAt']);
+        $this->reset(['tokenName', 'expiresAt', 'showCreateForm']);
+
+        // Dispatch event to open modal
+        $this->dispatch('open-modal', 'new-token-modal');
 
         session()->flash('message', 'Token creado exitosamente. Asegúrate de copiarlo ahora, no podrás verlo nuevamente.');
     }
@@ -63,6 +66,7 @@ class ApiTokens extends Component {
     {
         $this->showNewToken = false;
         $this->newTokenValue = '';
+        $this->dispatch('close-modal', 'new-token-modal');
     }
 
     public function render() {
