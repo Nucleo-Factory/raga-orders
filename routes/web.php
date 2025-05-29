@@ -19,6 +19,7 @@ use App\Livewire\Settings\Users;
 use App\Livewire\Settings\RoleCreate;
 use App\Livewire\Settings\UserCreate;
 use App\Livewire\Settings\Sessions;
+use App\Livewire\Settings\ApiTokens;
 use App\Http\Controllers\AuthorizationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -203,6 +204,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/active-sessions', ActiveSessions::class)
         ->name('settings.active-sessions');
+
+    Route::get('settings/api-tokens', ApiTokens::class)
+        ->name('settings.api-tokens');
 
     Route::get('settings/profile', function() {
         return view('profile.index');
