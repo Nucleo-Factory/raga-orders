@@ -260,6 +260,12 @@
                                 Log Histórico
                             </x-sidebar-dropdown-item>
                         </li>
+
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.api-tokens') }}" :active="request()->routeIs('settings.api-tokens')">
+                                Tokens API
+                            </x-sidebar-dropdown-item>
+                        </li>
                     </ul>
                 </x-sidebar-dropdown>
             </li>
