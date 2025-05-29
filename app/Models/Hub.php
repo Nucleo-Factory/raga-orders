@@ -21,6 +21,7 @@ class Hub extends Model
         'country',
         'documentary_cut',
         'zarpe',
+        'operation_days',
     ];
 
     /**
