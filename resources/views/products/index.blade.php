@@ -52,7 +52,7 @@
                 $headers = [
                     'material_id' => 'ID',
                     'short_text' => 'Descripción',
-                    'supplying_plant' => 'Planta',
+                    'supplying_plant' => 'Planta de suministro',
                     'unit_of_measure' => 'Unidad de Medida',
                     'plant' => 'Planta',
                     'vendor_name' => 'Proveedor',
