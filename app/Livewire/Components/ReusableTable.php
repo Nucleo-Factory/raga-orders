@@ -172,6 +172,7 @@ class ReusableTable extends Component
 
         // Determine if we're using a model or array data
         if ($model) {
+            // If model is passed as a string (class name), keep it as string for instantiation
             $this->model = $model;
             $this->useModel = true;
         } else {

@@ -56,21 +56,21 @@
                     'unit_of_measure' => 'Unidad de Medida',
                     'plant' => 'Planta',
                     'vendor_name' => 'Proveedor',
-                    'vendor_code' => 'Código Proveedor',
+                    'vendo_code' => 'Código Proveedor',
                     'actions' => 'Acciones',
                     'actions_html' => '',
                 ];
 
-                $sortable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
-                $searchable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
-                $filterable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendor_code'];
-                $filterOptions = ['material_id', 'description', 'qty_unit', 'price_per_unit', 'net_value', 'vat_value'];
+                $sortable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendo_code'];
+                $searchable = ['material_id', 'short_text', 'supplying_plant', 'unit_of_measure', 'plant', 'vendor_name', 'vendo_code', 'short_text'];
+                $filterable = ['supplying_plant', 'unit_of_measure', 'plant', 'vendor_name'];
+                $filterOptions = [];
             @endphp
 
 
             <livewire:components.reusable-table :headers="$headers" :sortable="$sortable" :searchable="$searchable" :filterable="$filterable"
                 :filterOptions="$filterOptions" :actions="true" :actionsView="false" :actionsEdit="true" :actionsDelete="true"
-                :baseRoute="'products'" :model="\App\Models\Product::class" />
+                :baseRoute="'products'" :model="\App\Models\Product::class" :showPerPage="false" />
         </div>
     </div>
 </x-app-layout>
