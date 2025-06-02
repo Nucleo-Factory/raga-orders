@@ -10,7 +10,16 @@
 
     <div class="space-y-1">
         <p>Lead time: <span>{{ $leadTime }}</span></p>
-        <p>Recolecta: <span>{{ $recolectaTime }}</span></p>
-        <p>Pickup: <span>{{ $pickupTime }}</span></p>
+        <p>Fecha requerida en destino: <span>{{ $requiredInDestination }}</span></p>
+        <p>Fecha pickup planificada: <span>{{ $plannedPickup }}</span></p>
+        <p>Fecha pickup real: <span>{{ $pickupTime }}</span></p>
+        <p>Fecha estimada de llegada al hub: <span>{{ $estimatedHubArrival }}</span></p>
+        <p>Fecha real de llegada al hub: <span>{{ $actualHubArrival }}</span></p>
+        <p>Fecha ETD: <span>{{ $dateEtd}}</span></p>
+        <p>Fecha ATD: <span>{{ $dateAtd}}</span></p>
+        <p>Fecha ETA: <span>{{ $dateEta}}</span></p>
+        <p>Fecha ATA: <span>{{ $dateAta}}</span></p>
+        <p>Fecha de consolidado: <span>{{ $consolidationDate }}</span></p>
+        <p>Fecha de release: <span>{{ $releaseDate }}</span></p>
     </div>
 </div>

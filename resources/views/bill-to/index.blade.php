@@ -50,7 +50,6 @@
                     'address' => 'Dirección',
                     'country' => 'País',
                     'phone' => 'Teléfono',
-                    'status' => 'Estado',
                     'actions' => 'Acciones',
                     'actions_html' => '',
                 ];

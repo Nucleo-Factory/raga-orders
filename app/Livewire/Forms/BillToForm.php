@@ -39,12 +39,11 @@ class BillToForm extends Component
             $this->name = $billTo->name;
             $this->email = $billTo->email;
             $this->contact_person = $billTo->contact_person;
-            $this->direccion = $billTo->direccion;
-            $this->codigo_postal = $billTo->codigo_postal;
-            $this->pais = $billTo->pais;
-            $this->estado = $billTo->estado;
-            $this->telefono = $billTo->telefono;
-            $this->status = $billTo->status;
+            $this->direccion = $billTo->address;
+            $this->codigo_postal = $billTo->postal_code;
+            $this->pais = $billTo->country;
+            $this->estado = $billTo->state;
+            $this->telefono = $billTo->phone;
             $this->notes = $billTo->notes;
             $this->isEdit = true;
             $this->company_id = auth()->user()->company_id;
@@ -74,9 +73,10 @@ class BillToForm extends Component
             'country' => $this->pais,
             'state' => $this->estado,
             'phone' => $this->telefono,
-            'status' => $this->status,
+            'status' => 'active',
             'notes' => $this->notes,
         ];
+
 
         if ($this->isEdit) {
             $billTo = BillTo::findOrFail($this->billToId);

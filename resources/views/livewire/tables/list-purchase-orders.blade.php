@@ -70,6 +70,12 @@
                             </div>
                             <div class="px-4 py-2">
                                 <label class="flex items-center space-x-2">
+                                    <input type="checkbox" wire:model.live="visibleColumns.updated_at" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Ultima edición</span>
+                                </label>
+                            </div>
+                            <div class="px-4 py-2">
+                                <label class="flex items-center space-x-2">
                                     <input type="checkbox" wire:model.live="visibleColumns.actions" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">Acciones</span>
                                 </label>
@@ -180,6 +186,23 @@
                         </th>
                         @endif
 
+                        @if($visibleColumns['updated_at'])
+                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                            <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('updated_at')">
+                                <span>Ultima edición</span>
+                                @if ($sortField === 'updated_at')
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </div>
+                        </th>
+                        @endif
+
                         @if($visibleColumns['actions'])
                         <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
                             Acciones
@@ -225,6 +248,12 @@
                             @if($visibleColumns['total'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 {{ $order->total ? number_format($order->total, 2) : 'N/A' }}
+                            </td>
+                            @endif
+
+                            @if($visibleColumns['updated_at'])
+                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                {{ $order->updated_at ? $order->updated_at->format('d/m/Y / H:i') : 'N/A' }}
                             </td>
                             @endif
 

@@ -13,61 +13,56 @@
             </x-slot:label>
             <x-slot:input name="name" placeholder="Nombre de rol" wire:model="name">
             </x-slot:input>
+            @error('name')
+                <div class="mt-1 text-sm text-red-500">{{ $message }}</div>
+            @enderror
         </x-form-input>
 
-        <!-- Permisos básicos -->
-        <div class="space-y-4 text-lg text-[#231F20]">
-            <h2>Tipo de permisos</h2>
-            <ul class="space-y-4 text-sm text-[#2B3674]">
-                @foreach(['read', 'export', 'filter'] as $permission)
-                    <li class="flex items-start gap-4">
-                        <button type="button" wire:click="togglePermission('{{ $permission }}')" class="toggle-button">
-                            <div class="w-12 h-6 rounded-full transition-all {{ $selectedPermissions[$permission] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                                <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $selectedPermissions[$permission] ?? false ? 'right-1' : 'left-1' }}"></div>
-                            </div>
-                        </button>
-                        <label class="ml-2">{{ $permissions[$permission] }}</label>
-                    </li>
-                @endforeach
-            </ul>
+        @error('selectedPermissions')
+            <div class="p-4 text-red-700 bg-red-100 rounded-lg">
+                {{ $message }}
+            </div>
+        @enderror
+
+        <!-- Permisos organizados por grupos -->
+        <div class="space-y-8">
+            @foreach($permissionGroups as $groupName => $permissions)
+                <div class="space-y-4 text-lg text-[#231F20]">
+                    <h2 class="pb-2 text-xl font-semibold border-b border-gray-200">{{ $groupName }}</h2>
+                    <ul class="space-y-4 text-sm text-[#2B3674]">
+                        @foreach($permissions as $permissionKey => $permissionLabel)
+                            <li class="flex items-start gap-4">
+                                <button type="button" wire:click="togglePermission('{{ $permissionKey }}')" class="toggle-button">
+                                    <div class="w-12 h-6 rounded-full transition-all {{ $selectedPermissions[$permissionKey] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
+                                        <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $selectedPermissions[$permissionKey] ?? false ? 'right-1' : 'left-1' }}"></div>
+                                    </div>
+                                </button>
+                                <label class="ml-2 cursor-pointer" wire:click="togglePermission('{{ $permissionKey }}')">{{ $permissionLabel }}</label>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endforeach
         </div>
 
-        <!-- Permisos de operaciones -->
-        <div class="space-y-4 text-lg text-[#231F20]">
-            <h2>Tareas y operaciones relevantes</h2>
-            <ul class="space-y-4 text-sm text-[#2B3674]">
-                @foreach($permissions as $key => $label)
-                    @if (!in_array($key, ['read', 'export', 'filter']))
-                        <li class="flex items-start gap-4">
-                            <button type="button" wire:click="togglePermission('{{ $key }}')" class="toggle-button">
-                                <div class="w-12 h-6 rounded-full transition-all {{ $selectedPermissions[$key] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                                    <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $selectedPermissions[$key] ?? false ? 'right-1' : 'left-1' }}"></div>
-                                </div>
-                            </button>
-                            <label class="ml-2">{{ $label }}</label>
-                        </li>
-                    @endif
-                @endforeach
-            </ul>
+        <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+            <x-secondary-button type="button" wire:click="backToList">
+                Cancelar
+            </x-secondary-button>
+            <x-primary-button type="submit">
+                Crear Rol
+            </x-primary-button>
         </div>
     </form>
 </div>
 
 <x-modal-success name="modal-role-created">
     <x-slot:title>
-        @if ($id)
-            Rol fue editado correctamente
-        @else
-            Rol creado correctamente
-        @endif
+        Rol creado correctamente
     </x-slot:title>
 
     <x-slot:description>
-        @if ($id)
-            El rol ha sido editado correctamente con el nombre: {{ $name }}
-        @else
-            El rol ha sido creado correctamente con el nombre: {{ $name }}
-        @endif
+        El rol ha sido creado correctamente con el nombre: {{ $name }}
     </x-slot:description>
 
     <x-primary-button wire:click="closeModal" class="w-full">
