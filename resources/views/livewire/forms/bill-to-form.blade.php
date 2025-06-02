@@ -1,5 +1,5 @@
 <div>
-    <div class="flex max-w-[1254px] items-center justify-between mb-10">
+    <div class="flex items-center justify-between mb-10">
         <x-view-title>
             <x-slot:title>
                 {{ $title }}
@@ -12,7 +12,7 @@
     </div>
 
     <form wire:submit.prevent="saveBillTo">
-        <div class="w-full max-w-[1254px] space-y-6 bg-white rounded-2xl p-8">
+        <div class="w-full p-8 space-y-6 bg-white rounded-2xl">
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                 <!-- Información básica -->
                 <x-form-input>
@@ -95,31 +95,17 @@
                         {{ $errors->first('telefono') }}
                     </x-slot:error>
                 </x-form-input>
-
-                <x-form-select>
-                    <x-slot:label>
-                        Estado
-                    </x-slot:label>
-                    <x-slot:select name="status" wire:model="status">
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
-                    </x-slot:select>
-                    <x-slot:error>
-                        {{ $errors->first('status') }}
-                    </x-slot:error>
-                </x-form-select>
             </div>
 
             <div class="mt-6">
-                <x-form-textarea>
-                    <x-slot:label>
+                <div class="flex flex-col gap-2">
+                    <label for="notes" class="ml-[1.125rem] text-sm font-medium text-[#565AFF]">
                         Notas
-                    </x-slot:label>
-                    <x-slot:textarea name="notes" placeholder="Ingrese notas adicionales" wire:model="notes" rows="4"></x-slot:textarea>
-                    <x-slot:error>
-                        {{ $errors->first('notes') }}
-                    </x-slot:error>
-                </x-form-textarea>
+                    </label>
+                    <textarea id="notes" name="notes"
+                        class="w-full rounded-xl border-2 border-[#9AABFF] px-3 py-[0.625rem] text-lg text-[#2E2E2E] placeholder:text-[#AFAFAF]"
+                        placeholder="Ingrese notas adicionales" wire:model="notes"></textarea>
+                </div>
             </div>
 
             <div class="flex justify-end mt-6 space-x-4">

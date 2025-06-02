@@ -19,6 +19,7 @@ use App\Livewire\Settings\Users;
 use App\Livewire\Settings\RoleCreate;
 use App\Livewire\Settings\UserCreate;
 use App\Livewire\Settings\Sessions;
+use App\Livewire\Settings\ApiTokens;
 use App\Http\Controllers\AuthorizationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -27,51 +28,54 @@ Route::view('/', 'welcome')
     ->name('welcome');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'permission:has_view_dashboard'])
     ->name('dashboard');
 
 Route::view('profile', 'profile')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'permission:has_view_profile'])
     ->name('profile');
 
 Route::view('new-purchase-order', 'new-purchase-order')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'permission:has_create_orders'])
     ->name('new-purchase-order');
 
 Route::middleware(['auth'])->group(function () {
     // Vista principal de Productos
     Route::view('products', 'products.index')
+        ->middleware('permission:has_view_products')
         ->name('products.index');
 
     // Formulario creación de productos
     Route::view('products/create', 'products.create')
+        ->middleware('permission:has_create_products')
         ->name('products.create');
 
     Route::get('products/{product}/edit', function ($product) {
         return view('products.edit', ['product' => \App\Models\Product::findOrFail($product)]);
-    })->name('products.edit');
+    })->middleware('permission:has_edit_products')->name('products.edit');
 
     Route::view('products/forecast', 'products.forecast')
+        ->middleware('permission:has_view_forecast_table')
         ->name('products.forecast');
 
     Route::view('products/forecast-graph', 'products.forecast-graph')
+        ->middleware('permission:has_view_forecast_graph')
         ->name('products.forecast-graph');
 
     Route::get('products/forecast-edit/{id}', function ($id) {
         return view('products.forecast-edit', ['forecast' => \App\Models\Forecast::findOrFail($id)]);
-    })->name('products.forecast.edit');
+    })->middleware('permission:has_edit_forecast')->name('products.forecast.edit');
 });
 
 // Rutas para documentación de envío
 Route::middleware(['auth'])->group(function () {
     // Vista principal de documentación de envío
     Route::view('shipping-documentation', 'shipping-documentation.index')
+        ->middleware('permission:has_view_shipping_docs')
         ->name('shipping-documentation.index');
 
-    // Agregamos un log de información separado en lugar de usar middleware anónimo
-    \Illuminate\Support\Facades\Log::info('Ruta shipping-documentation.index registrada');
-
     Route::view('shipping-documentation/create', 'shipping-documentation.create')
+        ->middleware('permission:has_create_shipping_docs')
         ->name('shipping-documentation.create');
 
     // Rutas para proveedores
@@ -92,7 +96,8 @@ Route::middleware(['auth'])->group(function () {
     Route::view('ship-to/create', 'ship-to.create')
         ->name('ship-to.create');
 
-    Route::view('ship-to/{id}/edit', 'ship-to.edit')->name('ship-to.edit');
+    Route::view('ship-to/{id}/edit', 'ship-to.edit')
+        ->name('ship-to.edit');
 
     Route::view('shipping-documentation/requests', 'shipping-documentation.requests')
         ->name('shipping-documentation.requests');
@@ -194,9 +199,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/active-sessions', ActiveSessions::class)
         ->name('settings.active-sessions');
 
+    Route::get('settings/api-tokens', ApiTokens::class)
+        ->name('settings.api-tokens');
+
     Route::get('settings/profile', function() {
         return view('profile.index');
-    })->name('settings.profile');
+    })->middleware('permission:has_view_profile')->name('settings.profile');
 
     Route::get('settings/sessions', Sessions::class)
         ->name('settings.sessions');

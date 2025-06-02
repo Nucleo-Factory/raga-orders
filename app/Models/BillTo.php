@@ -30,7 +30,8 @@ class BillTo extends Model
         'country',
         'state',
         'phone',
-        'company_id'
+        'company_id',
+        'notes',
     ];
 
     /**

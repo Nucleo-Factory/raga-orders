@@ -11,6 +11,7 @@
 
 @php
     $purchaseOrder = App\Models\PurchaseOrder::find($id);
+    $hubId = $purchaseOrder->actual_hub_id;
     $hub =  $purchaseOrder->actualHub->name ?? 'Sin Hub';
     $leadTime = \Carbon\Carbon::parse($purchaseOrder->date_required_in_destination)->format('d/m/Y');
     $recolectaTime = \Carbon\Carbon::parse($purchaseOrder->date_estimated_hub_arrival)->format('d/m/Y');
@@ -18,6 +19,21 @@
     $totalWeight = $purchaseOrder->total_weight;
     $dangerLevel = $purchaseOrder->material_type;
     $materialType = $purchaseOrder->material_type;
+    $expectedLeadTime = App\Models\Hub::find($hubId)->operation_days ?? 0;
+    $eta = \Carbon\Carbon::parse($purchaseOrder->date_eta)->format('d/m/Y');
+    $ata = \Carbon\Carbon::parse($purchaseOrder->date_ata)->format('d/m/Y');
+
+    // Calcular realLeadTime = expectedLeadTime + días de atraso (ATA - ETA)
+    // Si ATA es mayor que ETA, hay atraso (valor positivo)
+    // Si ATA es menor que ETA, se adelantó (valor negativo)
+    $delayDays = 0;
+    if ($purchaseOrder->date_eta && $purchaseOrder->date_ata) {
+        $etaDate = \Carbon\Carbon::parse($purchaseOrder->date_eta);
+        $ataDate = \Carbon\Carbon::parse($purchaseOrder->date_ata);
+        $delayDays = $etaDate->diffInDays($ataDate, false); // ATA - ETA (invertir parámetros)
+    }
+    $realLeadTime = $expectedLeadTime + $delayDays;
+
 @endphp
 
 <li class="kanban-card relative flex justify-between min-h-[180px] w-full gap-5 rounded-[0.625rem] border-2 border-[#E0E5FF] bg-white px-4 py-2 text-xs"
@@ -127,9 +143,8 @@
             </svg>
 
             <div class="space-y-1">
-                <p>Lead time: <span>{{ $leadTime }}</span></p>
-                <p>Recolecta: <span>{{ $recolectaTime }}</span></p>
-                <p>Pickup: <span>{{ $pickupTime }}</span></p>
+                <p class="whitespace-nowrap">Lead time esperado: <span>{{ $expectedLeadTime }}</span></p>
+                <p class="whitespace-nowrap">Lead time real: <span>{{ $realLeadTime }}</span></p>
             </div>
         </div>
 

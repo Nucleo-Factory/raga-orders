@@ -1,4 +1,4 @@
-@props(['label' => 'Label', 'name' => 'textarea', 'placeholder' => 'Ingrese su texto...', 'class' => '', 'wireModel' => null])
+@props(['label' => 'Label', 'name' => 'textarea', 'placeholder' => 'Ingrese su texto...', 'class' => '', 'wireModel' => ''])
 
 <div class="{{ $class }} flex flex-col gap-2">
     <label for="{{ $name }}" class="ml-[1.125rem] text-sm font-medium text-[#565AFF]">
