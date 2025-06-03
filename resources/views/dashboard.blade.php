@@ -5,55 +5,55 @@
         <link rel="stylesheet" href="{{ asset('css/dashboard-styles.css') }}">
     @endpush
 
-    <div class="dashboard-container">
+    <div class="dashboard-container !font-inter">
         <!-- Filter Controls -->
-        <div class="filters-section">
-            <div class="filter-group">
-                <label class="filter-label">Fecha</label>
-                <div class="date-range">
-                    <div class="date-input-wrapper">
-                        <input type="date" placeholder="asdf" class="date-input">
+        <div class="filters-section justify-between">
+            <div class="flex gap-4">
+                <div class="filter-group">
+                    <label class="filter-label">Fecha</label>
+                    <div class="date-range">
+                        <div class="date-input-wrapper">
+                            <input type="date" placeholder="asdf" class="date-input !border-2 !border-[#7288FF] !rounded-xl">
+                        </div>
+                        <span class="date-separator">→</span>
+                        <div class="date-input-wrapper">
+                            <input type="date" placeholder="End date" class="date-input !border-2 !border-[#7288FF] !rounded-xl">
+                        </div>
                     </div>
-                    <span class="date-separator">→</span>
-                    <div class="date-input-wrapper">
-                        <input type="date" placeholder="End date" class="date-input">
-                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Categoría</label>
+                    <select class="filter-select !border-2 !border-[#7288FF] !rounded-xl">
+                        <option value="">Seleccionar</option>
+                        <option value="cat1">Categoría 1</option>
+                        <option value="cat2">Categoría 2</option>
+                        <option value="cat3">Categoría 3</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Producto</label>
+                    <select class="filter-select !border-2 !border-[#7288FF] !rounded-xl">
+                        <option value="">Seleccionar</option>
+                        <option value="prod1">Producto 1</option>
+                        <option value="prod2">Producto 2</option>
+                        <option value="prod3">Producto 3</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Material</label>
+                    <select class="filter-select !border-2 !border-[#7288FF] !rounded-xl">
+                        <option value="">Material</option>
+                        <option value="mat1">Material 1</option>
+                        <option value="mat2">Material 2</option>
+                        <option value="mat3">Material 3</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="filter-group">
-                <label class="filter-label">Categoría</label>
-                <select class="filter-select">
-                    <option value="">Seleccionar</option>
-                    <option value="cat1">Categoría 1</option>
-                    <option value="cat2">Categoría 2</option>
-                    <option value="cat3">Categoría 3</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Producto</label>
-                <select class="filter-select">
-                    <option value="">Seleccionar</option>
-                    <option value="prod1">Producto 1</option>
-                    <option value="prod2">Producto 2</option>
-                    <option value="prod3">Producto 3</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Material</label>
-                <select class="filter-select">
-                    <option value="">Material</option>
-                    <option value="mat1">Material 1</option>
-                    <option value="mat2">Material 2</option>
-                    <option value="mat3">Material 3</option>
-                </select>
-            </div>
-
             <div class="action-buttons">
-                <button class="btn-primary">Aceptar</button>
-                <button class="btn-secondary">
+                <button class="btn-primary !border-2 !border-light-blue !py-[0.594rem]">Aceptar</button>
+                <button class="btn-secondary !border-2 !border-light-blue !py-[0.594rem]">
                     <i class="fas fa-download"></i>
                     Descargar
                 </button>
