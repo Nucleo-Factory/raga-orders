@@ -128,7 +128,7 @@
                 <!-- Treemap -->
                 <div class="card treemap-card">
                     <div class="card-header">
-                        <h3 class="card-title">Desviación por Material</h3>
+                        <h3 class="card-title !mb-0">Desviación por Material</h3>
                         <select class="treemap-select">
                             <option value="all">Todo</option>
                         </select>
