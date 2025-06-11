@@ -32,12 +32,12 @@
                         <div class="date-input-wrapper">
                             <input type="date" name="date_from" value="{{ request('date_from') }}" class="date-input" style="padding-right: 10px !important;">
                         </div>
+
                         <div class="date-separator"></div>
 
                         <div class="date-input-wrapper">
                             <input type="date" name="date_to" value="{{ request('date_to') }}" class="date-input" style="padding-right: 10px !important;">
                         </div>
-                        <div class="date-separator"></div>
                     </div>
                 </div>
 

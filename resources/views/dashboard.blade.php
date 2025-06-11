@@ -28,6 +28,7 @@
                             <input type="date" name="date_to" value="{{ request('date_to') }}"
                                    class="date-input !border-2 !border-[#7288FF] !rounded-xl">
                         </div>
+
                     </div>
                 </div>
                 <div class="filter-group">
@@ -41,6 +42,7 @@
                         @endforeach
                     </select>
                 </div>
+
                 <div class="filter-group">
                     <label class="filter-label">Material</label>
                     <select name="material_type" class="filter-select !border-2 !border-[#7288FF] !rounded-xl">
