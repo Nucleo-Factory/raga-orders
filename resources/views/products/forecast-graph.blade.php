@@ -95,8 +95,8 @@
                 <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">Monto total</div>
-                <div class="kpi-value" id="total-amount">${{ number_format($forecastData['metrics']['total_amount'] ?? 0, 0) }} USD</div>
+                <div class="kpi-title">Monto total USD</div>
+                <div class="kpi-value" id="total-amount">${{ number_format($forecastData['metrics']['total_amount'] ?? 0, 0) }} </div>
                 <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
         </div>
