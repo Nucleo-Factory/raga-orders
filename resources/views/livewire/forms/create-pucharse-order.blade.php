@@ -792,12 +792,18 @@
             }
         }
 
+        // Variables para evitar bucles infinitos en conversiones de peso
+        let isConverting = false;
+
         // Función para convertir kg a lb
         function convertKgToLb() {
+            if (isConverting) return; // Evitar bucle infinito
+
             console.log('Convirtiendo kg a lb');
             const kg = parseFloat(weightKgField?.value) || 0;
 
             if (kg) {
+                isConverting = true;
                 const lb = kg * 2.20462;
                 if (weightLbField) {
                     weightLbField.value = lb.toFixed(2);
@@ -805,15 +811,19 @@
                     weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 console.log('Peso convertido a lb:', lb.toFixed(2));
+                isConverting = false;
             }
         }
 
         // Función para convertir lb a kg
         function convertLbToKg() {
+            if (isConverting) return; // Evitar bucle infinito
+
             console.log('Convirtiendo lb a kg');
             const lb = parseFloat(weightLbField?.value) || 0;
 
             if (lb) {
+                isConverting = true;
                 const kg = lb * 0.453592;
                 if (weightKgField) {
                     weightKgField.value = kg.toFixed(2);
@@ -821,6 +831,7 @@
                     weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 console.log('Peso convertido a kg:', kg.toFixed(2));
+                isConverting = false;
             }
         }
 

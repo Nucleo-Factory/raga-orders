@@ -857,7 +857,7 @@ class CreatePucharseOrder extends Component
 
     public function closeModal() {
         $this->dispatch('close-modal', 'modal-purchase-order-created');
-        return redirect()->route('purchase-orders.index');
+        return redirect()->route('purchase-orders.detail', $this->id);
     }
 
     public function render() {

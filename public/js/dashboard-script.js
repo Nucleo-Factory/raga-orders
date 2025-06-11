@@ -43,78 +43,184 @@ const detailData = [
   { fechaSalida: "28 abr 2025", fechaEstimada: "null", cantidadKgs: "4.129,58", noPO: "12" },
 ]
 
+// Function to check if Chart.js is loaded and DOM elements exist
+function waitForChartAndElements() {
+  return new Promise((resolve) => {
+    const checkReady = () => {
+      console.log('Checking Chart.js availability...', typeof Chart !== 'undefined');
+
+      // Check if Chart.js is loaded
+      if (typeof Chart === 'undefined') {
+        console.log('Chart.js not loaded yet, waiting...');
+        setTimeout(checkReady, 100);
+        return;
+      }
+
+      // Check if all canvas elements exist
+      const canvasIds = ['hubChart', 'deliveryChart', 'transportChart', 'delayChart', 'stageChart'];
+      const allCanvasExist = canvasIds.every(id => {
+        const element = document.getElementById(id);
+        const exists = element !== null;
+        if (!exists) {
+          console.log(`Canvas element ${id} not found`);
+        }
+        return exists;
+      });
+
+      if (!allCanvasExist) {
+        console.log('Not all canvas elements ready, waiting...');
+        setTimeout(checkReady, 100);
+        return;
+      }
+
+      // Check if table body exists
+      const tableBody = document.getElementById('detailTableBody');
+      if (!tableBody) {
+        console.log('Table body not found, waiting...');
+        setTimeout(checkReady, 100);
+        return;
+      }
+
+      console.log('All elements ready, resolving...');
+      resolve();
+    };
+
+    checkReady();
+  });
+}
+
 // Function to create pie chart
 function createPieChart(canvasId, data, legendId) {
-  const ctx = document.getElementById(canvasId).getContext("2d")
+  console.log(`Creating pie chart for ${canvasId}...`);
 
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: data.map((item) => item.name),
-      datasets: [
-        {
-          data: data.map((item) => item.value),
-          backgroundColor: data.map((item) => item.color),
-          borderWidth: 0,
-          cutout: "30%",
-        },
-      ],
-    },
-    options: {
-      responsive: false,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) {
+    console.error(`Canvas element ${canvasId} not found`);
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    console.error(`Could not get 2D context for ${canvasId}`);
+    return;
+  }
+
+  try {
+    const chart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: data.map((item) => item.name),
+        datasets: [
+          {
+            data: data.map((item) => item.value),
+            backgroundColor: data.map((item) => item.color),
+            borderWidth: 0,
+            cutout: "30%",
+          },
+        ],
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
         },
       },
-    },
-  })
+    });
 
-  // Create custom legend
-  const legendContainer = document.getElementById(legendId)
-  legendContainer.innerHTML = ""
+    console.log(`Chart ${canvasId} created successfully`);
 
-  data.forEach((item) => {
-    const legendItem = document.createElement("div")
-    legendItem.className = "legend-item"
-    legendItem.innerHTML = `
-            <div class="legend-label">
-                <div class="legend-color" style="background-color: ${item.color}"></div>
-                <span>${item.name}</span>
-            </div>
-            <span>${item.value}%</span>
-        `
-    legendContainer.appendChild(legendItem)
-  })
+    // Create custom legend
+    const legendContainer = document.getElementById(legendId);
+    if (legendContainer) {
+      legendContainer.innerHTML = "";
+
+      data.forEach((item) => {
+        const legendItem = document.createElement("div");
+        legendItem.className = "legend-item";
+        legendItem.innerHTML = `
+                <div class="legend-label">
+                    <div class="legend-color" style="background-color: ${item.color}"></div>
+                    <span>${item.name}</span>
+                </div>
+                <span>${item.value}%</span>
+            `;
+        legendContainer.appendChild(legendItem);
+      });
+      console.log(`Legend ${legendId} created successfully`);
+    } else {
+      console.error(`Legend container ${legendId} not found`);
+    }
+  } catch (error) {
+    console.error(`Error creating chart ${canvasId}:`, error);
+  }
 }
 
 // Function to populate detail table
 function populateDetailTable() {
-  const tbody = document.getElementById("detailTableBody")
-  tbody.innerHTML = ""
+  console.log('Populating detail table...');
+
+  const tbody = document.getElementById("detailTableBody");
+  if (!tbody) {
+    console.error('Table body not found');
+    return;
+  }
+
+  tbody.innerHTML = "";
 
   detailData.forEach((row) => {
-    const tr = document.createElement("tr")
+    const tr = document.createElement("tr");
     tr.innerHTML = `
             <td>${row.fechaSalida}</td>
             <td style="color: #6b7280;">${row.fechaEstimada}</td>
             <td class="text-right">${row.cantidadKgs}</td>
             <td class="text-right">${row.noPO}</td>
-        `
-    tbody.appendChild(tr)
-  })
+        `;
+    tbody.appendChild(tr);
+  });
 
   // Add total row
-  const totalRow = document.createElement("tr")
-  totalRow.className = "total-row"
+  const totalRow = document.createElement("tr");
+  totalRow.className = "total-row";
   totalRow.innerHTML = `
         <td>Total</td>
         <td></td>
         <td class="text-right">46.304,85</td>
         <td class="text-right">91</td>
-    `
-  tbody.appendChild(totalRow)
+    `;
+  tbody.appendChild(totalRow);
+
+  console.log('Detail table populated successfully');
+}
+
+// Function to initialize all charts
+async function initializeCharts() {
+  console.log('Starting chart initialization...');
+
+  try {
+    await waitForChartAndElements();
+
+    console.log('All prerequisites met, creating charts...');
+
+    // Initialize charts
+    createPieChart("hubChart", hubData, "hubLegend");
+    createPieChart("deliveryChart", deliveryStatusData, "deliveryLegend");
+    createPieChart("transportChart", transportTypeData, "transportLegend");
+    createPieChart("delayChart", delayReasonsData, "delayLegend");
+
+    // Create stage chart with numbered labels
+    const stageDataWithNumbers = posByStageData.map((item, index) => ({
+      ...item,
+      name: `${index + 1}`,
+    }));
+    createPieChart("stageChart", stageDataWithNumbers, "stageLegend");
+
+    console.log('All charts initialized successfully');
+  } catch (error) {
+    console.error('Error initializing charts:', error);
+  }
 }
 
 // Modal functions
@@ -130,59 +236,93 @@ function hideModal(modalId) {
   document.body.style.overflow = "auto"
 }
 
-// Initialize everything when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  // Initialize charts
-  createPieChart("hubChart", hubData, "hubLegend")
-  createPieChart("deliveryChart", deliveryStatusData, "deliveryLegend")
-  createPieChart("transportChart", transportTypeData, "transportLegend")
-  createPieChart("delayChart", delayReasonsData, "delayLegend")
+// Initialize everything when page loads
+function initializeDashboard() {
+  console.log('Initializing dashboard...');
 
-  // Create stage chart with numbered labels
-  const stageDataWithNumbers = posByStageData.map((item, index) => ({
-    ...item,
-    name: `${index + 1}`,
-  }))
-  createPieChart("stageChart", stageDataWithNumbers, "stageLegend")
+  // Initialize charts
+  initializeCharts();
 
   // Populate table
-  populateDetailTable()
+  populateDetailTable();
 
-  // Modal event listeners
-  document.getElementById("showSuccessBtn").addEventListener("click", () => {
-    showModal("successModal")
-  })
+  // Setup modal event listeners
+  const showSuccessBtn = document.getElementById("showSuccessBtn");
+  const showErrorBtn = document.getElementById("showErrorBtn");
+  const closeSuccessBtn = document.getElementById("closeSuccessBtn");
+  const closeErrorBtn = document.getElementById("closeErrorBtn");
+  const successModal = document.getElementById("successModal");
+  const errorModal = document.getElementById("errorModal");
 
-  document.getElementById("showErrorBtn").addEventListener("click", () => {
-    showModal("errorModal")
-  })
+  if (showSuccessBtn) {
+    showSuccessBtn.addEventListener("click", () => {
+      showModal("successModal");
+    });
+  }
 
-  document.getElementById("closeSuccessBtn").addEventListener("click", () => {
-    hideModal("successModal")
-  })
+  if (showErrorBtn) {
+    showErrorBtn.addEventListener("click", () => {
+      showModal("errorModal");
+    });
+  }
 
-  document.getElementById("closeErrorBtn").addEventListener("click", () => {
-    hideModal("errorModal")
-  })
+  if (closeSuccessBtn) {
+    closeSuccessBtn.addEventListener("click", () => {
+      hideModal("successModal");
+    });
+  }
+
+  if (closeErrorBtn) {
+    closeErrorBtn.addEventListener("click", () => {
+      hideModal("errorModal");
+    });
+  }
 
   // Close modals when clicking outside
-  document.getElementById("successModal").addEventListener("click", (e) => {
-    if (e.target.id === "successModal") {
-      hideModal("successModal")
-    }
-  })
+  if (successModal) {
+    successModal.addEventListener("click", (e) => {
+      if (e.target.id === "successModal") {
+        hideModal("successModal");
+      }
+    });
+  }
 
-  document.getElementById("errorModal").addEventListener("click", (e) => {
-    if (e.target.id === "errorModal") {
-      hideModal("errorModal")
-    }
-  })
+  if (errorModal) {
+    errorModal.addEventListener("click", (e) => {
+      if (e.target.id === "errorModal") {
+        hideModal("errorModal");
+      }
+    });
+  }
 
   // Close modals with ESC key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      hideModal("successModal")
-      hideModal("errorModal")
+      hideModal("successModal");
+      hideModal("errorModal");
     }
-  })
-})
+  });
+}
+
+// Multiple initialization strategies
+document.addEventListener("DOMContentLoaded", initializeDashboard);
+
+// Fallback for when DOMContentLoaded has already fired
+if (document.readyState === 'loading') {
+  // Document still loading, DOMContentLoaded will fire
+  console.log('Document still loading...');
+} else {
+  // Document already loaded
+  console.log('Document already loaded, initializing immediately...');
+  initializeDashboard();
+}
+
+// Additional fallback with window.onload
+window.addEventListener('load', () => {
+  console.log('Window load event fired, checking if charts exist...');
+  // Only initialize if charts haven't been created yet
+  if (!document.querySelector('#hubChart canvas')) {
+    console.log('Charts not found, initializing as fallback...');
+    initializeDashboard();
+  }
+});
