@@ -2,85 +2,90 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/styles-forecast.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
 @push('scripts')
+    <script>
+        // Pass data from PHP to JavaScript
+        window.forecastData = @json($forecastData ?? []);
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    </script>
     <script src="{{ asset('js/script-forecast.js') }}"></script>
 @endpush
 
 <x-app-layout>
     <div class="content">
+        @if(isset($error))
+            <div class="px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
+                {{ $error }}
+            </div>
+        @endif
+
         <!-- Filters Section -->
-        <div class="filters-section">
+        <form id="forecast-filters" class="filters-section">
             <div class="filters-left">
                 <!-- Date Range -->
                 <div class="filter-group">
                     <label class="filter-label">Fecha</label>
                     <div class="date-range">
                         <div class="date-input-wrapper">
-                            <input type="text" placeholder="Start date" class="date-input">
-                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="date" name="date_from" value="{{ request('date_from') }}" class="date-input" style="padding-right: 10px !important;">
                         </div>
                         <div class="date-separator"></div>
-                        <div class="date-input-wrapper">
-                            <input type="text" placeholder="End date" class="date-input">
-                            <i class="fas fa-calendar-alt date-icon"></i>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Category -->
-                <div class="filter-group">
-                    <label class="filter-label">Categoría</label>
-                    <select class="filter-select">
-                        <option value="">Seleccionar</option>
-                        <option value="cat1">Categoría 1</option>
-                        <option value="cat2">Categoría 2</option>
-                    </select>
+                        <div class="date-input-wrapper">
+                            <input type="date" name="date_to" value="{{ request('date_to') }}" class="date-input" style="padding-right: 10px !important;">
+                        </div>
+                        <div class="date-separator"></div>
+                    </div>
                 </div>
 
                 <!-- Product -->
                 <div class="filter-group">
                     <label class="filter-label">Producto</label>
-                    <select class="filter-select">
+                    <select name="product_id" class="filter-select">
                         <option value="">Seleccionar</option>
-                        <option value="prod1">Producto 1</option>
-                        <option value="prod2">Producto 2</option>
+                        @foreach($filterOptions['products'] ?? [] as $product)
+                            <option value="{{ $product->id }}" {{ request('product_id') == $product->id ? 'selected' : '' }}>
+                                {{ $product->name }} ({{ $product->material_id }})
+                            </option>
+                        @endforeach
                     </select>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="btn-primary">Aceptar</button>
-                <button class="btn-secondary">
+                <button type="submit" class="btn-primary">Aceptar</button>
+                <button type="button" id="export-btn" class="btn-secondary">
                     <i class="fas fa-download"></i>
                     Descargar
                 </button>
             </div>
-        </div>
+        </form>
 
         <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-title">Total PO's</div>
-                <div class="kpi-value">91</div>
-                <div class="kpi-description">Description Bottom</div>
+                <div class="kpi-value" id="total-pos">{{ $forecastData['metrics']['total_pos'] ?? 0 }}</div>
+                <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">% PO's on time</div>
-                <div class="kpi-value">71,7%</div>
-                <div class="kpi-description">Description Bottom</div>
+                <div class="kpi-value" id="on-time-percentage">{{ $forecastData['metrics']['on_time_percentage'] ?? 0 }}%</div>
+                <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">% PO's atrasadas</div>
-                <div class="kpi-value">28,3%</div>
-                <div class="kpi-description">Description Bottom</div>
+                <div class="kpi-value" id="delayed-percentage">{{ $forecastData['metrics']['delayed_percentage'] ?? 0 }}%</div>
+                <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Monto total</div>
-                <div class="kpi-value">$270.346</div>
-                <div class="kpi-description">Description Bottom</div>
+                <div class="kpi-value" id="total-amount">${{ number_format($forecastData['metrics']['total_amount'] ?? 0, 0) }} USD</div>
+                <!-- <div class="kpi-description">Description Bottom</div> -->
             </div>
         </div>
 
@@ -91,7 +96,7 @@
                 <!-- Forecast Table -->
                 <div class="card">
                     <h3 class="card-title">Forecast v/s real - Mensual</h3>
-                    <div class="table-container">
+                    <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: 285px;">
                         <table class="forecast-table">
                             <thead>
                                 <tr>
@@ -112,7 +117,7 @@
                 <div class="card">
                     <h3 class="card-title">Cantidad kgs por mes</h3>
                     <div class="chart-container">
-                        <canvas id="barChart" width="400" height="200"></canvas>
+                        <canvas id="barChart" width="400" height="255"></canvas>
                     </div>
                     <div class="chart-legend">
                         <div class="legend-item">
