@@ -244,7 +244,7 @@ class DashboardService
     }
 
     /**
-     * Get hub distribution data
+     * Get hub distribution data - Using user's exact corrected query
      *
      * @param array $filters
      * @return Collection
@@ -254,17 +254,30 @@ class DashboardService
         try {
             Log::info('Getting hub distribution...');
 
-            $result = $this->getBaseQuery($filters)
-                ->select('planned_hub_id', DB::raw('count(*) as total'))
-                ->join('hubs', 'purchase_orders.planned_hub_id', '=', 'hubs.id')
-                ->selectRaw('hubs.name as hub_name')
-                ->whereNotNull('purchase_orders.planned_hub_id')
-                ->groupBy('purchase_orders.planned_hub_id', 'hubs.name')
-                ->get()
+            $companyId = auth()->user()->company_id ?? null;
+
+            // Using the user's exact query structure
+            $query = DB::table('purchase_orders as po')
+                ->join('hubs as h', 'po.actual_hub_id', '=', 'h.id')
+                ->selectRaw('
+                    h.code AS hub,
+                    COUNT(po.id) AS total_pos,
+                    100.0 * COUNT(po.id) / (SELECT COUNT(*) FROM purchase_orders' .
+                    ($companyId ? ' WHERE company_id = ' . $companyId : '') .
+                    ') AS pct_total
+                ')
+                ->groupBy('h.code');
+
+            if ($companyId) {
+                $query->where('po.company_id', $companyId);
+            }
+
+            $result = $query->get()
                 ->map(function ($item) {
                     return [
-                        'name' => $item->hub_name,
-                        'value' => (int) $item->total,
+                        'name' => $item->hub,
+                        'value' => (int) $item->total_pos,
+                        'percentage' => round((float) $item->pct_total, 1),
                     ];
                 });
 

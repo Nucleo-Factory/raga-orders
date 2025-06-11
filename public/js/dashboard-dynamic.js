@@ -276,12 +276,16 @@ class DashboardManager {
             const colors = this.generateColors(data.length);
 
             console.log(`Creating new chart: ${canvasId}`);
+
+            // Use percentage values for the chart visualization if available, otherwise use value
+            const chartData = data.map(item => item.percentage || item.value);
+
             const chart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: data.map(item => item.name),
                     datasets: [{
-                        data: data.map(item => item.value),
+                        data: chartData,
                         backgroundColor: colors,
                         borderWidth: 0
                     }]
@@ -292,6 +296,17 @@ class DashboardManager {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const item = data[context.dataIndex];
+                                    if (item.percentage) {
+                                        return `${item.name}: ${item.percentage}% (${item.value})`;
+                                    }
+                                    return `${item.name}: ${item.value}`;
+                                }
+                            }
                         }
                     },
                     cutout: '70%'
@@ -322,13 +337,20 @@ class DashboardManager {
                 return;
             }
 
-            legend.innerHTML = data.map((item, index) => `
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: ${colors[index]}"></div>
-                    <span class="legend-text">${item.name}</span>
-                    <span class="legend-value">${item.value}${typeof item.value === 'number' && item.value < 100 ? '%' : ''}</span>
-                </div>
-            `).join('');
+            legend.innerHTML = data.map((item, index) => {
+                // Use percentage if available, otherwise use value
+                const displayValue = item.percentage ? `${item.percentage}%` : item.value;
+
+                return `
+                    <div class="legend-item">
+                        <div class="legend-label">
+                            <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                            <span class="legend-text">${item.name}</span>
+                        </div>
+                        <span class="legend-value">${displayValue}</span>
+                    </div>
+                `;
+            }).join('');
         } catch (error) {
             console.error(`Error updating legend ${legendId}:`, error);
         }

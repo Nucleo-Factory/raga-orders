@@ -237,7 +237,6 @@
             window.dashboardData = @json($dashboardData);
             window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         </script>
-        <script src="{{ asset('js/dashboard-script.js') }}"></script>
         <script src="{{ asset('js/dashboard-dynamic.js') }}"></script>
     @endpush
 </x-app-layout>

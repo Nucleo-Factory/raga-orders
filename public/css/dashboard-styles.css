@@ -241,8 +241,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   font-size: 14px;
+  line-height: 1.4;
+}
+
+.legend-label {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .legend-color {
@@ -250,11 +257,18 @@
   height: 12px;
   border-radius: 50%;
   margin-right: 8px;
+  flex-shrink: 0;
 }
 
-.legend-label {
-  display: flex;
-  align-items: center;
+.legend-text {
+  color: #374151;
+  font-weight: 400;
+}
+
+.legend-value {
+  color: #374151;
+  font-weight: 500;
+  text-align: right;
 }
 
 /* Bottom Section */
@@ -330,12 +344,21 @@
 
 .chart-legend-small .legend-item {
   font-size: 12px;
-  margin-bottom: 2px;
+  margin-bottom: 6px;
+  line-height: 1.3;
 }
 
 .chart-legend-small .legend-color {
   width: 8px;
   height: 8px;
+}
+
+.chart-legend-small .legend-text {
+  font-size: 12px;
+}
+
+.chart-legend-small .legend-value {
+  font-size: 12px;
 }
 
 /* Test Buttons */
