@@ -53,6 +53,18 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Vendors</label>
+                    <select name="vendor_id" class="filter-select">
+                        <option value="">Seleccionar</option>
+                        @foreach($filterOptions['vendors'] ?? [] as $vendor)
+                            <option value="{{ $vendor->id }}" {{ request('vendor_id') == $vendor->id ? 'selected' : '' }}>
+                                {{ $vendor->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <!-- Action Buttons -->
