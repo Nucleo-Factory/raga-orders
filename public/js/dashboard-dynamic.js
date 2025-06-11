@@ -367,7 +367,7 @@ class DashboardManager {
             }
 
             if (!tableData || tableData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Sin datos disponibles</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500">Sin datos disponibles</td></tr>';
                 return;
             }
 
@@ -376,7 +376,6 @@ class DashboardManager {
                     <td>${row.po_number}</td>
                     <td>${row.fecha_salida}</td>
                     <td>${row.fecha_estimada}</td>
-                    <td>${row.fecha_real}</td>
                     <td class="text-right">${row.cantidad_kg}</td>
                 </tr>
             `).join('');

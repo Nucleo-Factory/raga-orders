@@ -138,11 +138,10 @@
                     <table class="detail-table">
                         <thead>
                             <tr>
-                                <th>N° PO</th>
-                                <th>Fecha salida</th>
+                                <th>Total POs</th>
+                                <th>Fecha pedido</th>
                                 <th>Fecha estimada</th>
-                                <th>Fecha real llegada</th>
-                                <th class="text-right">Cantidad kgs</th>
+                                <th class="text-right">Total kgs</th>
                             </tr>
                         </thead>
                         <tbody id="detailTableBody">
@@ -151,7 +150,6 @@
                                     <td>{{ $row['po_number'] }}</td>
                                     <td>{{ $row['fecha_salida'] }}</td>
                                     <td>{{ $row['fecha_estimada'] }}</td>
-                                    <td>{{ $row['fecha_real'] }}</td>
                                     <td class="text-right">{{ $row['cantidad_kg'] }}</td>
                                 </tr>
                             @endforeach

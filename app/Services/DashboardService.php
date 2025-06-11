@@ -293,7 +293,7 @@ class DashboardService
     }
 
     /**
-     * Get delivery status data
+     * Get delivery status data - Using user's exact corrected query
      *
      * @param array $filters
      * @return Collection
@@ -303,21 +303,74 @@ class DashboardService
         try {
             Log::info('Getting delivery status...');
 
-            $result = $this->getBaseQuery($filters)
-                ->whereNotNull('date_ata')
-                ->whereNotNull('date_eta')
-                ->selectRaw('
-                    SUM(CASE WHEN date_ata <= date_eta THEN 1 ELSE 0 END) as on_time,
-                    SUM(CASE WHEN date_ata > date_eta THEN 1 ELSE 0 END) as delayed
-                ')
-                ->first();
+            $companyId = auth()->user()->company_id ?? null;
 
-            $collection = collect([
-                ['name' => 'On Time', 'value' => (int) ($result->on_time ?? 0)],
-                ['name' => 'Atrasado', 'value' => (int) ($result->delayed ?? 0)],
+            // Using the user's exact query structure
+            $query = DB::table('purchase_orders')
+                ->selectRaw('
+                    CASE
+                        WHEN date_ata <= date_eta THEN \'On Time\'
+                        ELSE \'Atrasado\'
+                    END AS estado,
+                    COUNT(*) AS total_pos,
+                    100.0 * COUNT(*) / (
+                        SELECT COUNT(*) FROM purchase_orders
+                        WHERE date_ata IS NOT NULL AND date_eta IS NOT NULL' .
+                        ($companyId ? ' AND company_id = ' . $companyId : '') . '
+                    ) AS pct
+                ')
+                ->whereNotNull('date_ata')
+                ->whereNotNull('date_eta');
+
+            // Apply company filter
+            if ($companyId) {
+                $query->where('company_id', $companyId);
+            }
+
+            // Apply additional filters similar to getBaseQuery
+            if (!empty($filters['date_from'])) {
+                $query->where('order_date', '>=', $filters['date_from']);
+            }
+
+            if (!empty($filters['date_to'])) {
+                $query->where('order_date', '<=', $filters['date_to']);
+            }
+
+            if (!empty($filters['vendor_id'])) {
+                $query->where('vendor_id', $filters['vendor_id']);
+            }
+
+            if (!empty($filters['hub_id'])) {
+                $query->where(function ($q) use ($filters) {
+                    $q->where('planned_hub_id', $filters['hub_id'])
+                      ->orWhere('actual_hub_id', $filters['hub_id']);
+                });
+            }
+
+            if (!empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+
+            $result = $query->groupBy(DB::raw('
+                CASE
+                    WHEN date_ata <= date_eta THEN \'On Time\'
+                    ELSE \'Atrasado\'
+                END
+            '))->get();
+
+            $collection = $result->map(function ($item) {
+                return [
+                    'name' => $item->estado,
+                    'value' => (int) $item->total_pos,
+                    'percentage' => round((float) $item->pct, 1),
+                ];
+            });
+
+            Log::info('Delivery status retrieved using exact query', [
+                'count' => $collection->count(),
+                'data' => $collection->toArray()
             ]);
 
-            Log::info('Delivery status retrieved', ['count' => $collection->count()]);
             return $collection;
         } catch (\Exception $e) {
             Log::error('Error in getDeliveryStatus', [
@@ -329,7 +382,7 @@ class DashboardService
     }
 
     /**
-     * Get transport type data
+     * Get transport type data - Using user's exact corrected query
      *
      * @param array $filters
      * @return Collection
@@ -339,20 +392,64 @@ class DashboardService
         try {
             Log::info('Getting transport type...');
 
-            $result = $this->getBaseQuery($filters)
-                ->select('mode', DB::raw('count(*) as total'))
-                ->whereNotNull('mode')
-                ->groupBy('mode')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'name' => ucfirst($item->mode ?? 'Sin especificar'),
-                        'value' => (int) $item->total,
-                    ];
-                });
+            $companyId = auth()->user()->company_id ?? null;
 
-            Log::info('Transport type retrieved', ['count' => $result->count()]);
-            return $result;
+            // Using the user's exact query structure
+            $query = DB::table('purchase_orders')
+                ->selectRaw('
+                    mode AS transport_mode,
+                    COUNT(*) AS total_pos,
+                    100.0 * COUNT(*) / (SELECT COUNT(*) FROM purchase_orders' .
+                    ($companyId ? ' WHERE company_id = ' . $companyId : '') .
+                    ') AS pct_total
+                ')
+                ->groupBy('mode');
+
+            // Apply company filter
+            if ($companyId) {
+                $query->where('company_id', $companyId);
+            }
+
+            // Apply additional filters similar to getBaseQuery
+            if (!empty($filters['date_from'])) {
+                $query->where('order_date', '>=', $filters['date_from']);
+            }
+
+            if (!empty($filters['date_to'])) {
+                $query->where('order_date', '<=', $filters['date_to']);
+            }
+
+            if (!empty($filters['vendor_id'])) {
+                $query->where('vendor_id', $filters['vendor_id']);
+            }
+
+            if (!empty($filters['hub_id'])) {
+                $query->where(function ($q) use ($filters) {
+                    $q->where('planned_hub_id', $filters['hub_id'])
+                      ->orWhere('actual_hub_id', $filters['hub_id']);
+                });
+            }
+
+            if (!empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+
+            $result = $query->get();
+
+            $collection = $result->map(function ($item) {
+                return [
+                    'name' => strtoupper($item->transport_mode ?? 'SIN ESPECIFICAR'),
+                    'value' => (int) $item->total_pos,
+                    'percentage' => round((float) $item->pct_total, 1),
+                ];
+            });
+
+            Log::info('Transport type retrieved using exact query', [
+                'count' => $collection->count(),
+                'data' => $collection->toArray()
+            ]);
+
+            return $collection;
         } catch (\Exception $e) {
             Log::error('Error in getTransportType', [
                 'error' => $e->getMessage(),
@@ -429,7 +526,7 @@ class DashboardService
     }
 
     /**
-     * Get detail table data
+     * Get detail table data - Using user's exact corrected query
      *
      * @param array $filters
      * @param int $limit
@@ -440,29 +537,106 @@ class DashboardService
         try {
             Log::info('Getting detail table data...');
 
-            $result = $this->getBaseQuery($filters)
-                ->select([
-                    'order_number',
-                    'date_atd as fecha_salida',
-                    'date_eta as fecha_estimada',
-                    'date_ata as fecha_real',
-                    'weight_kg as cantidad_kg'
-                ])
-                ->orderBy('order_date', 'desc')
-                ->limit($limit)
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'po_number' => $item->order_number,
-                        'fecha_salida' => $item->fecha_salida ? Carbon::parse($item->fecha_salida)->format('d/m/Y') : '-',
-                        'fecha_estimada' => $item->fecha_estimada ? Carbon::parse($item->fecha_estimada)->format('d/m/Y') : '-',
-                        'fecha_real' => $item->fecha_real ? Carbon::parse($item->fecha_real)->format('d/m/Y') : '-',
-                        'cantidad_kg' => number_format((float)($item->cantidad_kg ?? 0), 2),
-                    ];
-                });
+            $companyId = auth()->user()->company_id ?? null;
+            Log::info('Company ID for detail table', ['company_id' => $companyId]);
 
-            Log::info('Detail table data retrieved', ['count' => $result->count()]);
-            return $result;
+            // Using the user's exact query structure but with order_date since date_atd is NULL
+            $query = DB::table('purchase_orders as po')
+                ->join('purchase_order_product as pp', 'pp.purchase_order_id', '=', 'po.id')
+                ->selectRaw('
+                    po.order_date    AS dispatch_date,
+                    po.date_eta      AS eta,
+                    SUM(pp.quantity) AS total_kgs,
+                    COUNT(DISTINCT po.order_number) AS total_pos
+                ')
+                ->whereNotNull('po.order_date')  // Changed from date_atd to order_date
+                ->groupBy('po.order_date', 'po.date_eta')
+                ->orderBy('po.order_date')
+                ->limit($limit);
+
+            // Apply company filter
+            if ($companyId) {
+                $query->where('po.company_id', $companyId);
+                Log::info('Applied company filter to detail table');
+            }
+
+            // Log the SQL query
+            Log::info('Detail table SQL query', [
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
+
+            // Check if there are any POs with order_date
+            $poCount = DB::table('purchase_orders')
+                ->when($companyId, function ($q) use ($companyId) {
+                    return $q->where('company_id', $companyId);
+                })
+                ->whereNotNull('order_date')  // Changed from date_atd to order_date
+                ->count();
+            Log::info('POs with order_date count', ['count' => $poCount]);
+
+            // Check if there are any purchase_order_product records
+            $popCount = DB::table('purchase_order_product')->count();
+            Log::info('Purchase order product records count', ['count' => $popCount]);
+
+            // Apply additional filters similar to getBaseQuery
+            if (!empty($filters['date_from'])) {
+                $query->where('po.order_date', '>=', $filters['date_from']);
+                Log::info('Applied date_from filter', ['date_from' => $filters['date_from']]);
+            }
+
+            if (!empty($filters['date_to'])) {
+                $query->where('po.order_date', '<=', $filters['date_to']);
+                Log::info('Applied date_to filter', ['date_to' => $filters['date_to']]);
+            }
+
+            if (!empty($filters['vendor_id'])) {
+                $query->where('po.vendor_id', $filters['vendor_id']);
+                Log::info('Applied vendor filter', ['vendor_id' => $filters['vendor_id']]);
+            }
+
+            if (!empty($filters['hub_id'])) {
+                $query->where(function ($q) use ($filters) {
+                    $q->where('po.planned_hub_id', $filters['hub_id'])
+                      ->orWhere('po.actual_hub_id', $filters['hub_id']);
+                });
+                Log::info('Applied hub filter', ['hub_id' => $filters['hub_id']]);
+            }
+
+            if (!empty($filters['status'])) {
+                $query->where('po.status', $filters['status']);
+                Log::info('Applied status filter', ['status' => $filters['status']]);
+            }
+
+            $result = $query->get();
+            Log::info('Detail table raw result', [
+                'result_count' => $result->count(),
+                'raw_data' => $result->toArray()
+            ]);
+
+            $collection = $result->map(function ($item) {
+                Log::info('Processing detail table row', [
+                    'dispatch_date' => $item->dispatch_date,
+                    'eta' => $item->eta,
+                    'total_kgs' => $item->total_kgs,
+                    'total_pos' => $item->total_pos
+                ]);
+
+                return [
+                    'po_number' => $item->total_pos, // Number of POs instead of individual PO number
+                    'fecha_salida' => $item->dispatch_date ? Carbon::parse($item->dispatch_date)->format('d/m/Y') : '-',
+                    'fecha_estimada' => $item->eta ? Carbon::parse($item->eta)->format('d/m/Y') : '-',
+                    'fecha_real' => '-', // Not used in this aggregated view
+                    'cantidad_kg' => number_format((float)($item->total_kgs ?? 0), 2),
+                ];
+            });
+
+            Log::info('Detail table data retrieved using exact query', [
+                'count' => $collection->count(),
+                'sample' => $collection->take(3)->toArray()
+            ]);
+
+            return $collection;
         } catch (\Exception $e) {
             Log::error('Error in getDetailTableData', [
                 'error' => $e->getMessage(),
