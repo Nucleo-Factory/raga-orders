@@ -46,6 +46,7 @@ class PucharseOrderDetail extends Component
     public $fileUploadApproved = false;
     public $commentAttachmentApproved = false;
     public $approvedCommentData = null;
+    public $real_lead_time = 0;
 
     protected AuthorizationService $authorizationService;
 
@@ -59,6 +60,24 @@ class PucharseOrderDetail extends Component
         // Cargar la orden de compra con sus productos y hub relacionados
         $this->purchaseOrder = PurchaseOrder::with(['products', 'actualHub', 'shippingDocuments'])->findOrFail($id);
         $this->purchaseOrderDetails = PurchaseOrder::findOrFail($id);
+
+        // Calcular lead time requerido
+        $expectedLeadTime = 0;
+        if ($this->purchaseOrder->date_required_in_destination && $this->purchaseOrder->date_planned_pickup) {
+            $dateRequired = \Carbon\Carbon::parse($this->purchaseOrder->date_required_in_destination);
+            $datePlannedPickup = \Carbon\Carbon::parse($this->purchaseOrder->date_planned_pickup);
+            $expectedLeadTime = $datePlannedPickup->diffInDays($dateRequired);
+        }
+        $this->purchaseOrder->expected_lead_time = $expectedLeadTime;
+
+        // Calcular lead time en tránsito
+        $realLeadTime = 0;
+        if ($this->purchaseOrder->date_eta && $this->purchaseOrder->date_actual_pickup) {
+            $etaDate = \Carbon\Carbon::parse($this->purchaseOrder->date_eta);
+            $actualPickupDate = \Carbon\Carbon::parse($this->purchaseOrder->date_actual_pickup);
+            $realLeadTime = $actualPickupDate->diffInDays($etaDate);
+        }
+        $this->purchaseOrder->real_lead_time = $realLeadTime;
 
         // Cargar el shipping document asociado (si existe)
         $this->shippingDocument = $this->purchaseOrder->shippingDocuments->first();

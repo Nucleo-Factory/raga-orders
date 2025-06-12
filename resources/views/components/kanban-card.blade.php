@@ -166,7 +166,6 @@
             <div class="space-y-1">
                 <p class="whitespace-nowrap">Lead requerido: <span>{{ $expectedLeadTime }}</span></p>
                 <p class="whitespace-nowrap">Lead en transito: <span>{{ $realLeadTime }}</span></p>
-                <p class="whitespace-nowrap">Lead time real: <span>{{ $actualLeadTime }}</span></p>
             </div>
         </div>
 

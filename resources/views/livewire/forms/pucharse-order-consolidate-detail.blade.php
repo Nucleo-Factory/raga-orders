@@ -432,6 +432,60 @@
                                     @endif
                                 </th>
                                 <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('expected_lead_time')">
+                                    Lead Requerido
+                                    @if ($sortField === 'expected_lead_time')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('real_lead_time')">
+                                    Lead en Tránsito
+                                    @if ($sortField === 'real_lead_time')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('actual_lead_time')">
+                                    Desviación 1
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('actual_lead_time')">
+                                    Desviación 2
+                                </th>
+                                <th scope="col"
                                     class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                                     Acciones
                                 </th>
@@ -459,6 +513,18 @@
                                             class="text-{{ $order['status_color'] }}-800 bg-{{ $order['status_color'] }}-100 inline-flex rounded-full px-2 text-xs font-semibold leading-5">
                                             {{ $order['status'] }}
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['expected_lead_time'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['real_lead_time'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['desviacion1'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['desviacion2'] }} días</div>
                                     </td>
                                     <td class="flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap">
                                         <a href="{{ route('purchase-orders.detail', $order['id']) }}"

@@ -137,7 +137,8 @@
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M4.125 0.5C3.82663 0.5 3.54048 0.618526 3.3295 0.829505C3.11853 1.04048 3 1.32663 3 1.625V3.5C2.20435 3.5 1.44129 3.81607 0.87868 4.37868C0.31607 4.94129 0 5.70435 0 6.5V17C0 17.7956 0.31607 18.5587 0.87868 19.1213C1.44129 19.6839 2.20435 20 3 20H15C15.7956 20 16.5587 19.6839 17.1213 19.1213C17.6839 18.5587 18 17.7956 18 17V6.5C18 5.70435 17.6839 4.94129 17.1213 4.37868C16.5587 3.81607 15.7956 3.5 15 3.5V1.625C15 1.32663 14.8815 1.04048 14.6705 0.829505C14.4595 0.618526 14.1734 0.5 13.875 0.5C13.5766 0.5 13.2905 0.618526 13.0795 0.829505C12.8685 1.04048 12.75 1.32663 12.75 1.625V3.5H5.25V1.625C5.25 1.32663 5.13147 1.04048 4.9205 0.829505C4.70952 0.618526 4.42337 0.5 4.125 0.5ZM2.25 9.5C2.25 9.10218 2.40804 8.72064 2.68934 8.43934C2.97064 8.15804 3.35218 8 3.75 8H14.25C14.6478 8 15.0294 8.15804 15.3107 8.43934C15.592 8.72064 15.75 9.10218 15.75 9.5V16.25C15.75 16.6478 15.592 17.0294 15.3107 17.3107C15.0294 17.592 14.6478 17.75 14.25 17.75H3.75C3.35218 17.75 2.97064 17.592 2.68934 17.3107C2.40804 17.0294 2.25 16.6478 2.25 16.25V9.5Z" fill="black" />
             </svg>
             <div class="space-y-1">
-                <p>Lead time: <span>{{ $purchaseOrder->lead_time ? \Carbon\Carbon::parse($purchaseOrder->lead_time)->format('d/m/Y') : '-' }}</span></p>
+                <p>Lead time requerido: <span>{{ $purchaseOrder->expected_lead_time ?? 0 }} días</span></p>
+                <p>Lead time en tránsito: <span>{{ $purchaseOrder->real_lead_time ?? 0 }} días</span></p>
                 <p>Fecha requerida en destino: <span>{{ $purchaseOrder->date_required_in_destination ? \Carbon\Carbon::parse($purchaseOrder->date_required_in_destination)->format('d/m/Y') : '-' }}</span></p>
                 <p>Fecha pickup planificada: <span>{{ $purchaseOrder->date_planned_pickup ? \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup)->format('d/m/Y') : '-' }}</span></p>
             </div>
