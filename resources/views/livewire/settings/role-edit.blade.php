@@ -56,6 +56,20 @@
         </form>
     </div>
 
+    <x-modal-success name="modal-role-updated">
+        <x-slot:title>
+            Rol actualizado correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            El rol ha sido actualizado correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
+
     <style>
     .toggle-button {
         display: inline-block;
