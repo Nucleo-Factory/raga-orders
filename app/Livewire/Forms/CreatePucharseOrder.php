@@ -316,11 +316,14 @@ class CreatePucharseOrder extends Component
 
     public function generateUniqueOrderNumber()
     {
+        $companyId = auth()->user()->company_id ?? 1;
+
         // Formato: PO-YYYYMMDD-XXXX donde XXXX es un número secuencial
         $prefix = 'PO-' . date('Ymd') . '-';
 
-        // Obtener el último número de orden con este prefijo
-        $lastOrder = \App\Models\PurchaseOrder::where('order_number', 'like', $prefix . '%')
+        // Obtener el último número de orden con este prefijo para esta compañía
+        $lastOrder = \App\Models\PurchaseOrder::where('company_id', $companyId)
+            ->where('order_number', 'like', $prefix . '%')
             ->orderBy('order_number', 'desc')
             ->first();
 
@@ -333,6 +336,21 @@ class CreatePucharseOrder extends Component
             // Si no hay órdenes previas con este prefijo, empezar con 0001
             $this->order_number = $prefix . '0001';
         }
+
+        // Verificar que el número generado sea único (precaución extra)
+        $attempts = 0;
+        while (\App\Models\PurchaseOrder::where('company_id', $companyId)
+                ->where('order_number', $this->order_number)
+                ->exists() && $attempts < 100) {
+
+            $attempts++;
+            $lastNumber = substr($this->order_number, strlen($prefix));
+            $newNumber = intval($lastNumber) + 1;
+            $this->order_number = $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Clear any previous validation errors for order_number
+        $this->resetErrorBag('order_number');
     }
 
     public function onVendorSelected()
@@ -522,9 +540,38 @@ class CreatePucharseOrder extends Component
     public function createPurchaseOrder() {
         \Log::info('Iniciando createPurchaseOrder');
 
+        // Get company ID for validation
+        $companyId = auth()->user()->company_id ?? 1;
+        \Log::info('Company ID obtenido', ['company_id' => $companyId]);
+
+        // Log current field values for debugging
+        \Log::info('Valores de campos antes de validación', [
+            'order_number' => $this->order_number,
+            'currency' => $this->currency,
+            'incoterms' => $this->incoterms,
+            'vendor_id' => $this->vendor_id,
+            'ship_to_id' => $this->ship_to_id,
+            'bill_to_id' => $this->bill_to_id,
+            'date_required_in_destination' => $this->date_required_in_destination,
+            'planned_hub_id' => $this->planned_hub_id,
+            'mode' => $this->mode,
+            'peso_kg' => $this->peso_kg,
+            'length_cm' => $this->length_cm,
+            'width_cm' => $this->width_cm,
+            'height_cm' => $this->height_cm,
+            'material_type' => $this->material_type,
+            'orderProducts_count' => count($this->orderProducts)
+        ]);
+
+        \Log::info('Iniciando validación');
+
         // Validación básica
-        $this->validate([
-            'order_number' => 'required',
+        try {
+            $this->validate([
+            'order_number' => [
+                'required',
+                'unique:purchase_orders,order_number,NULL,id,company_id,' . $companyId
+            ],
             'currency' => 'required',
             'incoterms' => 'required',
             'vendor_id' => 'required',
@@ -533,13 +580,14 @@ class CreatePucharseOrder extends Component
             'date_required_in_destination' => 'required',
             'planned_hub_id' => 'required',
             'mode' => 'required',
-            'peso_kg' => 'required',
-            'length_cm' => 'required',
-            'width_cm' => 'required',
-            'height_cm' => 'required',
+            'peso_kg' => 'required|numeric|min:0',
+            'largo' => 'required|numeric|min:0',
+            'ancho' => 'required|numeric|min:0',
+            'alto' => 'required|numeric|min:0',
             'material_type' => 'required|array|min:1',
         ], [
             'order_number.required' => 'El número de orden es requerido',
+            'order_number.unique' => 'Este número de orden ya existe. Por favor, use un número diferente.',
             'currency.required' => 'La moneda es requerida',
             'incoterms.required' => 'El incoterm es requerido',
             'vendor_id.required' => 'El vendor es requerido',
@@ -549,21 +597,41 @@ class CreatePucharseOrder extends Component
             'planned_hub_id.required' => 'El hub es requerido',
             'mode.required' => 'El modo es requerido',
             'peso_kg.required' => 'El peso es requerido',
-            'ancho.required' => 'El ancho es requerido',
+            'peso_kg.numeric' => 'El peso debe ser un número',
+            'peso_kg.min' => 'El peso debe ser mayor a 0',
             'largo.required' => 'El largo es requerido',
+            'largo.numeric' => 'El largo debe ser un número',
+            'largo.min' => 'El largo debe ser mayor a 0',
+            'ancho.required' => 'El ancho es requerido',
+            'ancho.numeric' => 'El ancho debe ser un número',
+            'ancho.min' => 'El ancho debe ser mayor a 0',
             'alto.required' => 'El alto es requerido',
-            'volumen.required' => 'El volumen es requerido',
+            'alto.numeric' => 'El alto debe ser un número',
+            'alto.min' => 'El alto debe ser mayor a 0',
             'material_type.required' => 'Debe seleccionar al menos un tipo de material',
             'material_type.min' => 'Debe seleccionar al menos un tipo de material',
         ]);
 
+        \Log::info('Validación completada exitosamente');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Error de validación', [
+                'errors' => $e->errors(),
+                'message' => $e->getMessage()
+            ]);
+            throw $e; // Re-throw the validation exception
+        }
+
         // Validar que tenga al menos un producto
+        \Log::info('Validando productos', ['products_count' => count($this->orderProducts)]);
+
         if (empty($this->orderProducts) || count($this->orderProducts) < 1) {
+            \Log::error('Error: No hay productos agregados');
             $this->addError('products', 'Debe agregar al menos un producto a la orden de compra');
             return;
         }
 
-
+        \Log::info('Validación de productos exitosa');
         \Log::info('Preparando datos para guardar');
 
         try {
@@ -683,6 +751,12 @@ class CreatePucharseOrder extends Component
                 // Crear nueva orden
                 $purchaseOrder = \App\Models\PurchaseOrder::create($poData);
                 \Log::info('Orden creada con datos básicos', ['id' => $purchaseOrder->id]);
+
+                // Guardar el ID de la orden recién creada
+                $this->id = $purchaseOrder->id;
+
+                // Asegurar que el número de orden esté actualizado
+                $this->order_number = $purchaseOrder->order_number;
             }
 
             // Guardar los productos asociados a la orden
@@ -711,13 +785,24 @@ class CreatePucharseOrder extends Component
 
             \DB::commit();
 
+            // Dispatch success notification
+            $this->dispatch('show-success', 'Orden de compra creada exitosamente con número: ' . $this->order_number);
+
             $this->dispatch('open-modal', 'modal-purchase-order-created');
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Error en createPurchaseOrder: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
 
-            session()->flash('error', 'Error al guardar la orden: ' . $e->getMessage());
+            // Check if it's a duplicate key error
+            if (strpos($e->getMessage(), 'duplicate key value violates unique constraint') !== false) {
+                $this->addError('order_number', 'Este número de orden ya existe. Por favor, use un número diferente.');
+            } else {
+                session()->flash('error', 'Error al guardar la orden: ' . $e->getMessage());
+            }
+
+            // Dispatch error event to show notification
+            $this->dispatch('show-error', 'Error al crear la orden de compra. Por favor, revise los campos y vuelva a intentar.');
         }
     }
 
@@ -857,7 +942,14 @@ class CreatePucharseOrder extends Component
 
     public function closeModal() {
         $this->dispatch('close-modal', 'modal-purchase-order-created');
-        return redirect()->route('purchase-orders.detail', $this->id);
+
+        // Si tenemos un ID, redirigir a la página de detalle
+        if ($this->id) {
+            return redirect()->route('purchase-orders.detail', $this->id);
+        } else {
+            // Si no hay ID, redirigir al listado de POs
+            return redirect()->route('purchase-orders.index');
+        }
     }
 
     public function render() {
