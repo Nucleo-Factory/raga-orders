@@ -21,12 +21,6 @@
         </a>
     </div>
 
-    @if (session('message'))
-        <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
-            {{ session('message') }}
-        </div>
-    @endif
-
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'kanban' }" class="mb-6">
         <!-- Kanban View -->
