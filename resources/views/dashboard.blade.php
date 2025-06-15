@@ -46,10 +46,10 @@
                 <div class="filter-group">
                     <label class="filter-label">Material</label>
                     <select name="material_type" class="filter-select !border-2 !border-[#7288FF] !rounded-xl">
-                        <option value="">Material</option>
+                        <option value="">Seleccionar Material</option>
                         @foreach($filterOptions['materials'] as $material)
                             <option value="{{ $material }}" {{ request('material_type') == $material ? 'selected' : '' }}>
-                                {{ $material }}
+                                {{ ucfirst($material) }}
                             </option>
                         @endforeach
                     </select>

@@ -752,17 +752,46 @@ class DashboardService
         try {
             Log::info('Getting material options for company', ['company_id' => $companyId]);
 
-            $result = PurchaseOrder::when($companyId, function ($query) use ($companyId) {
+            $purchaseOrders = PurchaseOrder::when($companyId, function ($query) use ($companyId) {
                     return $query->where('company_id', $companyId);
                 })
                 ->whereNotNull('material_type')
-                ->get()
-                ->pluck('material_type')
-                ->flatten()
-                ->unique()
-                ->values();
+                ->get();
 
-            Log::info('Material options retrieved', ['count' => $result->count()]);
+            $materialTypes = [];
+
+            foreach ($purchaseOrders as $po) {
+                $materialType = $po->material_type;
+
+                if (!empty($materialType)) {
+                    // Si es string, intentar decodificar JSON
+                    if (is_string($materialType)) {
+                        $decoded = json_decode($materialType, true);
+                        if (is_array($decoded)) {
+                            // Es un JSON válido
+                            foreach ($decoded as $type) {
+                                if (!empty($type) && is_string($type)) {
+                                    $materialTypes[] = trim($type);
+                                }
+                            }
+                        } else {
+                            // Es un string simple
+                            $materialTypes[] = trim($materialType);
+                        }
+                    } elseif (is_array($materialType)) {
+                        // Ya es array
+                        foreach ($materialType as $type) {
+                            if (!empty($type) && is_string($type)) {
+                                $materialTypes[] = trim($type);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $result = collect(array_unique($materialTypes))->values()->sort();
+
+            Log::info('Material options retrieved', ['count' => $result->count(), 'materials' => $result->toArray()]);
             return $result;
         } catch (\Exception $e) {
             Log::error('Error in getMaterialOptions', [
@@ -818,7 +847,13 @@ class DashboardService
             // Material type filter
             if (!empty($filters['material_type'])) {
                 Log::info('Applying material_type filter', ['material_type' => $filters['material_type']]);
-                $query->whereJsonContains('material_type', $filters['material_type']);
+                $materialType = $filters['material_type'];
+                $query->where(function($q) use ($materialType) {
+                    // Buscar en JSON string con diferentes patrones
+                    $q->whereRaw('material_type LIKE ?', ['%"' . $materialType . '"%'])
+                      ->orWhereRaw('material_type = ?', [$materialType])
+                      ->orWhereRaw('material_type = ?', ['"' . $materialType . '"']);
+                });
             }
 
             // Hub filter
