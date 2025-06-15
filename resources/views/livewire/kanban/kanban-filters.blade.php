@@ -50,6 +50,18 @@
         </div>
 
         <div class="space-y-4">
+            <!-- Filtro de Búsqueda por Texto -->
+            <div>
+                <label for="search-filter" class="block text-sm font-medium text-gray-700">Búsqueda General</label>
+                <input
+                    type="text"
+                    id="search-filter"
+                    wire:model.live.debounce.300ms="searchText"
+                    placeholder="Buscar en número de orden, vendor, moneda, total, etc..."
+                    class="block w-full px-3 py-2 mt-1 text-base border-gray-300 rounded-md focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                />
+            </div>
+
             <!-- Filtro de Moneda -->
             @if(count($currencies) > 0)
                 <div>
