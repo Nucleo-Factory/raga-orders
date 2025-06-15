@@ -117,7 +117,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -201,7 +201,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -272,7 +272,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -354,7 +354,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -436,7 +436,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -507,7 +507,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -578,7 +578,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
@@ -649,7 +649,7 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId" />
         </div>
 
         <div class="mb-8">
