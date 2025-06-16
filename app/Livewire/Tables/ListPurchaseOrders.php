@@ -60,14 +60,35 @@ class ListPurchaseOrders extends Component
         $this->resetPage();
     }
 
+    public function updatingPerPage()
+    {
+        $this->resetPage();
+    }
+
+    public function previousPage()
+    {
+        $this->setPage($this->getPage() - 1);
+    }
+
+    public function nextPage()
+    {
+        $this->setPage($this->getPage() + 1);
+    }
+
+    public function gotoPage($page)
+    {
+        $this->setPage($page);
+    }
+
     public function render()
     {
         $purchaseOrders = PurchaseOrder::query()
             ->when($this->search, function ($query) {
-                $query->where(function ($query) {
-                    $query->where('order_number', 'like', '%' . $this->search . '%')
-                        ->orWhere('vendor_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('notes', 'like', '%' . $this->search . '%');
+                $searchTerm = strtolower($this->search);
+                $query->where(function ($query) use ($searchTerm) {
+                    $query->whereRaw('LOWER(order_number) LIKE ?', ['%' . $searchTerm . '%'])
+                        ->orWhereRaw('LOWER(CAST(vendor_id AS TEXT)) LIKE ?', ['%' . $searchTerm . '%'])
+                        ->orWhereRaw('LOWER(notes) LIKE ?', ['%' . $searchTerm . '%']);
                 });
             })
             ->when($this->statusFilter, function ($query) {
