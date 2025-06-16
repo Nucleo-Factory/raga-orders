@@ -181,7 +181,7 @@
                                                     {{ $row->$key }}
                                                 @elseif(is_object($row->$key))
                                                     {{ method_exists($row->$key, '__toString') ? $row->$key : $row->$key->id }}
-                                                @elseif(strtolower($key) === 'estado' && strtolower($row->$key) === 'active')
+                                                @elseif((strtolower($key) === 'estado' || strtolower($key) === 'status') && strtolower($row->$key) === 'active')
                                                     activo
                                                 @else
                                                     {{ $row->$key }}
@@ -220,7 +220,7 @@
                                                     @endforeach
                                                 @elseif(isset($row[$key . '_formatted']))
                                                     {!! $row[$key . '_formatted'] !!}
-                                                @elseif(strtolower($key) === 'estado' && strtolower($row[$key]) === 'active')
+                                                @elseif((strtolower($key) === 'estado' || strtolower($key) === 'status') && strtolower($row[$key]) === 'active')
                                                     activo
                                                 @else
                                                     {{ $row[$key] }}
