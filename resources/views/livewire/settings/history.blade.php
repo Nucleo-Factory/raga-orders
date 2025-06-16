@@ -148,7 +148,7 @@
                             {{ \Carbon\Carbon::parse($comment['created_at'])->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-6 py-4 text-sm whitespace-nowrap">
-                            <a href="{{ route('purchase-orders.show', $comment['purchase_order_id']) }}"
+                            <a href="{{ route('purchase-orders.detail', $comment['purchase_order_id']) }}"
                                class="text-blue-600 hover:text-blue-800 hover:underline">
                                 {{ $comment['purchase_order_number'] }}
                             </a>
