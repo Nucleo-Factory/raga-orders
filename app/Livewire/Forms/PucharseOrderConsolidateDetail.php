@@ -126,12 +126,12 @@ class PucharseOrderConsolidateDetail extends Component {
                 $expectedLeadTime = $datePlannedPickup->diffInDays($dateRequired);
             }
 
-            // Calcular realLeadTime (Lead en transito) = ETA - pickup real (en días)
+            // Calcular realLeadTime (Lead en transito) = ATA - pickup real (en días)
             $realLeadTime = 0;
-            if ($order->date_eta && $order->date_actual_pickup) {
-                $etaDate = \Carbon\Carbon::parse($order->date_eta);
-                $actualPickupDate = \Carbon\Carbon::parse($order->date_actual_pickup);
-                $realLeadTime = $actualPickupDate->diffInDays($etaDate);
+            if ($order->date_ata && $order->date_actual_pickup) {
+                $ataDate = \Carbon\Carbon::parse($order->date_ata);
+                $datePickupReal = \Carbon\Carbon::parse($order->date_actual_pickup);
+                $realLeadTime = $datePickupReal->diffInDays($ataDate, false);
             }
 
             // Calcular actualLeadTime (Lead time real) = ATA - fecha pick planificada (en días)

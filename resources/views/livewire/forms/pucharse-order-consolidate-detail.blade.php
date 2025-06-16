@@ -434,7 +434,7 @@
                                 <th scope="col"
                                     class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
                                     wire:click="sortBy('expected_lead_time')">
-                                    Lead Requerido
+                                    Leadtime requerido
                                     @if ($sortField === 'expected_lead_time')
                                         @if ($sortDirection === 'asc')
                                             <svg class="inline-block w-4 h-4 ml-1" fill="none"
@@ -456,7 +456,7 @@
                                 <th scope="col"
                                     class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
                                     wire:click="sortBy('real_lead_time')">
-                                    Lead en Tránsito
+                                    Leadtime real
                                     @if ($sortField === 'real_lead_time')
                                         @if ($sortDirection === 'asc')
                                             <svg class="inline-block w-4 h-4 ml-1" fill="none"
