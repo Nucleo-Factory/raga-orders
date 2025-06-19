@@ -54,7 +54,7 @@ class DashboardService
                 ')
                 ->whereNotNull('date_ata')
                 ->whereNotNull('date_eta')
-                ->where('date_ata', '<=', DB::raw('date_eta'));
+                ->where('date_ata', '<=', DB::raw('date_required_in_destination'));
 
             if ($companyId) {
                 $onTimeQuery->where('company_id', $companyId);
@@ -82,7 +82,7 @@ class DashboardService
                 ')
                 ->whereNotNull('date_ata')
                 ->whereNotNull('date_eta')
-                ->where('date_ata', '>', DB::raw('date_eta'));
+                ->where('date_ata', '>', DB::raw('date_required_in_destination'));
 
             if ($companyId) {
                 $delayedQuery->where('company_id', $companyId);
@@ -309,18 +309,18 @@ class DashboardService
             $query = DB::table('purchase_orders')
                 ->selectRaw('
                     CASE
-                        WHEN date_ata <= date_eta THEN \'On Time\'
+                        WHEN date_ata <= date_required_in_destination THEN \'On Time\'
                         ELSE \'Atrasado\'
                     END AS estado,
                     COUNT(*) AS total_pos,
                     100.0 * COUNT(*) / (
                         SELECT COUNT(*) FROM purchase_orders
-                        WHERE date_ata IS NOT NULL AND date_eta IS NOT NULL' .
+                        WHERE date_ata IS NOT NULL AND date_required_in_destination IS NOT NULL' .
                         ($companyId ? ' AND company_id = ' . $companyId : '') . '
                     ) AS pct
                 ')
                 ->whereNotNull('date_ata')
-                ->whereNotNull('date_eta');
+                ->whereNotNull('date_required_in_destination');
 
             // Apply company filter
             if ($companyId) {
@@ -353,7 +353,7 @@ class DashboardService
 
             $result = $query->groupBy(DB::raw('
                 CASE
-                    WHEN date_ata <= date_eta THEN \'On Time\'
+                    WHEN date_ata <= date_required_in_destination THEN \'On Time\'
                     ELSE \'Atrasado\'
                 END
             '))->get();
