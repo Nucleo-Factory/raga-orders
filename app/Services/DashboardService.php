@@ -461,7 +461,7 @@ class DashboardService
     }
 
     /**
-     * Get delay reasons data (mock data for now)
+     * Get delay reasons data - Using user's exact corrected query
      *
      * @param array $filters
      * @return Collection
@@ -469,26 +469,82 @@ class DashboardService
     private function getDelayReasons(array $filters): Collection
     {
         try {
-            Log::info('Getting delay reasons (mock data)...');
+            Log::info('Getting delay reasons using real data...');
 
-            // This would ideally come from a dedicated table
-            // For now, returning mock data based on your requirements
-            $result = collect([
-                ['name' => 'Problemas de transporte', 'value' => 26.7],
-                ['name' => 'Error documental', 'value' => 20],
-                ['name' => 'Clima adverso', 'value' => 20],
-                ['name' => 'Retraso en aduana', 'value' => 17.8],
-                ['name' => 'Demora en despacho', 'value' => 15.6],
+            $companyId = auth()->user()->company_id ?? null;
+
+            // Using the user's exact CTE query structure
+            $query = DB::select("
+                WITH delayed_pos AS (
+                    -- 1) Filtramos sólo POs atrasadas
+                    SELECT id
+                    FROM purchase_orders
+                    WHERE date_ata IS NOT NULL
+                      AND date_eta IS NOT NULL
+                      AND date_ata > date_eta
+                      " . ($companyId ? "AND company_id = $companyId" : "") . "
+                ),
+                reasons AS (
+                    -- 2) Extraemos de los comentarios sólo los de esas POs y clasificamos según palabra clave
+                    SELECT
+                      poc.purchase_order_id,
+                      CASE
+                        WHEN poc.comment ILIKE '%transporte%'       THEN 'Problemas de transporte'
+                        WHEN poc.comment ILIKE '%error documental%'  THEN 'Error documental'
+                        WHEN poc.comment ILIKE '%clima%'             THEN 'Clima adverso'
+                        WHEN poc.comment ILIKE '%aduana%'            THEN 'Retraso en aduana'
+                        WHEN poc.comment ILIKE '%despacho%'          THEN 'Demora en despacho'
+                        ELSE 'Otro motivo'
+                      END AS motivo
+                    FROM purchase_order_comments poc
+                    JOIN delayed_pos dp ON poc.purchase_order_id = dp.id
+                    WHERE poc.comment IS NOT NULL
+                )
+                -- 3) Agrupamos y calculamos totales y % sobre el total de POs atrasadas con comentario
+                SELECT
+                  motivo AS name,
+                  COUNT(*) AS total_comentarios,
+                  ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS percentage
+                FROM reasons
+                GROUP BY motivo
+                ORDER BY percentage DESC
+            ");
+
+            $result = collect($query)->map(function ($item) {
+                return [
+                    'name' => $item->name,
+                    'value' => (int) $item->total_comentarios,
+                    'percentage' => (float) $item->percentage,
+                ];
+            });
+
+            Log::info('Delay reasons retrieved using real data', [
+                'count' => $result->count(),
+                'data' => $result->toArray()
             ]);
 
-            Log::info('Delay reasons retrieved', ['count' => $result->count()]);
+            // Si no hay datos, devolver colección vacía
+            if ($result->isEmpty()) {
+                Log::info('No delay reasons found, returning empty collection');
+                return collect([]);
+            }
+
             return $result;
         } catch (\Exception $e) {
             Log::error('Error in getDelayReasons', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return collect([]);
+
+            // En caso de error, devolver datos mock como fallback
+            Log::info('Falling back to mock data due to error');
+            return collect([
+                ['name' => 'Problemas de transporte', 'value' => 0, 'percentage' => 0],
+                ['name' => 'Error documental', 'value' => 0, 'percentage' => 0],
+                ['name' => 'Clima adverso', 'value' => 0, 'percentage' => 0],
+                ['name' => 'Retraso en aduana', 'value' => 0, 'percentage' => 0],
+                ['name' => 'Demora en despacho', 'value' => 0, 'percentage' => 0],
+            ]);
         }
     }
 
