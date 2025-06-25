@@ -1,5 +1,5 @@
 @php
-    $travelMethod = 'aéreo';
+    $travelMethod = $purchaseOrder->mode ?? 'aéreo';
     $materialType = $purchaseOrder->material_type;
 @endphp
 

@@ -280,6 +280,12 @@ class CreatePucharseOrder extends Component
                 $this->width_cm = $this->purchaseOrder->width_cm;
                 $this->height_cm = $this->purchaseOrder->height_cm;
 
+                // Cargar el modo de transporte
+                $this->mode = $this->purchaseOrder->mode;
+
+                // Cargar el tipo de seguro
+                $this->ensurence_type = $this->purchaseOrder->ensurence_type ?? 'pending';
+
                 // Cargar productos
                 $this->orderProducts = [];
                 foreach ($this->purchaseOrder->products as $product) {
