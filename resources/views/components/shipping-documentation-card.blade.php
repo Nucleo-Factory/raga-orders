@@ -84,7 +84,7 @@
             </svg>
 
             <div class="space-y-1">
-                <p>Creación: <span>{{ $creationDate }}</span></p>
+                <p>Desviación 1: <span>{{ $creationDate }}</span></p>
                 <p>Salida estimada: <span>{{ $estimatedDepartureDate }}</span></p>
                 <p>Llegada estimada: <span>{{ $estimatedArrivalDate }}</span></p>
             </div>

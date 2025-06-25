@@ -4,86 +4,74 @@ namespace App\Livewire\Settings;
 
 use Livewire\Component;
 use App\Models\NotificationType;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
 
 class Notifications extends Component
 {
     public array $preferences = [];
-    public array $frequencies = [];
+    public array $activeNotifications = [];
 
     // Añadimos listeners para los eventos de toggle
     protected $listeners = [
-        'togglePreference' => 'togglePreference',
-        'toggleFrequency' => 'toggleFrequency'
+        'togglePreference' => 'togglePreference'
     ];
 
     public function mount()
     {
         Log::info('Mounting notifications component');
 
-        // Inicializar todas las preferencias con valores por defecto
-        $notificationTypes = NotificationType::all();
+        // Obtener solo las notificaciones que están realmente implementadas
+        $this->loadActiveNotifications();
 
-        Log::info('Notification types count: ' . $notificationTypes->count());
+        // Inicializar preferencias del usuario
+        $this->loadUserPreferences();
+    }
 
-        // Si no hay tipos de notificaciones, inicializar manualmente
-        if ($notificationTypes->isEmpty()) {
-            Log::warning('No notification types found in database');
-            $this->initDefaultPreferences();
-            return;
-        }
-
-        // Obtener preferencias actuales del usuario
-        $user = auth()->user();
-        $userPreferences = $user->notificationPreferences()->get();
-
-        Log::info('User preferences count: ' . $userPreferences->count());
-
-        // Agrupar por tipo de notificación
-        foreach ($notificationTypes as $type) {
-            $userPref = $userPreferences->where('notification_type_id', $type->id)->first();
-
-            $this->preferences[$type->key] = [
-                'id' => $type->id,
-                'enabled' => $userPref ? $userPref->enabled : false,
-            ];
-        }
-
-        // Obtener las frecuencias seleccionadas por el usuario
-        $userFrequencies = $user->frequencies()->get();
-
-        Log::info('User frequencies count: ' . $userFrequencies->count());
-
-        // Establecer las frecuencias predeterminadas
-        $this->frequencies = [
-            'immediate' => $userFrequencies->contains('frequency', 'immediate'),
-            'daily' => $userFrequencies->contains('frequency', 'daily'),
-            'weekly' => $userFrequencies->contains('frequency', 'weekly'),
+    private function loadActiveNotifications()
+    {
+        // Solo mostrar las notificaciones que están realmente implementadas en el código
+        $this->activeNotifications = [
+            'task_moved' => [
+                'name' => 'Movimiento de tareas en Kanban',
+                'description' => 'Notificaciones cuando se mueven tareas entre columnas del tablero Kanban',
+                'category' => 'kanban',
+                'implemented' => true,
+                'controller' => 'KanbanBoard'
+            ]
         ];
     }
 
-    // Método para inicializar preferencias por defecto
-    private function initDefaultPreferences()
+    private function loadUserPreferences()
     {
-        $defaultTypes = [
-            'mobile_notifications', 'email_notifications', 'platform_notifications',
-            'status_update', 'issues_detected', 'successful_deliveries',
-            'pending_tasks', 'upcoming_deadlines', 'user_customization',
-            'order_creation_changes', 'order_consolidation'
-        ];
+        $user = auth()->user();
 
-        foreach ($defaultTypes as $type) {
-            $this->preferences[$type] = [
-                'id' => 0,
-                'enabled' => false,
-            ];
+        foreach ($this->activeNotifications as $key => $notification) {
+            $notificationType = NotificationType::where('key', $key)->first();
+
+            if ($notificationType) {
+                $userPref = $user->notificationPreferences()
+                    ->where('notification_type_id', $notificationType->id)
+                    ->first();
+
+                $this->preferences[$key] = [
+                    'id' => $notificationType->id,
+                    'name' => $notification['name'],
+                    'description' => $notification['description'],
+                    'category' => $notification['category'],
+                    'enabled' => $userPref ? $userPref->enabled : false,
+                ];
+            } else {
+                // Si no existe el tipo de notificación, crear placeholder
+                $this->preferences[$key] = [
+                    'id' => 0,
+                    'name' => $notification['name'],
+                    'description' => $notification['description'],
+                    'category' => $notification['category'],
+                    'enabled' => false,
+                ];
+            }
         }
-
-        $this->frequencies = [
-            'immediate' => false,
-            'daily' => false,
-            'weekly' => false,
-        ];
     }
 
     public function togglePreference($key, $field = 'enabled')
@@ -99,24 +87,10 @@ class Notifications extends Component
         }
     }
 
-    public function toggleFrequency($frequency)
-    {
-        Log::info("Toggling frequency: {$frequency}");
-
-        if (isset($this->frequencies[$frequency])) {
-            $oldValue = $this->frequencies[$frequency];
-            $this->frequencies[$frequency] = !$oldValue;
-            Log::info("Changed from {$oldValue} to {$this->frequencies[$frequency]}");
-        } else {
-            Log::warning("Frequency not found: {$frequency}");
-        }
-    }
-
     public function save()
     {
         Log::info('Saving preferences...');
         Log::info('Preferences: ' . json_encode($this->preferences));
-        Log::info('Frequencies: ' . json_encode($this->frequencies));
 
         try {
             $user = auth()->user();
@@ -126,8 +100,14 @@ class Notifications extends Component
                 $notificationType = NotificationType::where('key', $key)->first();
 
                 if (!$notificationType) {
-                    Log::warning("Notification type not found for key: {$key}");
-                    continue;
+                    Log::warning("Notification type not found for key: {$key}. Creating it...");
+                    // Crear el tipo de notificación si no existe
+                    $notificationType = NotificationType::create([
+                        'key' => $key,
+                        'name' => $values['name'],
+                        'category' => $values['category'],
+                        'description' => $values['description'] ?? '',
+                    ]);
                 }
 
                 Log::info("Saving preference for type: {$key} with value: " . ($values['enabled'] ? 'true' : 'false'));
@@ -138,22 +118,10 @@ class Notifications extends Component
                 );
             }
 
-            // Guardar frecuencias
-            Log::info("Deleting existing frequencies for user: {$user->id}");
-            $user->frequencies()->delete();
-
-            // Luego crear nuevas frecuencias basadas en las selecciones del usuario
-            foreach ($this->frequencies as $frequency => $enabled) {
-                if ($enabled) {
-                    Log::info("Creating frequency {$frequency} for user: {$user->id}");
-                    $user->frequencies()->create(['frequency' => $frequency]);
-                }
-            }
-
             $this->dispatch('open-modal', 'modal-notifications-saved');
             Log::info('Preferences saved successfully');
 
-            // Re-cargar las preferencias desde la base de datos para verificar que se guardaron correctamente
+            // Re-cargar las preferencias
             $this->mount();
         } catch (\Exception $e) {
             Log::error('Error saving preferences: ' . $e->getMessage());

@@ -64,7 +64,7 @@
                                 {{ $session->user_name ?? 'Usuario desconocido' }}
                             </div>
                             <div class="text-sm text-gray-500">
-                                Sin rol
+                                {{ $session->user_roles ?? 'Sin rol' }}
                             </div>
                         </div>
                     </td>

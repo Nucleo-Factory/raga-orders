@@ -79,6 +79,12 @@ class NotificationTypeSeeder extends Seeder
                 'category' => 'ordenes',
                 'description' => 'Alertas cuando se consolida una orden'
             ],
+            [
+                'key' => 'task_moved',
+                'name' => 'Movimiento de tareas',
+                'category' => 'kanban',
+                'description' => 'Notificaciones cuando se mueven tareas en el tablero Kanban'
+            ],
         ];
 
         foreach ($types as $type) {

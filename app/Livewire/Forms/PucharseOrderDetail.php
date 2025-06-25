@@ -36,6 +36,10 @@ class PucharseOrderDetail extends Component
     public $sortField = 'material_id';
     public $sortDirection = 'asc';
 
+    // Variables para sobre costo y comentario
+    public $overCostData = [];
+    public $totalOverCost = 0;
+
     public $newFile;
     public $newComment = '';
     public $fileSelected = false;
@@ -46,6 +50,7 @@ class PucharseOrderDetail extends Component
     public $fileUploadApproved = false;
     public $commentAttachmentApproved = false;
     public $approvedCommentData = null;
+    public $real_lead_time = 0;
 
     protected AuthorizationService $authorizationService;
 
@@ -60,6 +65,24 @@ class PucharseOrderDetail extends Component
         $this->purchaseOrder = PurchaseOrder::with(['products', 'actualHub', 'shippingDocuments'])->findOrFail($id);
         $this->purchaseOrderDetails = PurchaseOrder::findOrFail($id);
 
+        // Calcular lead time requerido
+        $expectedLeadTime = 0;
+        if ($this->purchaseOrder->date_required_in_destination && $this->purchaseOrder->date_planned_pickup) {
+            $dateRequired = \Carbon\Carbon::parse($this->purchaseOrder->date_required_in_destination);
+            $datePlannedPickup = \Carbon\Carbon::parse($this->purchaseOrder->date_planned_pickup);
+            $expectedLeadTime = $datePlannedPickup->diffInDays($dateRequired);
+        }
+        $this->purchaseOrder->expected_lead_time = $expectedLeadTime;
+
+        // Calcular lead time en tránsito
+        $realLeadTime = 0;
+        if ($this->purchaseOrder->date_eta && $this->purchaseOrder->date_actual_pickup) {
+            $etaDate = \Carbon\Carbon::parse($this->purchaseOrder->date_eta);
+            $actualPickupDate = \Carbon\Carbon::parse($this->purchaseOrder->date_actual_pickup);
+            $realLeadTime = $actualPickupDate->diffInDays($etaDate);
+        }
+        $this->purchaseOrder->real_lead_time = $realLeadTime;
+
         // Cargar el shipping document asociado (si existe)
         $this->shippingDocument = $this->purchaseOrder->shippingDocuments->first();
 
@@ -73,6 +96,9 @@ class PucharseOrderDetail extends Component
 
         // Cargar los totales
         $this->loadTotals();
+
+        // Cargar los datos de sobre costo
+        $this->loadOverCostData();
 
         // If this purchase order has a tracking ID, load the tracking data
         if ($this->purchaseOrder->tracking_id) {
@@ -140,6 +166,78 @@ class PucharseOrderDetail extends Component
 
         // Calcular el total final (neto + adicionales)
         $this->total = $this->net_total + $this->additional_cost + $this->insurance_cost;
+    }
+
+    protected function loadOverCostData()
+    {
+        try {
+            $this->overCostData = [];
+            $this->totalOverCost = 0;
+
+            // Obtener los IDs de las órdenes de compra que necesitamos consultar
+            $purchaseOrderIds = [];
+
+            // Si hay shipping document, obtener todas las POs asociadas
+            if ($this->shippingDocument) {
+                $purchaseOrderIds = $this->shippingDocument->purchaseOrders->pluck('id')->toArray();
+            } else {
+                // Si no hay shipping document, usar solo la PO actual
+                $purchaseOrderIds = [$this->purchaseOrder->id];
+            }
+
+            // Ejecutar la query optimizada para obtener datos de sobre costo
+            $overCostResults = DB::select("
+                SELECT
+                    poc.id,
+                    po.order_number AS order_number,
+                    'Sobre costo' AS comment,
+                    (regexp_match(poc.comment,
+                        'Sobre costo[–-]?([0-9]+(?:\.[0-9]+)?)\s*usd',
+                        'i'
+                    ))[1]::numeric AS amount_usd,
+                    (regexp_match(poc.comment,
+                        'usd\s*[–-]?\s*(.*)$',
+                        'i'
+                    ))[1] AS comment_final
+                FROM purchase_order_comments poc
+                JOIN purchase_orders po
+                    ON poc.purchase_order_id = po.id
+                WHERE poc.comment ILIKE '%Sobre costo%'
+                    AND po.id = ANY(?)
+            ", ['{' . implode(',', $purchaseOrderIds) . '}']);
+
+            // Procesar los resultados
+            foreach ($overCostResults as $result) {
+                $this->overCostData[] = [
+                    'id' => $result->id,
+                    'order_number' => $result->order_number,
+                    'comment' => $result->comment,
+                    'amount_usd' => $result->amount_usd ? floatval($result->amount_usd) : 0,
+                    'comment_final' => $result->comment_final ?? ''
+                ];
+
+                // Acumular el total
+                if ($result->amount_usd) {
+                    $this->totalOverCost += floatval($result->amount_usd);
+                }
+            }
+
+            Log::info('Datos de sobre costo cargados', [
+                'purchase_order_ids' => $purchaseOrderIds,
+                'results_count' => count($this->overCostData),
+                'total_over_cost' => $this->totalOverCost
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al cargar datos de sobre costo', [
+                'error' => $e->getMessage(),
+                'purchase_order_id' => $this->purchaseOrder->id ?? null
+            ]);
+
+            // Inicializar con valores por defecto en caso de error
+            $this->overCostData = [];
+            $this->totalOverCost = 0;
+        }
     }
 
     public function sortBy($field)
@@ -711,6 +809,9 @@ class PucharseOrderDetail extends Component
             // Reload comments to show the new ones
             $this->loadCommentsAndAttachments();
 
+            // Reload over cost data in case the new comment contains over cost information
+            $this->loadOverCostData();
+
         } catch (\Exception $e) {
             \Log::error("Error setting comments: " . $e->getMessage(), [
                 'error' => $e->getMessage(),
@@ -750,6 +851,7 @@ class PucharseOrderDetail extends Component
 
             session()->flash('message', 'Verificación de comentarios completada. Revise los logs para más detalles.');
             $this->loadCommentsAndAttachments(); // Recargar después de la verificación
+            $this->loadOverCostData(); // Recargar datos de sobre costo
 
         } catch (\Exception $e) {
             \Log::error('Error en debugComments', [
@@ -821,6 +923,7 @@ class PucharseOrderDetail extends Component
                             // Notificar éxito
                             session()->flash('message', 'Archivo adjuntado manualmente durante diagnóstico');
                             $this->loadCommentsAndAttachments();
+                            $this->loadOverCostData(); // Recargar datos de sobre costo
                         } catch (\Exception $e) {
                             \Log::error('Error al adjuntar archivo manualmente durante diagnóstico', [
                                 'error' => $e->getMessage(),

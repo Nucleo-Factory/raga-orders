@@ -19,25 +19,44 @@ class HubForm extends Component {
 
     public $isEdit = false;
 
-    public function mount($id = null) {
-        if ($id) {
-            $this->isEdit = true;
-            $this->hub = Hub::find($id);
-            $this->code = $this->hub->code;
-            $this->name = $this->hub->name;
-            $this->country = $this->hub->country;
-            $this->documentary_cut = $this->hub->documentary_cut;
-            $this->zarpe = $this->hub->zarpe;
+    protected $rules = [
+        'name' => 'required|string|max:255',
+        'code' => 'required|string|max:255',
+        'country' => 'required|string|max:255',
+        'documentary_cut' => 'required|string|max:255',
+        'zarpe' => 'required|string|max:255',
+    ];
+
+    public function mount($hub = null) {
+        $this->isEdit = $hub !== null;
+
+        if ($this->isEdit) {
+            $this->hub = $hub;
+            $this->code = $hub->code;
+            $this->name = $hub->name;
+            $this->country = $hub->country;
+            $this->documentary_cut = $hub->documentary_cut;
+            $this->zarpe = $hub->zarpe;
+
+            if (!$this->title) {
+                $this->title = 'Editar Hub';
+                $this->subtitle = 'Edite los datos del hub';
+            }
+        } else {
+            if (!$this->title) {
+                $this->title = 'Nuevo Hub';
+                $this->subtitle = 'Ingrese los datos para crear un nuevo hub';
+            }
         }
     }
 
     public function saveHub() {
         $this->validate([
-            'name' => 'required',
-            'code' => 'required',
-            'country' => 'required',
-            'documentary_cut' => 'required',
-            'zarpe' => 'required',
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
+            'documentary_cut' => 'required|string|max:255',
+            'zarpe' => 'required|string|max:255',
         ], [
             'name.required' => 'El nombre es requerido',
             'code.required' => 'El código es requerido',
@@ -46,18 +65,33 @@ class HubForm extends Component {
             'zarpe.required' => 'El zarpe es requerido',
         ]);
 
-        if ($this->hub) {
-            $this->hub->update($this->all());
-        } else {
-            $this->hub = Hub::create([
-                'name' => $this->name,
-                'code' => $this->code,
-                'country' => $this->country,
-                'documentary_cut' => $this->documentary_cut,
-                'zarpe' => $this->zarpe,
-            ]);
-        }
+        $hubData = [
+            'name' => $this->name,
+            'code' => $this->code,
+            'country' => $this->country,
+            'documentary_cut' => $this->documentary_cut,
+            'zarpe' => $this->zarpe,
+        ];
 
+        if ($this->isEdit) {
+            $this->hub->update($hubData);
+            session()->flash('message', 'Hub actualizado correctamente.');
+            $this->dispatch('open-modal', 'modal-hub-updated');
+        } else {
+            $hubData['company_id'] = auth()->user()->company_id;
+            $this->hub = Hub::create($hubData);
+            session()->flash('message', 'Hub creado correctamente.');
+            $this->dispatch('open-modal', 'modal-hub-created');
+        }
+    }
+
+    public function closeModal() {
+        $this->dispatch('close-modal', 'modal-hub-created');
+        $this->dispatch('close-modal', 'modal-hub-updated');
+        return redirect()->route('hub.index');
+    }
+
+    public function backToList() {
         return redirect()->route('hub.index');
     }
 
