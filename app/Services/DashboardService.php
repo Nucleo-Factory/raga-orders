@@ -460,7 +460,7 @@ class DashboardService
         }
     }
 
-    /**
+        /**
      * Get delay reasons data - Using user's exact corrected query
      *
      * @param array $filters
@@ -473,53 +473,71 @@ class DashboardService
 
             $companyId = auth()->user()->company_id ?? null;
 
-            // Using the user's exact CTE query structure
-            $query = DB::select("
-                WITH delayed_pos AS (
-                    -- 1) Filtramos sólo POs atrasadas
-                    SELECT id
-                    FROM purchase_orders
-                    WHERE date_ata IS NOT NULL
-                      AND date_eta IS NOT NULL
-                      AND date_ata > date_eta
-                      " . ($companyId ? "AND company_id = $companyId" : "") . "
-                ),
-                reasons AS (
-                    -- 2) Extraemos de los comentarios sólo los de esas POs y clasificamos según palabra clave
-                    SELECT
-                      poc.purchase_order_id,
-                      CASE
-                        WHEN poc.comment ILIKE '%transporte%'       THEN 'Problemas de transporte'
-                        WHEN poc.comment ILIKE '%error documental%'  THEN 'Error documental'
-                        WHEN poc.comment ILIKE '%clima%'             THEN 'Clima adverso'
-                        WHEN poc.comment ILIKE '%aduana%'            THEN 'Retraso en aduana'
-                        WHEN poc.comment ILIKE '%despacho%'          THEN 'Demora en despacho'
-                        ELSE 'Otro motivo'
-                      END AS motivo
-                    FROM purchase_order_comments poc
-                    JOIN delayed_pos dp ON poc.purchase_order_id = dp.id
-                    WHERE poc.comment IS NOT NULL
-                )
-                -- 3) Agrupamos y calculamos totales y % sobre el total de POs atrasadas con comentario
-                SELECT
-                  motivo AS name,
-                  COUNT(*) AS total_comentarios,
-                  ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS percentage
-                FROM reasons
-                GROUP BY motivo
-                ORDER BY percentage DESC
-            ");
+            // Using the user's exact regex query structure
+            $queryBuilder = DB::table('purchase_order_comments as poc')
+                ->join('purchase_orders as po', 'poc.purchase_order_id', '=', 'po.id')
+                ->selectRaw("
+                    po.order_number AS order_number,
+                    regexp_replace(
+                        poc.comment,
+                        '(?i)^motivo de atraso[[:space:]]*[-–—][[:space:]]*(.+)$',
+                        '\\1'
+                    ) AS motivo
+                ")
+                ->whereRaw("poc.comment ~* '^motivo de atraso[[:space:]]*[-–—]'");
 
-            $result = collect($query)->map(function ($item) {
+            // Apply company filter
+            if ($companyId) {
+                $queryBuilder->where('po.company_id', $companyId);
+            }
+
+            // Apply additional filters similar to getBaseQuery
+            if (!empty($filters['date_from'])) {
+                $queryBuilder->where('po.order_date', '>=', $filters['date_from']);
+            }
+
+            if (!empty($filters['date_to'])) {
+                $queryBuilder->where('po.order_date', '<=', $filters['date_to']);
+            }
+
+            if (!empty($filters['vendor_id'])) {
+                $queryBuilder->where('po.vendor_id', $filters['vendor_id']);
+            }
+
+            if (!empty($filters['hub_id'])) {
+                $queryBuilder->where(function ($q) use ($filters) {
+                    $q->where('po.planned_hub_id', $filters['hub_id'])
+                      ->orWhere('po.actual_hub_id', $filters['hub_id']);
+                });
+            }
+
+            if (!empty($filters['status'])) {
+                $queryBuilder->where('po.status', $filters['status']);
+            }
+
+            $results = $queryBuilder->get();
+
+            Log::info('Raw delay reasons retrieved', [
+                'count' => $results->count(),
+                'sample' => $results->take(3)->toArray()
+            ]);
+
+            // Group by motivo and calculate percentages
+            $grouped = $results->groupBy('motivo');
+            $total = $results->count();
+
+            $result = $grouped->map(function ($items, $motivo) use ($total) {
+                $count = $items->count();
                 return [
-                    'name' => $item->name,
-                    'value' => (int) $item->total_comentarios,
-                    'percentage' => (float) $item->percentage,
+                    'name' => trim($motivo) ?: 'Sin motivo especificado',
+                    'value' => $count,
+                    'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
                 ];
-            });
+            })->sortByDesc('percentage')->values();
 
-            Log::info('Delay reasons retrieved using real data', [
-                'count' => $result->count(),
+            Log::info('Delay reasons processed and grouped', [
+                'total_comments' => $total,
+                'unique_reasons' => $result->count(),
                 'data' => $result->toArray()
             ]);
 
