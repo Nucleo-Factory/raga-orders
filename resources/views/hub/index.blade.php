@@ -14,16 +14,12 @@
             </x-slot:content>
         </x-view-title>
 
-        <a href="{{ route('hub.create') }}" class="block w-fit rounded-[0.375rem] bg-[#0F172A] px-4 py-2 text-white">
-            Nuevo Hub
+        <a href="{{ route('hub.create') }}">
+            <x-primary-button>
+                Nuevo Hub
+            </x-primary-button>
         </a>
     </div>
-
-    @if (session('message'))
-        <div class="px-4 py-2 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
-            {{ session('message') }}
-        </div>
-    @endif
 
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'kanban' }" class="mb-6">

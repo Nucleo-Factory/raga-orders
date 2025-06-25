@@ -182,8 +182,15 @@ class RoleEdit extends Component {
         $this->role->update(['name' => $this->name]);
         $this->role->syncPermissions($this->selectedPermissions);
 
-        session()->flash('message', 'Rol actualizado exitosamente.');
+        $this->dispatch('open-modal', 'modal-role-updated');
     }
+
+    public function closeModal()
+    {
+        $this->dispatch('close-modal', 'modal-role-updated');
+        return redirect()->route('settings.roles');
+    }
+
 
     public function render() {
         return view('livewire.settings.role-edit')

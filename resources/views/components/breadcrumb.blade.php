@@ -1,7 +1,7 @@
 @props(['segments' => []])
 
 <nav class="flex items-center p-3 text-gray-500 rounded !font-inter">
-    <a href="{{ url('/') }}" class="hover:text-gray-700">
+    <a href="{{ url('/dashboard') }}" class="hover:text-gray-700">
         Inicio
     </a>
 

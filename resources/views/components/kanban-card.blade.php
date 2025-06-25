@@ -19,20 +19,41 @@
     $totalWeight = $purchaseOrder->total_weight;
     $dangerLevel = $purchaseOrder->material_type;
     $materialType = $purchaseOrder->material_type;
-    $expectedLeadTime = App\Models\Hub::find($hubId)->operation_days ?? 0;
+
+    // Calcular expectedLeadTime = date_required_in_destination - date_planned_pickup (en días)
+    $expectedLeadTime = 0;
+    if ($purchaseOrder->date_required_in_destination && $purchaseOrder->date_planned_pickup) {
+        $dateRequired = \Carbon\Carbon::parse($purchaseOrder->date_required_in_destination);
+        $datePlannedPickup = \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup);
+        $expectedLeadTime = $datePlannedPickup->diffInDays($dateRequired);
+    }
+
     $eta = \Carbon\Carbon::parse($purchaseOrder->date_eta)->format('d/m/Y');
     $ata = \Carbon\Carbon::parse($purchaseOrder->date_ata)->format('d/m/Y');
 
-    // Calcular realLeadTime = expectedLeadTime + días de atraso (ATA - ETA)
-    // Si ATA es mayor que ETA, hay atraso (valor positivo)
-    // Si ATA es menor que ETA, se adelantó (valor negativo)
+    // Calcular realLeadTime (Lead en transito) = ETA - pickup real (en días)
+    $realLeadTime = 0;
+    if ($purchaseOrder->date_eta && $purchaseOrder->date_actual_pickup) {
+        $etaDate = \Carbon\Carbon::parse($purchaseOrder->date_eta);
+        $actualPickupDate = \Carbon\Carbon::parse($purchaseOrder->date_actual_pickup);
+        $realLeadTime = $actualPickupDate->diffInDays($etaDate);
+    }
+
+    // Calcular días de atraso (ATA - ETA) para referencia si se necesita
     $delayDays = 0;
     if ($purchaseOrder->date_eta && $purchaseOrder->date_ata) {
         $etaDate = \Carbon\Carbon::parse($purchaseOrder->date_eta);
         $ataDate = \Carbon\Carbon::parse($purchaseOrder->date_ata);
         $delayDays = $etaDate->diffInDays($ataDate, false); // ATA - ETA (invertir parámetros)
     }
-    $realLeadTime = $expectedLeadTime + $delayDays;
+
+    // Calcular actualLeadTime (Lead time real) = ATA - fecha pick planificada (en días)
+    $actualLeadTime = 0;
+    if ($purchaseOrder->date_ata && $purchaseOrder->date_planned_pickup) {
+        $ataDate = \Carbon\Carbon::parse($purchaseOrder->date_ata);
+        $plannedPickupDate = \Carbon\Carbon::parse($purchaseOrder->date_planned_pickup);
+        $actualLeadTime = $plannedPickupDate->diffInDays($ataDate);
+    }
 
 @endphp
 
@@ -143,8 +164,8 @@
             </svg>
 
             <div class="space-y-1">
-                <p class="whitespace-nowrap">Lead time esperado: <span>{{ $expectedLeadTime }}</span></p>
-                <p class="whitespace-nowrap">Lead time real: <span>{{ $realLeadTime }}</span></p>
+                <p class="whitespace-nowrap">Lead requerido: <span>{{ $expectedLeadTime }}</span></p>
+                <p class="whitespace-nowrap">Lead en transito: <span>{{ $realLeadTime }}</span></p>
             </div>
         </div>
 

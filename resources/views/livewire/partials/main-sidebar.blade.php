@@ -238,6 +238,13 @@
                         </li>
 
                         <li>
+                            <x-sidebar-dropdown-item href="{{ route('hub.index') }}"
+                                :active="request()->routeIs('hub.index')">
+                                Hubs
+                            </x-sidebar-dropdown-item>
+                        </li>
+
+                        <li>
                             <x-sidebar-dropdown-item href="{{ route('settings.users') }}" :active="request()->routeIs('settings.users')">
                                 Usuarios
                             </x-sidebar-dropdown-item>

@@ -15,170 +15,25 @@
             </div>
         @endif
 
-        <!-- Tipo de notificaciones -->
+        <!-- Notificaciones activas -->
         <div class="mb-8">
-            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Tipo de notificaciones</h4>
+            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Notificaciones activas</h4>
 
             <div class="space-y-6">
-                <div class="flex items-start gap-4">
-                    <button type="button" wire:click="togglePreference('mobile_notifications')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['mobile_notifications']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['mobile_notifications']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
+                @foreach($activeNotifications as $key => $notification)
+                    @if(isset($preferences[$key]))
+                        <div class="flex items-start gap-4">
+                            <button type="button" wire:click="togglePreference('{{ $key }}')" class="toggle-button">
+                                <div class="w-12 h-6 rounded-full transition-all {{ $preferences[$key]['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
+                                    <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences[$key]['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
+                                </div>
+                            </button>
+                            <div>
+                                <p class="text-gray-800">{{ $notification['name'] }}: {{ $notification['description'] }}</p>
+                            </div>
                         </div>
-                    </button>
-                    <div>
-                        <p class="text-gray-800">Notificaciones móviles: Activa/desactiva alertas en la app móvil sobre actualizaciones importantes (como cambios en órdenes o estados de carga).</p>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-4">
-                    <button type="button" wire:click="togglePreference('email_notifications')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['email_notifications']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['email_notifications']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <div>
-                        <p class="text-gray-800">Notificaciones por correo electrónico: Selecciona qué eventos deben enviarse por email (órdenes confirmadas, entregas, problemas detectados)</p>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-4">
-                    <button type="button" wire:click="togglePreference('platform_notifications')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['platform_notifications']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['platform_notifications']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <div>
-                        <p class="text-gray-800">Notificaciones en la plataforma (desktop): Activa pop-ups o banners dentro del dashboard para tareas urgentes o recordatorios.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Frecuencia -->
-        <div class="mb-8">
-            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Frecuencia</h4>
-
-            <div class="space-y-6">
-                <div class="flex items-center">
-                    <button type="button" wire:click="toggleFrequency('immediate')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $frequencies['immediate'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $frequencies['immediate'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Inmediato: Notificaciones enviadas al instante.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="toggleFrequency('daily')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $frequencies['daily'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $frequencies['daily'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Diario: Resumen de actividad al final del día.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="toggleFrequency('weekly')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $frequencies['weekly'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $frequencies['weekly'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Semanal: Resumen consolidado de la semana.</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cargas y envíos -->
-        <div class="mb-8">
-            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Cargas y envíos</h4>
-
-            <div class="space-y-6">
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('status_update')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['status_update']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['status_update']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Actualización de estado.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('issues_detected')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['issues_detected']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['issues_detected']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Problemas detectados.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('successful_deliveries')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['successful_deliveries']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['successful_deliveries']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Entregas exitosas.</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recordatorios -->
-        <div class="mb-8">
-            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Recordatorios:</h4>
-
-            <div class="space-y-6">
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('pending_tasks')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['pending_tasks']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['pending_tasks']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Tareas pendientes.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('upcoming_deadlines')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['upcoming_deadlines']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['upcoming_deadlines']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Vencimientos próximos</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('user_customization')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['user_customization']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['user_customization']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Personalización por usuario:</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Órdenes -->
-        <div class="mb-8">
-            <h4 class="text-lg font-bold text-[#7288FF] mb-4">Órdenes:</h4>
-
-            <div class="space-y-6">
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('order_creation_changes')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['order_creation_changes']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['order_creation_changes']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Creación o cambios en PO'S.</label>
-                </div>
-
-                <div class="flex items-center">
-                    <button type="button" wire:click="togglePreference('order_consolidation')" class="toggle-button">
-                        <div class="w-12 h-6 rounded-full transition-all {{ $preferences['order_consolidation']['enabled'] ?? false ? 'bg-[#7288FF]' : 'bg-gray-300' }} relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-all {{ $preferences['order_consolidation']['enabled'] ?? false ? 'right-1' : 'left-1' }}"></div>
-                        </div>
-                    </button>
-                    <label class="ml-2">Al consolidar una orden.</label>
-                </div>
+                    @endif
+                @endforeach
             </div>
         </div>
 
