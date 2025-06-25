@@ -256,17 +256,18 @@ class DashboardService
 
             $companyId = auth()->user()->company_id ?? null;
 
-            // Using the user's exact query structure
+            // Using the new query structure with LEFT JOIN and COALESCE for "Sin Hub"
             $query = DB::table('purchase_orders as po')
-                ->join('hubs as h', 'po.actual_hub_id', '=', 'h.id')
+                ->leftJoin('hubs as h', 'po.actual_hub_id', '=', 'h.id')
                 ->selectRaw('
-                    h.code AS hub,
+                    COALESCE(h.code, \'Sin Hub\') AS hub,
                     COUNT(po.id) AS total_pos,
                     100.0 * COUNT(po.id) / (SELECT COUNT(*) FROM purchase_orders' .
                     ($companyId ? ' WHERE company_id = ' . $companyId : '') .
                     ') AS pct_total
                 ')
-                ->groupBy('h.code');
+                ->groupBy(DB::raw('COALESCE(h.code, \'Sin Hub\')'))
+                ->orderBy('total_pos', 'desc');
 
             if ($companyId) {
                 $query->where('po.company_id', $companyId);
@@ -281,7 +282,7 @@ class DashboardService
                     ];
                 });
 
-            Log::info('Hub distribution retrieved', ['count' => $result->count()]);
+            Log::info('Hub distribution retrieved with new query', ['count' => $result->count()]);
             return $result;
         } catch (\Exception $e) {
             Log::error('Error in getHubDistribution', [
