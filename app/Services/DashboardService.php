@@ -460,8 +460,8 @@ class DashboardService
         }
     }
 
-        /**
-     * Get delay reasons data - Using user's exact corrected query
+            /**
+     * Get delay reasons data - Using user's exact corrected query with CTE
      *
      * @param array $filters
      * @return Collection
@@ -469,82 +469,140 @@ class DashboardService
     private function getDelayReasons(array $filters): Collection
     {
         try {
-            Log::info('Getting delay reasons using real data...');
+            Log::info('Getting delay reasons using CTE query...');
 
             $companyId = auth()->user()->company_id ?? null;
 
-            // Using the user's exact regex query structure
-            $queryBuilder = DB::table('purchase_order_comments as poc')
-                ->join('purchase_orders as po', 'poc.purchase_order_id', '=', 'po.id')
-                ->selectRaw("
-                    po.order_number AS order_number,
-                    regexp_replace(
-                        poc.comment,
-                        '(?i)^motivo de atraso[[:space:]]*[-–—][[:space:]]*(.+)$',
-                        '\\1'
-                    ) AS motivo
-                ")
-                ->whereRaw("poc.comment ~* '^motivo de atraso[[:space:]]*[-–—]'");
+            // Build where conditions for filters
+            $whereConditions = [];
+            $bindings = [];
 
-            // Apply company filter
             if ($companyId) {
-                $queryBuilder->where('po.company_id', $companyId);
+                $whereConditions[] = "po.company_id = ?";
+                $bindings[] = $companyId;
             }
 
-            // Apply additional filters similar to getBaseQuery
             if (!empty($filters['date_from'])) {
-                $queryBuilder->where('po.order_date', '>=', $filters['date_from']);
+                $whereConditions[] = "po.order_date >= ?";
+                $bindings[] = $filters['date_from'];
             }
 
             if (!empty($filters['date_to'])) {
-                $queryBuilder->where('po.order_date', '<=', $filters['date_to']);
+                $whereConditions[] = "po.order_date <= ?";
+                $bindings[] = $filters['date_to'];
             }
 
             if (!empty($filters['vendor_id'])) {
-                $queryBuilder->where('po.vendor_id', $filters['vendor_id']);
+                $whereConditions[] = "po.vendor_id = ?";
+                $bindings[] = $filters['vendor_id'];
             }
 
             if (!empty($filters['hub_id'])) {
-                $queryBuilder->where(function ($q) use ($filters) {
-                    $q->where('po.planned_hub_id', $filters['hub_id'])
-                      ->orWhere('po.actual_hub_id', $filters['hub_id']);
-                });
+                $whereConditions[] = "(po.planned_hub_id = ? OR po.actual_hub_id = ?)";
+                $bindings[] = $filters['hub_id'];
+                $bindings[] = $filters['hub_id'];
             }
 
             if (!empty($filters['status'])) {
-                $queryBuilder->where('po.status', $filters['status']);
+                $whereConditions[] = "po.status = ?";
+                $bindings[] = $filters['status'];
             }
 
-            $results = $queryBuilder->get();
+            // Build the WHERE clause
+            $whereClause = '';
+            if (!empty($whereConditions)) {
+                $whereClause = "WHERE " . implode(' AND ', $whereConditions);
+            }
 
-            Log::info('Raw delay reasons retrieved', [
-                'count' => $results->count(),
-                'sample' => $results->take(3)->toArray()
+            // Using the user's exact CTE query structure
+            $query = "
+                WITH
+                  total AS (
+                    SELECT COUNT(*) AS total_pos
+                    FROM purchase_orders po
+                    $whereClause
+                  ),
+                  reasons AS (
+                    -- extrae motivo por PO
+                    SELECT DISTINCT
+                      poc.purchase_order_id,
+                      regexp_replace(
+                        poc.comment,
+                        '(?i)^motivo de atraso\\s*[-–—]\\s*(.*)$',
+                        '\\1'
+                      ) AS motivo
+                    FROM purchase_order_comments poc
+                    JOIN purchase_orders po ON poc.purchase_order_id = po.id
+                    WHERE poc.comment ~* '^motivo de atraso\\s*[-–—]'
+                    " . ($whereClause ? "AND " . str_replace('po.', 'po.', implode(' AND ', $whereConditions)) : "") . "
+                  ),
+                  counts AS (
+                    -- cuenta cuántas POs hay de cada motivo
+                    SELECT motivo, COUNT(*) AS cnt
+                    FROM reasons
+                    GROUP BY motivo
+                  ),
+                  sum_reasons AS (
+                    -- suma de todas las POs que tienen algún motivo
+                    SELECT SUM(cnt) AS sum_cnt
+                    FROM counts
+                  )
+
+                -- 1) motivos existentes
+                SELECT
+                  c.motivo,
+                  c.cnt                                    AS total,
+                  ROUND(100.0 * c.cnt / t.total_pos, 1)    AS pct
+                FROM counts c
+                CROSS JOIN total t
+
+                UNION ALL
+
+                -- 2) fila \"Sin atraso\" con el resto
+                SELECT
+                  'Sin atraso'                            AS motivo,
+                  (t.total_pos - COALESCE(sr.sum_cnt, 0)) AS total,
+                  ROUND(
+                    100.0 * (t.total_pos - COALESCE(sr.sum_cnt, 0)) / t.total_pos,
+                    1
+                  )                                       AS pct
+                FROM total t
+                CROSS JOIN sum_reasons sr
+
+                ORDER BY pct DESC
+            ";
+
+            Log::info('Executing delay reasons CTE query', [
+                'has_filters' => !empty($whereConditions),
+                'bindings_count' => count($bindings)
             ]);
 
-            // Group by motivo and calculate percentages
-            $grouped = $results->groupBy('motivo');
-            $total = $results->count();
+            $results = DB::select($query, array_merge($bindings, $bindings)); // Duplicate bindings for the reasons CTE
 
-            $result = $grouped->map(function ($items, $motivo) use ($total) {
-                $count = $items->count();
+            Log::info('Raw delay reasons retrieved', [
+                'count' => count($results),
+                'sample' => array_slice($results, 0, 3)
+            ]);
+
+            $result = collect($results)->map(function ($item) {
                 return [
-                    'name' => trim($motivo) ?: 'Sin motivo especificado',
-                    'value' => $count,
-                    'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
+                    'name' => trim($item->motivo) ?: 'Sin motivo especificado',
+                    'value' => (int) $item->total,
+                    'percentage' => (float) $item->pct,
                 ];
-            })->sortByDesc('percentage')->values();
+            });
 
-            Log::info('Delay reasons processed and grouped', [
-                'total_comments' => $total,
+            Log::info('Delay reasons processed', [
                 'unique_reasons' => $result->count(),
                 'data' => $result->toArray()
             ]);
 
-            // Si no hay datos, devolver colección vacía
+            // Si no hay datos, devolver colección con solo "Sin atraso"
             if ($result->isEmpty()) {
-                Log::info('No delay reasons found, returning empty collection');
-                return collect([]);
+                Log::info('No delay reasons found, returning default data');
+                return collect([
+                    ['name' => 'Sin atraso', 'value' => 0, 'percentage' => 100.0]
+                ]);
             }
 
             return $result;
@@ -557,11 +615,7 @@ class DashboardService
             // En caso de error, devolver datos mock como fallback
             Log::info('Falling back to mock data due to error');
             return collect([
-                ['name' => 'Problemas de transporte', 'value' => 0, 'percentage' => 0],
-                ['name' => 'Error documental', 'value' => 0, 'percentage' => 0],
-                ['name' => 'Clima adverso', 'value' => 0, 'percentage' => 0],
-                ['name' => 'Retraso en aduana', 'value' => 0, 'percentage' => 0],
-                ['name' => 'Demora en despacho', 'value' => 0, 'percentage' => 0],
+                ['name' => 'Sin atraso', 'value' => 0, 'percentage' => 100.0],
             ]);
         }
     }
