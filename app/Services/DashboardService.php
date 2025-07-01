@@ -341,16 +341,38 @@ class DashboardService
                 $query->where('vendor_id', $filters['vendor_id']);
             }
 
+            // Handle multiple hub_id values in getDeliveryStatus
             if (!empty($filters['hub_id'])) {
-                if ($filters['hub_id'] == 0) {
-                    // Filtrar por "Sin Hub" - registros donde ambos hubs son NULL
-                    $query->whereNull('planned_hub_id')
-                          ->whereNull('actual_hub_id');
-                } else {
-                    // Filtrar por hub específico
-                    $query->where(function ($q) use ($filters) {
-                        $q->where('planned_hub_id', $filters['hub_id'])
-                          ->orWhere('actual_hub_id', $filters['hub_id']);
+                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
+                $hubIds = array_filter($hubIds, function($value) {
+                    return $value !== null && $value !== '';
+                });
+
+                if (!empty($hubIds)) {
+                    $query->where(function ($q) use ($hubIds) {
+                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
+                        $nonZeroHubIds = array_filter($hubIds, function($id) {
+                            return $id != 0;
+                        });
+
+                        if ($hasZero) {
+                            $q->where(function ($subQ) {
+                                $subQ->whereNull('planned_hub_id')
+                                     ->whereNull('actual_hub_id');
+                            });
+                        }
+
+                        if (!empty($nonZeroHubIds)) {
+                            if ($hasZero) {
+                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
+                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
+                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                                });
+                            } else {
+                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
+                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                            }
+                        }
                     });
                 }
             }
@@ -431,16 +453,38 @@ class DashboardService
                 $query->where('vendor_id', $filters['vendor_id']);
             }
 
+            // Handle multiple hub_id values in getTransportType
             if (!empty($filters['hub_id'])) {
-                if ($filters['hub_id'] == 0) {
-                    // Filtrar por "Sin Hub" - registros donde ambos hubs son NULL
-                    $query->whereNull('planned_hub_id')
-                          ->whereNull('actual_hub_id');
-                } else {
-                    // Filtrar por hub específico
-                    $query->where(function ($q) use ($filters) {
-                        $q->where('planned_hub_id', $filters['hub_id'])
-                          ->orWhere('actual_hub_id', $filters['hub_id']);
+                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
+                $hubIds = array_filter($hubIds, function($value) {
+                    return $value !== null && $value !== '';
+                });
+
+                if (!empty($hubIds)) {
+                    $query->where(function ($q) use ($hubIds) {
+                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
+                        $nonZeroHubIds = array_filter($hubIds, function($id) {
+                            return $id != 0;
+                        });
+
+                        if ($hasZero) {
+                            $q->where(function ($subQ) {
+                                $subQ->whereNull('planned_hub_id')
+                                     ->whereNull('actual_hub_id');
+                            });
+                        }
+
+                        if (!empty($nonZeroHubIds)) {
+                            if ($hasZero) {
+                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
+                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
+                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                                });
+                            } else {
+                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
+                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                            }
+                        }
                     });
                 }
             }
@@ -511,15 +555,34 @@ class DashboardService
                 $bindings[] = $filters['vendor_id'];
             }
 
+            // Handle multiple hub_id values in getDelayReasons
             if (!empty($filters['hub_id'])) {
-                if ($filters['hub_id'] == 0) {
-                    // Filtrar por "Sin Hub" - registros donde ambos hubs son NULL
-                    $whereConditions[] = "po.planned_hub_id IS NULL AND po.actual_hub_id IS NULL";
-                } else {
-                    // Filtrar por hub específico
-                    $whereConditions[] = "(po.planned_hub_id = ? OR po.actual_hub_id = ?)";
-                    $bindings[] = $filters['hub_id'];
-                    $bindings[] = $filters['hub_id'];
+                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
+                $hubIds = array_filter($hubIds, function($value) {
+                    return $value !== null && $value !== '';
+                });
+
+                if (!empty($hubIds)) {
+                    $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
+                    $nonZeroHubIds = array_filter($hubIds, function($id) {
+                        return $id != 0;
+                    });
+
+                    $hubConditions = [];
+
+                    if ($hasZero) {
+                        $hubConditions[] = "(po.planned_hub_id IS NULL AND po.actual_hub_id IS NULL)";
+                    }
+
+                    if (!empty($nonZeroHubIds)) {
+                        $placeholders = str_repeat('?,', count($nonZeroHubIds) - 1) . '?';
+                        $hubConditions[] = "(po.planned_hub_id IN ($placeholders) OR po.actual_hub_id IN ($placeholders))";
+                        $bindings = array_merge($bindings, $nonZeroHubIds, $nonZeroHubIds);
+                    }
+
+                    if (!empty($hubConditions)) {
+                        $whereConditions[] = "(" . implode(' OR ', $hubConditions) . ")";
+                    }
                 }
             }
 
@@ -744,19 +807,40 @@ class DashboardService
                 Log::info('Applied vendor filter', ['vendor_id' => $filters['vendor_id']]);
             }
 
+            // Handle multiple hub_id values in getDetailTableData
             if (!empty($filters['hub_id'])) {
-                if ($filters['hub_id'] == 0) {
-                    // Filtrar por "Sin Hub" - registros donde ambos hubs son NULL
-                    $query->whereNull('po.planned_hub_id')
-                          ->whereNull('po.actual_hub_id');
-                    Log::info('Applied Sin Hub filter');
-                } else {
-                    // Filtrar por hub específico
-                    $query->where(function ($q) use ($filters) {
-                        $q->where('po.planned_hub_id', $filters['hub_id'])
-                          ->orWhere('po.actual_hub_id', $filters['hub_id']);
+                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
+                $hubIds = array_filter($hubIds, function($value) {
+                    return $value !== null && $value !== '';
+                });
+
+                if (!empty($hubIds)) {
+                    $query->where(function ($q) use ($hubIds) {
+                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
+                        $nonZeroHubIds = array_filter($hubIds, function($id) {
+                            return $id != 0;
+                        });
+
+                        if ($hasZero) {
+                            $q->where(function ($subQ) {
+                                $subQ->whereNull('po.planned_hub_id')
+                                     ->whereNull('po.actual_hub_id');
+                            });
+                        }
+
+                        if (!empty($nonZeroHubIds)) {
+                            if ($hasZero) {
+                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
+                                    $subQ->whereIn('po.planned_hub_id', $nonZeroHubIds)
+                                         ->orWhereIn('po.actual_hub_id', $nonZeroHubIds);
+                                });
+                            } else {
+                                $q->whereIn('po.planned_hub_id', $nonZeroHubIds)
+                                  ->orWhereIn('po.actual_hub_id', $nonZeroHubIds);
+                            }
+                        }
                     });
-                    Log::info('Applied specific hub filter', ['hub_id' => $filters['hub_id']]);
+                    Log::info('Applied multiple hub filter', ['hub_ids' => $hubIds]);
                 }
             }
 
@@ -1001,42 +1085,76 @@ class DashboardService
                 $query->where('order_date', '<=', $filters['date_to']);
             }
 
-            // Product filter
+            // Product filter - Updated for multiple values
             if (!empty($filters['product_id'])) {
                 Log::info('Applying product filter', ['product_id' => $filters['product_id']]);
-                $query->whereHas('products', function ($q) use ($filters) {
-                    $q->where('product_id', $filters['product_id']);
-                });
+                $productIds = is_array($filters['product_id']) ? $filters['product_id'] : [$filters['product_id']];
+                $productIds = array_filter($productIds); // Remove empty values
+
+                if (!empty($productIds)) {
+                    $query->whereHas('products', function ($q) use ($productIds) {
+                        $q->whereIn('product_id', $productIds);
+                    });
+                }
             }
 
-            // Material type filter
+            // Material type filter - Updated for multiple values
             if (!empty($filters['material_type'])) {
                 Log::info('Applying material_type filter', ['material_type' => $filters['material_type']]);
-                $materialType = $filters['material_type'];
-                $query->where(function($q) use ($materialType) {
-                    // Buscar en JSON string con diferentes patrones
-                    $q->whereRaw('material_type LIKE ?', ['%"' . $materialType . '"%'])
-                      ->orWhereRaw('material_type = ?', [$materialType])
-                      ->orWhereRaw('material_type = ?', ['"' . $materialType . '"']);
-                });
+                $materialTypes = is_array($filters['material_type']) ? $filters['material_type'] : [$filters['material_type']];
+                $materialTypes = array_filter($materialTypes); // Remove empty values
+
+                if (!empty($materialTypes)) {
+                    $query->where(function($q) use ($materialTypes) {
+                        foreach ($materialTypes as $materialType) {
+                            $q->orWhere(function($subQ) use ($materialType) {
+                                // Buscar en JSON string con diferentes patrones
+                                $subQ->whereRaw('material_type LIKE ?', ['%"' . $materialType . '"%'])
+                                     ->orWhereRaw('material_type = ?', [$materialType])
+                                     ->orWhereRaw('material_type = ?', ['"' . $materialType . '"']);
+                            });
+                        }
+                    });
+                }
             }
 
-            // Hub filter
+            // Hub filter - Updated for multiple values
             if (!empty($filters['hub_id'])) {
                 Log::info('Applying hub filter', ['hub_id' => $filters['hub_id']]);
+                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
+                $hubIds = array_filter($hubIds, function($value) {
+                    return $value !== null && $value !== '';
+                }); // Remove empty values but keep 0
 
-                if ($filters['hub_id'] == 0) {
-                    // Filtrar por "Sin Hub" - registros donde ambos hubs son NULL
-                    $query->whereNull('planned_hub_id')
-                          ->whereNull('actual_hub_id');
-                    Log::info('Applied Sin Hub filter');
-                } else {
-                    // Filtrar por hub específico
-                    $query->where(function ($q) use ($filters) {
-                        $q->where('planned_hub_id', $filters['hub_id'])
-                          ->orWhere('actual_hub_id', $filters['hub_id']);
+                if (!empty($hubIds)) {
+                    $query->where(function ($q) use ($hubIds) {
+                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
+                        $nonZeroHubIds = array_filter($hubIds, function($id) {
+                            return $id != 0;
+                        });
+
+                        if ($hasZero) {
+                            // Incluir registros sin hub
+                            $q->where(function ($subQ) {
+                                $subQ->whereNull('planned_hub_id')
+                                     ->whereNull('actual_hub_id');
+                            });
+                        }
+
+                        if (!empty($nonZeroHubIds)) {
+                            // Incluir registros con hubs específicos
+                            if ($hasZero) {
+                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
+                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
+                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                                });
+                            } else {
+                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
+                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                            }
+                        }
                     });
-                    Log::info('Applied specific hub filter', ['hub_id' => $filters['hub_id']]);
+                    Log::info('Applied multiple hub filter', ['hub_ids' => $hubIds]);
                 }
             }
 
