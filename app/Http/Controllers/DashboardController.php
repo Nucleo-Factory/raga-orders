@@ -99,11 +99,14 @@ class DashboardController extends Controller
             Log::info('AJAX Filters processed', ['filters' => $filters]);
 
             $dashboardData = $this->getDashboardData($filters);
+            $filterOptions = $this->dashboardService->getFilterOptions();
+
             Log::info('AJAX Dashboard data retrieved successfully');
 
             return response()->json([
                 'success' => true,
-                'data' => $dashboardData
+                'data' => $dashboardData,
+                'filterOptions' => $filterOptions
             ]);
         } catch (\Exception $e) {
             Log::error('Error getting dashboard data via AJAX', [
@@ -198,7 +201,7 @@ class DashboardController extends Controller
      */
     private function getFilters(Request $request): array
     {
-        return [
+        $filters = [
             'date_from' => $request->get('date_from'),
             'date_to' => $request->get('date_to'),
             'product_id' => $request->get('product_id'),
@@ -206,7 +209,11 @@ class DashboardController extends Controller
             'hub_id' => $request->get('hub_id'),
             'vendor_id' => $request->get('vendor_id'),
             'status' => $request->get('status'),
+            'transport' => $request->get('transport'),
+            'stage' => $request->get('stage'),
         ];
+        Log::info('Valor recibido en filtro stage:', ['stage' => $filters['stage']]);
+        return $filters;
     }
 
     /**

@@ -7,6 +7,48 @@
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <style>
+            .multi-select {
+                border: 2px solid #7288FF !important;
+                border-radius: 0.75rem !important;
+                padding: 0.25rem 0.75rem !important;
+                background: #fff;
+                min-height: 42px;
+                box-sizing: border-box;
+            }
+            .multi-select-trigger {
+                min-height: 38px;
+                font-size: 1rem;
+                color: #565AFF;
+                background: transparent;
+                border: none;
+                outline: none;
+                width: 100%;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0;
+            }
+            .multi-select-content {
+                border-radius: 0.75rem;
+                border: 2px solid #7288FF;
+                margin-top: 0.25rem;
+                box-shadow: 0 2px 8px rgba(86,90,255,0.08);
+            }
+            .multi-select-search-input {
+                border-radius: 0.5rem;
+                border: 1px solid #7288FF;
+                padding: 0.25rem 0.5rem;
+                margin-bottom: 0.25rem;
+                width: 100%;
+            }
+            .multi-select-value {
+                color: #565AFF;
+                font-size: 1rem;
+                font-weight: 500;
+            }
+        </style>
     @endpush
     <!-- Clear Filters Button -->
     <div class="clear-filters-container">
@@ -16,91 +58,66 @@
     </div>
 
     <!-- Filter Controls -->
-    <div class="filters-section">
-      <div class="filter-group">
-        <label class="filter-label">Fecha</label>
-        <div class="date-range">
-          <div class="date-input-wrapper">
-            <input type="text" placeholder="Start date" class="date-input" id="startDate">
-            <i class="fas fa-calendar-alt date-icon"></i>
-          </div>
-          <span class="date-separator">→</span>
-          <div class="date-input-wrapper">
-            <input type="text" placeholder="End date" class="date-input" id="endDate">
-            <i class="fas fa-calendar-alt date-icon"></i>
-          </div>
-        </div>
+    <div class="filters-section" style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: nowrap; font-family: 'Lato', sans-serif;">
+      <div class="filter-group" data-filter="date-from" style="width: 180px;">
+        <label class="filter-label" style="color: #565AFF; font-size: 14px;">Fecha inicio</label>
+        <input type="date" id="startDate" class="date-input" style="height: 40px; width: 180px; padding: 8px 14px; border: 2px solid #7288FF; border-radius: 10px; font-size: 16px; color: #222; font-family: 'Lato', sans-serif;">
       </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Categoría</label>
-        <div class="multi-select" data-multiselect data-placeholder="Seleccionar categorías">
-          <button type="button" class="multi-select-trigger">
-            <span class="multi-select-value">Seleccionar categorías</span>
+      <div class="filter-group" data-filter="date-to" style="width: 180px;">
+        <label class="filter-label" style="color: #565AFF; font-size: 14px;">Fecha fin</label>
+        <input type="date" id="endDate" class="date-input" style="height: 40px; width: 180px; padding: 8px 14px; border: 2px solid #7288FF; border-radius: 10px; font-size: 16px; color: #222; font-family: 'Lato', sans-serif;">
+      </div>
+      <div class="filter-group" data-filter="vendor" style="width: 180px;">
+        <label class="filter-label" style="color: #565AFF; font-size: 14px;">Vendor</label>
+        <div class="multi-select" data-multiselect data-placeholder="Seleccionar vendors" style="height: 40px; width: 180px; border: 2px solid #7288FF; border-radius: 10px; padding: 0; background: #fff;">
+          <button type="button" class="multi-select-trigger" style="height: 36px; color: #222; font-size: 16px; font-family: 'Lato', sans-serif; padding: 8px 14px; background: transparent; border: none; width: 100%; text-align: left; display: flex; align-items: center;">
+            <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar vendors</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input">
+              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
-            <div class="multi-select-options">
-              <label class="multi-select-option"><input type="checkbox" value="pendiente"> Pendiente</label>
-              <label class="multi-select-option"><input type="checkbox" value="en-progreso"> En Progreso</label>
-              <label class="multi-select-option"><input type="checkbox" value="completado"> Completado</label>
-              <label class="multi-select-option"><input type="checkbox" value="cancelado"> Cancelado</label>
-            </div>
+            <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
           </div>
         </div>
       </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Producto</label>
-        <div class="multi-select" data-multiselect data-placeholder="Seleccionar productos">
-          <button type="button" class="multi-select-trigger">
-            <span class="multi-select-value">Seleccionar productos</span>
+      <div class="filter-group" data-filter="product" style="width: 180px;">
+        <label class="filter-label" style="color: #565AFF; font-size: 14px;">Producto</label>
+        <div class="multi-select" data-multiselect data-placeholder="Seleccionar productos" style="height: 40px; width: 180px; border: 2px solid #7288FF; border-radius: 10px; padding: 0; background: #fff;">
+          <button type="button" class="multi-select-trigger" style="height: 36px; color: #222; font-size: 16px; font-family: 'Lato', sans-serif; padding: 8px 14px; background: transparent; border: none; width: 100%; text-align: left; display: flex; align-items: center;">
+            <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar productos</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input">
+              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
-            <div class="multi-select-options">
-              <label class="multi-select-option"><input type="checkbox" value="producto-a"> Producto A</label>
-              <label class="multi-select-option"><input type="checkbox" value="producto-b"> Producto B</label>
-              <label class="multi-select-option"><input type="checkbox" value="producto-c"> Producto C</label>
-              <label class="multi-select-option"><input type="checkbox" value="producto-d"> Producto D</label>
-            </div>
+            <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
           </div>
         </div>
       </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Material</label>
-        <div class="multi-select" data-multiselect data-placeholder="Seleccionar materiales">
-          <button type="button" class="multi-select-trigger">
-            <span class="multi-select-value">Seleccionar materiales</span>
+      <div class="filter-group" data-filter="material" style="width: 180px;">
+        <label class="filter-label" style="color: #565AFF; font-size: 14px;">Material</label>
+        <div class="multi-select" data-multiselect data-placeholder="Seleccionar materiales" style="height: 40px; width: 180px; border: 2px solid #7288FF; border-radius: 10px; padding: 0; background: #fff;">
+          <button type="button" class="multi-select-trigger" style="height: 36px; color: #222; font-size: 16px; font-family: 'Lato', sans-serif; padding: 8px 14px; background: transparent; border: none; width: 100%; text-align: left; display: flex; align-items: center;">
+            <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar materiales</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input">
+              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
-            <div class="multi-select-options">
-              <label class="multi-select-option"><input type="checkbox" value="material-1"> Material Tipo 1</label>
-              <label class="multi-select-option"><input type="checkbox" value="material-2"> Material Tipo 2</label>
-              <label class="multi-select-option"><input type="checkbox" value="material-3"> Material Tipo 3</label>
-              <label class="multi-select-option"><input type="checkbox" value="material-4"> Material Tipo 4</label>
-            </div>
+            <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
           </div>
         </div>
       </div>
-
-      <div class="action-buttons">
-        <button class="btn-primary">Aceptar</button>
-        <button class="btn-secondary">
+      <div class="action-buttons" style="display: flex; gap: 16px; align-items: flex-end; margin-left: auto;">
+        <button class="btn-primary" style="height: 40px; min-width: 100px; padding: 0 18px; font-size: 16px; border-radius: 8px; border: none; background: #565AFF; color: #F7F7F7; font-weight: 700; font-family: 'Lato', sans-serif; display: flex; align-items: center; justify-content: center;">Aceptar</button>
+        <button class="btn-secondary" style="height: 40px; min-width: 100px; padding: 0 18px; font-size: 16px; border-radius: 8px; border: 2px solid #565AFF; background: #fff; color: #565AFF; font-weight: 700; font-family: 'Lato', sans-serif; display: flex; align-items: center; gap: 8px; justify-content: center;">
           <i class="fas fa-download"></i>
           Descargar
         </button>
@@ -108,22 +125,22 @@
     </div>
 
     <!-- Top Metrics Cards -->
-    <div class="metrics-grid">
+    <div class="metrics-grid" style="display: flex; gap: 16px; margin-top: 24px;">
       <div class="metric-card">
-        <p class="metric-label">Total PO's</p>
-        <p class="metric-value">91</p>
+        <p class="metric-label">PO's Activas</p>
+        <span class="metric-value" id="totalPosValue"></span>
       </div>
       <div class="metric-card">
         <p class="metric-label">% PO's on time</p>
-        <p class="metric-value">71,7%</p>
+        <span class="metric-value" id="onTimePercentageValue"></span>
       </div>
       <div class="metric-card">
         <p class="metric-label">% PO's atrasadas</p>
-        <p class="metric-value">28,3%</p>
+        <span class="metric-value" id="delayedPercentageValue"></span>
       </div>
       <div class="metric-card">
         <p class="metric-label">Material</p>
-        <p class="metric-value">91</p>
+        <span class="metric-value" id="materialCountValue"></span>
       </div>
     </div>
 
@@ -133,7 +150,7 @@
         <h3 class="chart-title">Entregas por hub</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="hubChart" width="120" height="120"></canvas>
+            <canvas id="hubChart" width="160" height="160"></canvas>
           </div>
           <div class="chart-legend" id="hubLegend"></div>
         </div>
@@ -143,7 +160,7 @@
         <h3 class="chart-title">Estado entrega</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="statusChart" width="120" height="120"></canvas>
+            <canvas id="statusChart" width="160" height="160"></canvas>
           </div>
           <div class="chart-legend" id="statusLegend"></div>
         </div>
@@ -153,7 +170,7 @@
         <h3 class="chart-title">Tipo de transporte</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="transportChart" width="120" height="120"></canvas>
+            <canvas id="transportChart" width="160" height="160"></canvas>
           </div>
           <div class="chart-legend" id="transportLegend"></div>
         </div>
@@ -182,35 +199,32 @@
         </div>
       </div>
 
-      <!-- Right Charts Column -->
-      <div class="right-charts">
-        <div class="chart-card">
+      <!-- Right Charts Column - Apilados verticalmente con alturas específicas -->
+      <div class="right-charts-vertical">
+        <!-- Motivo de atraso: 1/3 de la altura -->
+        <div class="chart-card delay-chart-small">
           <h3 class="chart-title">Motivo de atraso</h3>
-          <div class="chart-content-horizontal">
-            <div class="chart-container-small">
-              <canvas id="delayChart" width="120" height="120"></canvas>
+          <div class="chart-content">
+            <div class="chart-container">
+              <canvas id="delayChart" width="160" height="160"></canvas>
             </div>
-            <div class="chart-legend-small" id="delayLegend"></div>
+            <div class="chart-legend" id="delayLegend"></div>
           </div>
         </div>
 
-        <div class="chart-card">
+        <!-- PO's por etapa: 2/3 de la altura -->
+        <div class="chart-card stage-chart-large">
           <h3 class="chart-title">PO's por etapa</h3>
-          <div class="chart-content-horizontal">
-            <div class="chart-container-small">
-              <canvas id="stageChart" width="120" height="120"></canvas>
+          <div class="chart-content">
+            <div class="chart-container">
+              <canvas id="stageChart" width="160" height="160"></canvas>
             </div>
-            <div class="chart-legend-small" id="stageLegend"></div>
+            <div class="chart-legend" id="stageLegend"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Test Buttons -->
-    <div class="test-buttons">
-      <button id="showSuccessBtn" class="btn-primary">Show Success Modal</button>
-      <button id="showErrorBtn" class="btn-secondary">Show Error Modal</button>
-    </div>
   </div>
 
   <!-- Success Modal -->
@@ -248,8 +262,6 @@
 
     @push('scripts')
         <script>
-            // Pass data from PHP to JavaScript
-            window.dashboardData = @json($dashboardData);
             window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         </script>
         <script src="{{ asset('js/main.js') }}"></script>

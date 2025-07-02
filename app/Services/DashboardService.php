@@ -26,92 +26,47 @@ class DashboardService
         try {
             Log::info('DashboardService::getMetrics starting', ['filters' => $filters]);
 
-            $companyId = auth()->user()->company_id ?? null;
-            Log::info('User company ID', ['company_id' => $companyId]);
-
-            // 1. Total POs - Using the user's corrected query
+            // 1. Total POs
             Log::info('Getting total POs...');
-            $totalPOsQuery = DB::table('purchase_orders');
-            if ($companyId) {
-                $totalPOsQuery->where('company_id', $companyId);
-            }
-            $totalPOs = $totalPOsQuery->count();
+            $totalPOs = $this->getBaseQuery($filters)->count();
             Log::info('Total POs retrieved', ['total' => $totalPOs]);
 
-            // 2. % POs On-Time - Using the user's exact corrected query
-            Log::info('Getting on-time metrics...');
-            $onTimeQuery = DB::table('purchase_orders')
-                ->selectRaw('
-                    COUNT(*) AS on_time_count,
-                    100.0 * COUNT(*)
-                      / (
-                        SELECT COUNT(*)
-                        FROM purchase_orders
-                        WHERE date_ata IS NOT NULL
-                          AND date_eta IS NOT NULL
-                          ' . ($companyId ? 'AND company_id = ' . $companyId : '') . '
-                      ) AS pct_on_time
-                ')
+            // 2. % POs On-Time y Delayed
+            Log::info('Getting on-time and delayed metrics...');
+            $onTimeDelayedQuery = $this->getBaseQuery($filters)
                 ->whereNotNull('date_ata')
-                ->whereNotNull('date_eta')
-                ->where('date_ata', '<=', DB::raw('date_required_in_destination'));
-
-            if ($companyId) {
-                $onTimeQuery->where('company_id', $companyId);
-            }
-
-            $onTimeResult = $onTimeQuery->first();
-            Log::info('On-time metrics retrieved', [
-                'on_time_count' => $onTimeResult->on_time_count ?? 0,
-                'pct_on_time' => $onTimeResult->pct_on_time ?? 0
+                ->whereNotNull('date_required_in_destination')
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN date_ata <= date_required_in_destination THEN 1 ELSE 0 END) as on_time_count,
+                    SUM(CASE WHEN date_ata > date_required_in_destination THEN 1 ELSE 0 END) as delayed_count
+                ');
+            $result = $onTimeDelayedQuery->first();
+            $total = $result->total ?? 0;
+            $onTimeCount = $result->on_time_count ?? 0;
+            $delayedCount = $result->delayed_count ?? 0;
+            $onTimePercentage = $total > 0 ? round(($onTimeCount / $total) * 100, 1) : 0;
+            $delayedPercentage = $total > 0 ? round(($delayedCount / $total) * 100, 1) : 0;
+            Log::info('On-time/delayed metrics', [
+                'total' => $total,
+                'on_time_count' => $onTimeCount,
+                'delayed_count' => $delayedCount,
+                'on_time_percentage' => $onTimePercentage,
+                'delayed_percentage' => $delayedPercentage
             ]);
 
-            // 3. % POs Delayed - Using the user's exact corrected query
-            Log::info('Getting delayed metrics...');
-            $delayedQuery = DB::table('purchase_orders')
-                ->selectRaw('
-                    COUNT(*) AS delayed_count,
-                    100.0 * COUNT(*)
-                      / (
-                        SELECT COUNT(*)
-                        FROM purchase_orders
-                        WHERE date_ata IS NOT NULL
-                          AND date_eta IS NOT NULL
-                          ' . ($companyId ? 'AND company_id = ' . $companyId : '') . '
-                      ) AS pct_delayed
-                ')
-                ->whereNotNull('date_ata')
-                ->whereNotNull('date_eta')
-                ->where('date_ata', '>', DB::raw('date_required_in_destination'));
-
-            if ($companyId) {
-                $delayedQuery->where('company_id', $companyId);
-            }
-
-            $delayedResult = $delayedQuery->first();
-            Log::info('Delayed metrics retrieved', [
-                'delayed_count' => $delayedResult->delayed_count ?? 0,
-                'pct_delayed' => $delayedResult->pct_delayed ?? 0
-            ]);
-
-            // 4. Material count - Using the user's exact corrected query
+            // 3. Material count
             Log::info('Getting material count...');
-            $materialQuery = DB::table('purchase_order_product as pp')
-                ->selectRaw('COUNT(DISTINCT pp.product_id) AS material_count');
-
-            if ($companyId) {
-                $materialQuery->join('purchase_orders as po', 'pp.purchase_order_id', '=', 'po.id')
-                             ->where('po.company_id', $companyId);
-            }
-
-            $materialResult = $materialQuery->first();
-            $materialCount = $materialResult->material_count ?? 0;
-            Log::info('Material count retrieved', ['count' => $materialCount]);
+            $materialCount = $this->getBaseQuery($filters)
+                ->join('purchase_order_product', 'purchase_orders.id', '=', 'purchase_order_product.purchase_order_id')
+                ->distinct('purchase_order_product.product_id')
+                ->count('purchase_order_product.product_id');
+            Log::info('Material count result', ['count' => $materialCount]);
 
             $result = [
                 'total_pos' => $totalPOs,
-                'on_time_percentage' => round((float)($onTimeResult->pct_on_time ?? 0), 1),
-                'delayed_percentage' => round((float)($delayedResult->pct_delayed ?? 0), 1),
+                'on_time_percentage' => $onTimePercentage,
+                'delayed_percentage' => $delayedPercentage,
                 'material_count' => $materialCount,
             ];
 
@@ -243,498 +198,211 @@ class DashboardService
         }
     }
 
-    /**
-     * Get hub distribution data - Using user's exact corrected query
-     *
-     * @param array $filters
-     * @return Collection
-     */
     private function getHubDistribution(array $filters): Collection
     {
-        try {
-            Log::info('Getting hub distribution...');
+        $filtersSinHub = $filters;
+        unset($filtersSinHub['hub_id']);
+        \Log::info('getHubDistribution - Filtros usados', $filtersSinHub);
+        
+        $baseQuery = $this->getBaseQuery($filtersSinHub);
+        $total = (clone $baseQuery)->count();
+        
+        // Obtener TODOS los hubs existentes
+        $allHubs = \App\Models\Hub::select('id', 'code', 'name')->get();
+        
+        // Agregar "Sin Hub" a la lista
+        $allHubs->prepend((object)[
+            'id' => 0,
+            'code' => 'Sin Hub',
+            'name' => 'Sin Hub'
+        ]);
+        
+        // Obtener datos de POs agrupados por hub
+        $query = $baseQuery
+            ->leftJoin('hubs as h', 'purchase_orders.actual_hub_id', '=', 'h.id')
+            ->selectRaw("COALESCE(h.code, 'Sin Hub') AS hub, COALESCE(h.id, 0) AS hub_id, COUNT(purchase_orders.id) AS total_pos")
+            ->groupBy(DB::raw("COALESCE(h.code, 'Sin Hub')"), DB::raw("COALESCE(h.id, 0)"))
+            ->orderBy('total_pos', 'desc');
+            
+        $rawResult = $query->get()->keyBy('hub_id');
+        
+        // Construir resultado con TODOS los hubs, incluso los que tienen 0 datos
+        $result = $allHubs->map(function($hub) use ($rawResult, $total) {
+            $data = $rawResult->get($hub->id);
+            
+            return [
+                'name' => $hub->code,
+                'id' => (int)$hub->id,
+                'value' => $data ? (int)$data->total_pos : 0,
+                'percentage' => $total > 0 && $data ? round(100.0 * $data->total_pos / $total, 1) : 0,
+            ];
+        })->sortByDesc('value')->values();
+        
 
-            $companyId = auth()->user()->company_id ?? null;
-
-            // Using the new query structure with LEFT JOIN and COALESCE for "Sin Hub"
-            $query = DB::table('purchase_orders as po')
-                ->leftJoin('hubs as h', 'po.actual_hub_id', '=', 'h.id')
-                ->selectRaw('
-                    COALESCE(h.code, \'Sin Hub\') AS hub,
-                    COUNT(po.id) AS total_pos,
-                    100.0 * COUNT(po.id) / (SELECT COUNT(*) FROM purchase_orders' .
-                    ($companyId ? ' WHERE company_id = ' . $companyId : '') .
-                    ') AS pct_total
-                ')
-                ->groupBy(DB::raw('COALESCE(h.code, \'Sin Hub\')'))
-                ->orderBy('total_pos', 'desc');
-
-            if ($companyId) {
-                $query->where('po.company_id', $companyId);
-            }
-
-            $result = $query->get()
-                ->map(function ($item) {
-                    return [
-                        'name' => $item->hub,
-                        'value' => (int) $item->total_pos,
-                        'percentage' => round((float) $item->pct_total, 1),
-                    ];
-                });
-
-            Log::info('Hub distribution retrieved with new query', ['count' => $result->count()]);
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('Error in getHubDistribution', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return collect([]);
-        }
+        
+        return $result;
     }
 
-    /**
-     * Get delivery status data - Using user's exact corrected query
-     *
-     * @param array $filters
-     * @return Collection
-     */
     private function getDeliveryStatus(array $filters): Collection
     {
-        try {
-            Log::info('Getting delivery status...');
-
-            $companyId = auth()->user()->company_id ?? null;
-
-            // Using the user's exact query structure
-            $query = DB::table('purchase_orders')
-                ->selectRaw('
-                    CASE
-                        WHEN date_ata <= date_required_in_destination THEN \'On Time\'
-                        ELSE \'Atrasado\'
-                    END AS estado,
-                    COUNT(*) AS total_pos,
-                    100.0 * COUNT(*) / (
-                        SELECT COUNT(*) FROM purchase_orders
-                        WHERE date_ata IS NOT NULL AND date_required_in_destination IS NOT NULL' .
-                        ($companyId ? ' AND company_id = ' . $companyId : '') . '
-                    ) AS pct
-                ')
-                ->whereNotNull('date_ata')
-                ->whereNotNull('date_required_in_destination');
-
-            // Apply company filter
-            if ($companyId) {
-                $query->where('company_id', $companyId);
-            }
-
-            // Apply additional filters similar to getBaseQuery
-            if (!empty($filters['date_from'])) {
-                $query->where('order_date', '>=', $filters['date_from']);
-            }
-
-            if (!empty($filters['date_to'])) {
-                $query->where('order_date', '<=', $filters['date_to']);
-            }
-
-            if (!empty($filters['vendor_id'])) {
-                $query->where('vendor_id', $filters['vendor_id']);
-            }
-
-            // Handle multiple hub_id values in getDeliveryStatus
-            if (!empty($filters['hub_id'])) {
-                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
-                $hubIds = array_filter($hubIds, function($value) {
-                    return $value !== null && $value !== '';
-                });
-
-                if (!empty($hubIds)) {
-                    $query->where(function ($q) use ($hubIds) {
-                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
-                        $nonZeroHubIds = array_filter($hubIds, function($id) {
-                            return $id != 0;
-                        });
-
-                        if ($hasZero) {
-                            $q->where(function ($subQ) {
-                                $subQ->whereNull('planned_hub_id')
-                                     ->whereNull('actual_hub_id');
-                            });
-                        }
-
-                        if (!empty($nonZeroHubIds)) {
-                            if ($hasZero) {
-                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
-                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
-                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
-                                });
-                            } else {
-                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
-                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
-                            }
-                        }
-                    });
-                }
-            }
-
-            if (!empty($filters['status'])) {
-                $query->where('status', $filters['status']);
-            }
-
-            $result = $query->groupBy(DB::raw('
-                CASE
-                    WHEN date_ata <= date_required_in_destination THEN \'On Time\'
-                    ELSE \'Atrasado\'
-                END
-            '))->get();
-
-            $collection = $result->map(function ($item) {
-                return [
-                    'name' => $item->estado,
-                    'value' => (int) $item->total_pos,
-                    'percentage' => round((float) $item->pct, 1),
-                ];
-            });
-
-            Log::info('Delivery status retrieved using exact query', [
-                'count' => $collection->count(),
-                'data' => $collection->toArray()
-            ]);
-
-            return $collection;
-        } catch (\Exception $e) {
-            Log::error('Error in getDeliveryStatus', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return collect([]);
-        }
+        $filtersSinStatus = $filters;
+        unset($filtersSinStatus['status']);
+        \Log::info('getDeliveryStatus - Filtros usados (SIN filtro status)', $filtersSinStatus);
+        $baseQuery = $this->getBaseQuery($filtersSinStatus)
+            ->whereNotNull('date_ata')
+            ->whereNotNull('date_required_in_destination');
+        
+        // NO aplicar filtro de estado aquí - calcular distribución total
+        $total = (clone $baseQuery)->count();
+        $query = (clone $baseQuery)
+            ->selectRaw("CASE WHEN date_ata <= date_required_in_destination THEN 'On Time' ELSE 'Atrasado' END AS estado, COUNT(*) AS total_pos")
+            ->groupBy(DB::raw("CASE WHEN date_ata <= date_required_in_destination THEN 'On Time' ELSE 'Atrasado' END"));
+        $raw = $query->get();
+        $resultByName = collect($raw)->keyBy('estado');
+        $allStatus = collect([
+            (object)['name' => 'On Time', 'color' => '#565aff'],
+            (object)['name' => 'Atrasado', 'color' => '#c9cfff'],
+        ]);
+        return $allStatus->map(function($cat) use ($resultByName, $total) {
+            $item = $resultByName->get($cat->name);
+            return [
+                'name' => $cat->name,
+                'value' => $item ? (int)$item->total_pos : 0,
+                'percentage' => $total > 0 ? round(100.0 * ($item ? $item->total_pos : 0) / $total, 1) : 0,
+                'color' => $cat->color,
+                'values' => [$cat->name],
+            ];
+        })->values(); // Mostrar TODOS los estados, incluso con 0
     }
 
-    /**
-     * Get transport type data - Using user's exact corrected query
-     *
-     * @param array $filters
-     * @return Collection
-     */
     private function getTransportType(array $filters): Collection
     {
-        try {
-            Log::info('Getting transport type...');
-
-            $companyId = auth()->user()->company_id ?? null;
-
-            // Using the user's exact query structure
-            $query = DB::table('purchase_orders')
-                ->selectRaw('
-                    mode AS transport_mode,
-                    COUNT(*) AS total_pos,
-                    100.0 * COUNT(*) / (SELECT COUNT(*) FROM purchase_orders' .
-                    ($companyId ? ' WHERE company_id = ' . $companyId : '') .
-                    ') AS pct_total
-                ')
-                ->groupBy('mode');
-
-            // Apply company filter
-            if ($companyId) {
-                $query->where('company_id', $companyId);
-            }
-
-            // Apply additional filters similar to getBaseQuery
-            if (!empty($filters['date_from'])) {
-                $query->where('order_date', '>=', $filters['date_from']);
-            }
-
-            if (!empty($filters['date_to'])) {
-                $query->where('order_date', '<=', $filters['date_to']);
-            }
-
-            if (!empty($filters['vendor_id'])) {
-                $query->where('vendor_id', $filters['vendor_id']);
-            }
-
-            // Handle multiple hub_id values in getTransportType
-            if (!empty($filters['hub_id'])) {
-                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
-                $hubIds = array_filter($hubIds, function($value) {
-                    return $value !== null && $value !== '';
-                });
-
-                if (!empty($hubIds)) {
-                    $query->where(function ($q) use ($hubIds) {
-                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
-                        $nonZeroHubIds = array_filter($hubIds, function($id) {
-                            return $id != 0;
-                        });
-
-                        if ($hasZero) {
-                            $q->where(function ($subQ) {
-                                $subQ->whereNull('planned_hub_id')
-                                     ->whereNull('actual_hub_id');
-                            });
-                        }
-
-                        if (!empty($nonZeroHubIds)) {
-                            if ($hasZero) {
-                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
-                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
-                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
-                                });
-                            } else {
-                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
-                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
-                            }
-                        }
-                    });
-                }
-            }
-
-            if (!empty($filters['status'])) {
-                $query->where('status', $filters['status']);
-            }
-
-            $result = $query->get();
-
-            $collection = $result->map(function ($item) {
-                return [
-                    'name' => strtoupper($item->transport_mode ?? 'SIN ESPECIFICAR'),
-                    'value' => (int) $item->total_pos,
-                    'percentage' => round((float) $item->pct_total, 1),
-                ];
-            });
-
-            Log::info('Transport type retrieved using exact query', [
-                'count' => $collection->count(),
-                'data' => $collection->toArray()
-            ]);
-
-            return $collection;
-        } catch (\Exception $e) {
-            Log::error('Error in getTransportType', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return collect([]);
+        $filtersSinMode = $filters;
+        unset($filtersSinMode['transport']);
+        \Log::info('getTransportType - Filtros usados', $filtersSinMode);
+        $baseQuery = $this->getBaseQuery($filtersSinMode);
+        $total = (clone $baseQuery)->count();
+        $query = (clone $baseQuery)
+            ->selectRaw('mode AS transport_mode, COUNT(*) AS total_pos')
+            ->groupBy('mode');
+        $raw = $query->get();
+        // Agrupar solo por los valores válidos
+        $counts = [ 'MARITIMO' => 0, 'AEREO' => 0, 'SIN ESPECIFICAR' => 0 ];
+        foreach ($raw as $item) {
+            $key = trim(strtolower($item->transport_mode ?? ''));
+            if ($key === 'maritimo') $cat = 'MARITIMO';
+            elseif ($key === 'aereo') $cat = 'AEREO';
+            else $cat = 'SIN ESPECIFICAR';
+            $counts[$cat] += (int)$item->total_pos;
         }
+        $allTypes = collect([
+            (object)['name' => 'MARITIMO', 'color' => '#565aff', 'values' => ['maritimo']],
+            (object)['name' => 'AEREO', 'color' => '#ff3459', 'values' => ['aereo']],
+            (object)['name' => 'SIN ESPECIFICAR', 'color' => '#c9cfff', 'values' => [null, '']],
+        ]);
+        return $allTypes->map(function($cat) use ($counts, $total) {
+            return [
+                'name' => $cat->name,
+                'value' => $counts[$cat->name],
+                'percentage' => $total > 0 ? round(100.0 * $counts[$cat->name] / $total, 1) : 0,
+                'color' => $cat->color,
+                'values' => $cat->values,
+            ];
+        })->values(); // Mostrar TODOS los tipos de transporte, incluso con 0
     }
 
-            /**
-     * Get delay reasons data - Using user's exact corrected query with CTE
-     *
-     * @param array $filters
-     * @return Collection
-     */
     private function getDelayReasons(array $filters): Collection
     {
-        try {
-            Log::info('Getting delay reasons using CTE query...');
+        $filtersSinDelay = $filters;
+        unset($filtersSinDelay['delay_reason']);
+        \Log::info('getDelayReasons - Filtros usados', $filtersSinDelay);
+        $baseQuery = $this->getBaseQuery($filtersSinDelay);
+        $total = (clone $baseQuery)->count();
 
-            $companyId = auth()->user()->company_id ?? null;
-
-            // Build where conditions for filters
-            $whereConditions = [];
-            $bindings = [];
-
-            if ($companyId) {
-                $whereConditions[] = "po.company_id = ?";
-                $bindings[] = $companyId;
-            }
-
-            if (!empty($filters['date_from'])) {
-                $whereConditions[] = "po.order_date >= ?";
-                $bindings[] = $filters['date_from'];
-            }
-
-            if (!empty($filters['date_to'])) {
-                $whereConditions[] = "po.order_date <= ?";
-                $bindings[] = $filters['date_to'];
-            }
-
-            if (!empty($filters['vendor_id'])) {
-                $whereConditions[] = "po.vendor_id = ?";
-                $bindings[] = $filters['vendor_id'];
-            }
-
-            // Handle multiple hub_id values in getDelayReasons
-            if (!empty($filters['hub_id'])) {
-                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
-                $hubIds = array_filter($hubIds, function($value) {
-                    return $value !== null && $value !== '';
-                });
-
-                if (!empty($hubIds)) {
-                    $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
-                    $nonZeroHubIds = array_filter($hubIds, function($id) {
-                        return $id != 0;
-                    });
-
-                    $hubConditions = [];
-
-                    if ($hasZero) {
-                        $hubConditions[] = "(po.planned_hub_id IS NULL AND po.actual_hub_id IS NULL)";
-                    }
-
-                    if (!empty($nonZeroHubIds)) {
-                        $placeholders = str_repeat('?,', count($nonZeroHubIds) - 1) . '?';
-                        $hubConditions[] = "(po.planned_hub_id IN ($placeholders) OR po.actual_hub_id IN ($placeholders))";
-                        $bindings = array_merge($bindings, $nonZeroHubIds, $nonZeroHubIds);
-                    }
-
-                    if (!empty($hubConditions)) {
-                        $whereConditions[] = "(" . implode(' OR ', $hubConditions) . ")";
-                    }
-                }
-            }
-
-            if (!empty($filters['status'])) {
-                $whereConditions[] = "po.status = ?";
-                $bindings[] = $filters['status'];
-            }
-
-            // Build the WHERE clause
-            $whereClause = '';
-            if (!empty($whereConditions)) {
-                $whereClause = "WHERE " . implode(' AND ', $whereConditions);
-            }
-
-            // Using the user's exact CTE query structure
-            $query = "
-                WITH
-                  total AS (
-                    SELECT COUNT(*) AS total_pos
-                    FROM purchase_orders po
-                    $whereClause
-                  ),
-                  reasons AS (
-                    -- extrae motivo por PO
-                    SELECT DISTINCT
-                      poc.purchase_order_id,
-                      regexp_replace(
-                        poc.comment,
-                        '(?i)^motivo de atraso\\s*[-–—]\\s*(.*)$',
-                        '\\1'
-                      ) AS motivo
-                    FROM purchase_order_comments poc
-                    JOIN purchase_orders po ON poc.purchase_order_id = po.id
-                    WHERE poc.comment ~* '^motivo de atraso\\s*[-–—]'
-                    " . ($whereClause ? "AND " . str_replace('po.', 'po.', implode(' AND ', $whereConditions)) : "") . "
-                  ),
-                  counts AS (
-                    -- cuenta cuántas POs hay de cada motivo
-                    SELECT motivo, COUNT(*) AS cnt
-                    FROM reasons
-                    GROUP BY motivo
-                  ),
-                  sum_reasons AS (
-                    -- suma de todas las POs que tienen algún motivo
-                    SELECT SUM(cnt) AS sum_cnt
-                    FROM counts
-                  )
-
-                -- 1) motivos existentes
-                SELECT
-                  c.motivo,
-                  c.cnt                                    AS total,
-                  ROUND(100.0 * c.cnt / t.total_pos, 1)    AS pct
-                FROM counts c
-                CROSS JOIN total t
-
-                UNION ALL
-
-                -- 2) fila \"Sin atraso\" con el resto
-                SELECT
-                  'Sin atraso'                            AS motivo,
-                  (t.total_pos - COALESCE(sr.sum_cnt, 0)) AS total,
-                  ROUND(
-                    100.0 * (t.total_pos - COALESCE(sr.sum_cnt, 0)) / t.total_pos,
-                    1
-                  )                                       AS pct
-                FROM total t
-                CROSS JOIN sum_reasons sr
-
-                ORDER BY pct DESC
-            ";
-
-            Log::info('Executing delay reasons CTE query', [
-                'has_filters' => !empty($whereConditions),
-                'bindings_count' => count($bindings)
-            ]);
-
-            $results = DB::select($query, array_merge($bindings, $bindings)); // Duplicate bindings for the reasons CTE
-
-            Log::info('Raw delay reasons retrieved', [
-                'count' => count($results),
-                'sample' => array_slice($results, 0, 3)
-            ]);
-
-            $result = collect($results)->map(function ($item) {
-                return [
-                    'name' => trim($item->motivo) ?: 'Sin motivo especificado',
-                    'value' => (int) $item->total,
-                    'percentage' => (float) $item->pct,
-                ];
-            });
-
-            Log::info('Delay reasons processed', [
-                'unique_reasons' => $result->count(),
-                'data' => $result->toArray()
-            ]);
-
-            // Si no hay datos, devolver colección con solo "Sin atraso"
-            if ($result->isEmpty()) {
-                Log::info('No delay reasons found, returning default data');
-                return collect([
-                    ['name' => 'Sin atraso', 'value' => 0, 'percentage' => 100.0]
-                ]);
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('Error in getDelayReasons', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // En caso de error, devolver datos mock como fallback
-            Log::info('Falling back to mock data due to error');
+        // IDs de las órdenes filtradas
+        $poIds = (clone $baseQuery)->pluck('id');
+        if ($poIds->isEmpty()) {
+            // Si no hay órdenes, devuelve solo "Sin motivo" en 100%
             return collect([
-                ['name' => 'Sin atraso', 'value' => 0, 'percentage' => 100.0],
+                [
+                    'name' => 'Sin motivo',
+                    'value' => 0,
+                    'percentage' => 0,
+                    'color' => '#c9cfff',
+                ]
             ]);
         }
+
+        // Extraer motivos de atraso de los comentarios de las órdenes filtradas
+        $reasons = \DB::table('purchase_order_comments as poc')
+            ->selectRaw(
+                "regexp_replace(poc.comment, '(?i)^motivo de atraso\\s*[-–—]\\s*(.*)$', '\\1') as motivo"
+            )
+            ->whereIn('poc.purchase_order_id', $poIds)
+            ->whereRaw("poc.comment ~* '^motivo de atraso\\s*[-–—]'")
+            ->pluck('motivo');
+
+        // Contar cada motivo
+        $counts = collect($reasons)
+            ->filter(fn($m) => trim($m) !== '')
+            ->countBy();
+
+        $sum_cnt = $counts->sum();
+        $result = $counts->map(function($cnt, $motivo) use ($total) {
+            return [
+                'name' => $motivo,
+                'value' => $cnt,
+                'percentage' => $total > 0 ? round(100.0 * $cnt / $total, 1) : 0,
+                'color' => '#565aff', // color fijo, puedes variar si quieres
+            ];
+        })->values();
+
+        // Agregar "Sin motivo"
+        $sinMotivo = [
+            'name' => 'Sin motivo',
+            'value' => $total - $sum_cnt,
+            'percentage' => $total > 0 ? round(100.0 * ($total - $sum_cnt) / $total, 1) : 0,
+            'color' => '#c9cfff',
+        ];
+        $result = $result->push($sinMotivo)->sortByDesc('percentage')->filter(function($item) {
+            return $item['value'] > 0; // Solo mostrar items con datos
+        })->values();
+
+        return $result;
     }
 
-    /**
-     * Get POs by stage data
-     *
-     * @param array $filters
-     * @return Collection
-     */
     private function getPosByStage(array $filters): Collection
     {
-        try {
-            Log::info('Getting POs by stage...');
+        $filtersSinStage = $filters;
+        unset($filtersSinStage['stage']);
+        \Log::info('getPosByStage - Filtros usados para gráfico de etapas', $filtersSinStage);
+        $baseQuery = $this->getBaseQuery($filtersSinStage);
+        $total = (clone $baseQuery)->count();
 
-            $result = $this->getBaseQuery($filters)
-                ->leftJoin('kanban_statuses', 'purchase_orders.kanban_status_id', '=', 'kanban_statuses.id')
-                ->select(DB::raw("COALESCE(kanban_statuses.name, 'Sin etapa') as stage_name"), DB::raw('count(*) as total'))
-                ->groupBy('kanban_statuses.id', 'kanban_statuses.name')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'name' => $item->stage_name,
-                        'value' => (int) $item->total,
-                    ];
-                });
+        // Obtener todas las etapas del board 1
+        $allStages = \App\Models\KanbanStatus::where('kanban_board_id', 1)
+            ->orderBy('position')
+            ->get(['id', 'name', 'color']);
 
-            Log::info('POs by stage retrieved', ['count' => $result->count()]);
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('Error in getPosByStage', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return collect([]);
-        }
+        // Agrupar por etapa real de los POs filtrados
+        $query = $baseQuery
+            ->join('kanban_statuses as ks', 'purchase_orders.kanban_status_id', '=', 'ks.id')
+            ->where('ks.kanban_board_id', 1)
+            ->select('ks.name as stage', \DB::raw('COUNT(purchase_orders.id) as total_pos'))
+            ->groupBy('ks.name');
+        $raw = $query->get()->keyBy('stage');
+
+        // Construir resultado con todas las etapas posibles
+        $result = $allStages->map(function($stage) use ($raw, $total) {
+            $item = $raw->get($stage->name);
+            return [
+                'name' => $stage->name,
+                'value' => $item ? (int)$item->total_pos : 0,
+                'percentage' => $total > 0 ? round(100.0 * ($item ? $item->total_pos : 0) / $total, 1) : 0,
+                'color' => $stage->color ?? '#c9cfff',
+            ];
+        });
+        return $result->sortByDesc('value')->values(); // Mostrar TODAS las etapas, incluso con 0
     }
 
     /**
@@ -752,102 +420,26 @@ class DashboardService
             $companyId = auth()->user()->company_id ?? null;
             Log::info('Company ID for detail table', ['company_id' => $companyId]);
 
-            // Using the user's exact query structure but with order_date since date_atd is NULL
-            $query = DB::table('purchase_orders as po')
-                ->join('purchase_order_product as pp', 'pp.purchase_order_id', '=', 'po.id')
+            // --- USAR getBaseQuery PARA FILTROS CONSISTENTES ---
+            $baseQuery = $this->getBaseQuery($filters);
+            $query = $baseQuery
+                ->join('purchase_order_product as pp', 'purchase_orders.id', '=', 'pp.purchase_order_id')
                 ->selectRaw('
-                    po.order_date    AS dispatch_date,
-                    po.date_eta      AS eta,
+                    purchase_orders.order_date    AS dispatch_date,
+                    purchase_orders.date_eta      AS eta,
                     SUM(pp.quantity) AS total_kgs,
-                    COUNT(DISTINCT po.order_number) AS total_pos
+                    COUNT(DISTINCT purchase_orders.order_number) AS total_pos
                 ')
-                ->whereNotNull('po.order_date')  // Changed from date_atd to order_date
-                ->groupBy('po.order_date', 'po.date_eta')
-                ->orderBy('po.order_date')
+                ->whereNotNull('purchase_orders.order_date')
+                ->groupBy('purchase_orders.order_date', 'purchase_orders.date_eta')
+                ->orderBy('purchase_orders.order_date')
                 ->limit($limit);
-
-            // Apply company filter
-            if ($companyId) {
-                $query->where('po.company_id', $companyId);
-                Log::info('Applied company filter to detail table');
-            }
 
             // Log the SQL query
             Log::info('Detail table SQL query', [
                 'sql' => $query->toSql(),
                 'bindings' => $query->getBindings()
             ]);
-
-            // Check if there are any POs with order_date
-            $poCount = DB::table('purchase_orders')
-                ->when($companyId, function ($q) use ($companyId) {
-                    return $q->where('company_id', $companyId);
-                })
-                ->whereNotNull('order_date')  // Changed from date_atd to order_date
-                ->count();
-            Log::info('POs with order_date count', ['count' => $poCount]);
-
-            // Check if there are any purchase_order_product records
-            $popCount = DB::table('purchase_order_product')->count();
-            Log::info('Purchase order product records count', ['count' => $popCount]);
-
-            // Apply additional filters similar to getBaseQuery
-            if (!empty($filters['date_from'])) {
-                $query->where('po.order_date', '>=', $filters['date_from']);
-                Log::info('Applied date_from filter', ['date_from' => $filters['date_from']]);
-            }
-
-            if (!empty($filters['date_to'])) {
-                $query->where('po.order_date', '<=', $filters['date_to']);
-                Log::info('Applied date_to filter', ['date_to' => $filters['date_to']]);
-            }
-
-            if (!empty($filters['vendor_id'])) {
-                $query->where('po.vendor_id', $filters['vendor_id']);
-                Log::info('Applied vendor filter', ['vendor_id' => $filters['vendor_id']]);
-            }
-
-            // Handle multiple hub_id values in getDetailTableData
-            if (!empty($filters['hub_id'])) {
-                $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
-                $hubIds = array_filter($hubIds, function($value) {
-                    return $value !== null && $value !== '';
-                });
-
-                if (!empty($hubIds)) {
-                    $query->where(function ($q) use ($hubIds) {
-                        $hasZero = in_array('0', $hubIds) || in_array(0, $hubIds);
-                        $nonZeroHubIds = array_filter($hubIds, function($id) {
-                            return $id != 0;
-                        });
-
-                        if ($hasZero) {
-                            $q->where(function ($subQ) {
-                                $subQ->whereNull('po.planned_hub_id')
-                                     ->whereNull('po.actual_hub_id');
-                            });
-                        }
-
-                        if (!empty($nonZeroHubIds)) {
-                            if ($hasZero) {
-                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
-                                    $subQ->whereIn('po.planned_hub_id', $nonZeroHubIds)
-                                         ->orWhereIn('po.actual_hub_id', $nonZeroHubIds);
-                                });
-                            } else {
-                                $q->whereIn('po.planned_hub_id', $nonZeroHubIds)
-                                  ->orWhereIn('po.actual_hub_id', $nonZeroHubIds);
-                            }
-                        }
-                    });
-                    Log::info('Applied multiple hub filter', ['hub_ids' => $hubIds]);
-                }
-            }
-
-            if (!empty($filters['status'])) {
-                $query->where('po.status', $filters['status']);
-                Log::info('Applied status filter', ['status' => $filters['status']]);
-            }
 
             $result = $query->get();
             Log::info('Detail table raw result', [
@@ -1060,8 +652,7 @@ class DashboardService
     private function getBaseQuery(array $filters)
     {
         try {
-            Log::info('Creating base query with filters', ['filters' => $filters]);
-
+            Log::info('getBaseQuery - Filtros recibidos:', $filters);
             $query = PurchaseOrder::query()
                 ->with(['vendor', 'plannedHub', 'actualHub', 'products']);
 
@@ -1098,7 +689,7 @@ class DashboardService
                 }
             }
 
-            // Material type filter - Updated for multiple values
+            // Material type filter - CAST a texto para LIKE sobre json
             if (!empty($filters['material_type'])) {
                 Log::info('Applying material_type filter', ['material_type' => $filters['material_type']]);
                 $materialTypes = is_array($filters['material_type']) ? $filters['material_type'] : [$filters['material_type']];
@@ -1107,20 +698,16 @@ class DashboardService
                 if (!empty($materialTypes)) {
                     $query->where(function($q) use ($materialTypes) {
                         foreach ($materialTypes as $materialType) {
-                            $q->orWhere(function($subQ) use ($materialType) {
-                                // Buscar en JSON string con diferentes patrones
-                                $subQ->whereRaw('material_type LIKE ?', ['%"' . $materialType . '"%'])
-                                     ->orWhereRaw('material_type = ?', [$materialType])
-                                     ->orWhereRaw('material_type = ?', ['"' . $materialType . '"']);
-                            });
+                            $q->orWhereRaw('material_type::text LIKE ?', ['%' . $materialType . '%']);
                         }
                     });
                 }
             }
 
-            // Hub filter - Updated for multiple values
+            // Hub filter - Updated for multiple values (actual_hub_id only)
             if (!empty($filters['hub_id'])) {
                 Log::info('Applying hub filter', ['hub_id' => $filters['hub_id']]);
+                
                 $hubIds = is_array($filters['hub_id']) ? $filters['hub_id'] : [$filters['hub_id']];
                 $hubIds = array_filter($hubIds, function($value) {
                     return $value !== null && $value !== '';
@@ -1133,47 +720,83 @@ class DashboardService
                             return $id != 0;
                         });
 
+
+
                         if ($hasZero) {
-                            // Incluir registros sin hub
-                            $q->where(function ($subQ) {
-                                $subQ->whereNull('planned_hub_id')
-                                     ->whereNull('actual_hub_id');
-                            });
+                            // Incluir registros sin hub (actual_hub_id es NULL)
+                            $q->whereNull('actual_hub_id');
                         }
 
                         if (!empty($nonZeroHubIds)) {
-                            // Incluir registros con hubs específicos
+                            // Incluir registros con hubs específicos (solo actual_hub_id)
                             if ($hasZero) {
-                                $q->orWhere(function ($subQ) use ($nonZeroHubIds) {
-                                    $subQ->whereIn('planned_hub_id', $nonZeroHubIds)
-                                         ->orWhereIn('actual_hub_id', $nonZeroHubIds);
-                                });
+                                $q->orWhereIn('actual_hub_id', $nonZeroHubIds);
                             } else {
-                                $q->whereIn('planned_hub_id', $nonZeroHubIds)
-                                  ->orWhereIn('actual_hub_id', $nonZeroHubIds);
+                                $q->whereIn('actual_hub_id', $nonZeroHubIds);
                             }
                         }
                     });
-                    Log::info('Applied multiple hub filter', ['hub_ids' => $hubIds]);
+                    Log::info('Applied hub filter (actual_hub_id only)', ['hub_ids' => $hubIds]);
                 }
             }
 
-            // Vendor filter
+            // Vendor filter - soporta múltiples valores
             if (!empty($filters['vendor_id'])) {
                 Log::info('Applying vendor filter', ['vendor_id' => $filters['vendor_id']]);
-                $query->where('vendor_id', $filters['vendor_id']);
+                $vendorIds = is_array($filters['vendor_id']) ? $filters['vendor_id'] : [$filters['vendor_id']];
+                $vendorIds = array_filter($vendorIds);
+                if (count($vendorIds) > 1) {
+                    $query->whereIn('vendor_id', $vendorIds);
+                } else {
+                    $query->where('vendor_id', $vendorIds[0]);
+                }
             }
 
             // Status filter
             if (!empty($filters['status'])) {
                 Log::info('Applying status filter', ['status' => $filters['status']]);
-                $query->where('status', $filters['status']);
+                $statuses = is_array($filters['status']) ? $filters['status'] : [$filters['status']];
+                $statuses = array_filter($statuses);
+                $validCalculated = ['Atrasado', 'On Time']; // Invertido para que el filtro coincida correctamente
+                if (count(array_intersect($statuses, $validCalculated)) > 0) {
+                    $query->whereRaw(
+                        "(CASE WHEN date_ata > date_required_in_destination THEN 'Atrasado' ELSE 'On Time' END) IN (" . implode(',', array_fill(0, count($statuses), '?')) . ")",
+                        $statuses
+                    );
+                } else {
+                    $query->where('status', $filters['status']);
+                }
             }
 
-            Log::info('Base query created successfully');
+            // Transport filter
+            if (!empty($filters['transport'])) {
+                Log::info('Filtro transport recibido:', ['transport' => $filters['transport']]);
+                $transports = is_array($filters['transport']) ? $filters['transport'] : [$filters['transport']];
+                $transports = array_filter($transports);
+                if (!empty($transports)) {
+                    $query->whereIn('mode', $transports);
+                }
+            }
+
+            // Filtro por etapa (nombre de la etapa del kanban_status)
+            if (!empty($filters['stage'])) {
+                Log::info('Applying stage filter', ['stage' => $filters['stage']]);
+                $stages = is_array($filters['stage']) ? $filters['stage'] : [$filters['stage']];
+                $stages = array_filter($stages);
+                if (!empty($stages)) {
+                    $query->whereHas('kanbanStatus', function ($q) use ($stages) {
+                        $q->whereIn('name', $stages);
+                    });
+                }
+            }
+
+            Log::info('getBaseQuery - SQL generado:', [
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
             return $query;
         } catch (\Exception $e) {
-            Log::error('Error creating base query', [
+            Log::error('Error en getBaseQuery:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

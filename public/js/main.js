@@ -1,45 +1,14 @@
-// main.js - Lógica base para el dashboard migrado sin React
+// main.js - Dashboard principal con datos reales del backend
 
-// Datos del dashboard
-const hubData = [
-  { name: "EWR", value: 47.8, color: "#565aff", hub_id: 1 },
-  { name: "MIA", value: 50, color: "#9aabff", hub_id: 2 },
-  { name: "AVR", value: 1.2, color: "#ff3459", hub_id: 3 },
-  { name: "DIR", value: 1, color: "#f46844", hub_id: 4 },
-];
-const deliveryStatusData = [
-  { name: "On Time", value: 71.7, color: "#565aff", status: "on_time" },
-  { name: "Atrasado", value: 28.3, color: "#c9cfff", status: "delayed" },
-];
-const transportTypeData = [
-  { name: "Marítimo", value: 60, color: "#565aff", transport: "sea" },
-  { name: "Aéreo", value: 40, color: "#ff3459", transport: "air" },
-];
-const delayReasonsData = [
-  { name: "Problemas de transporte", value: 26.7, color: "#565aff" },
-  { name: "Error documental", value: 20, color: "#9aabff" },
-  { name: "Clima adverso", value: 20, color: "#5ae7f4" },
-  { name: "Retraso en aduana", value: 17.8, color: "#f46844" },
-  { name: "Demora en despacho", value: 15.6, color: "#5dd595" },
-];
-const posByStageData = [
-  { name: "Etapa 1", value: 28.3, color: "#565aff" },
-  { name: "Etapa 2", value: 21.7, color: "#ff3459" },
-  { name: "Etapa 3", value: 22.8, color: "#f46844" },
-  { name: "Etapa 4", value: 13, color: "#5dd595" },
-  { name: "Etapa 5", value: 16.2, color: "#9aabff" },
-];
-
-// Dataset de ejemplo con campos reales
-const detailData = [
-  { po_number: "PO-001", fecha_salida: "01/01/2024", fecha_estimada: "15/01/2024", cantidad_kg: "1500.00", hub_id: 1, status: "on_time", product_id: 1, material_type: "type1", transport: "sea", delay_reason: "transporte", stage: "1" },
-  { po_number: "PO-002", fecha_salida: "02/01/2024", fecha_estimada: "16/01/2024", cantidad_kg: "2000.00", hub_id: 2, status: "delayed", product_id: 2, material_type: "type2", transport: "air", delay_reason: "documental", stage: "2" },
-  { po_number: "PO-003", fecha_salida: "03/01/2024", fecha_estimada: "17/01/2024", cantidad_kg: "1800.00", hub_id: 1, status: "on_time", product_id: 1, material_type: "type1", transport: "sea", delay_reason: "clima", stage: "3" },
-  { po_number: "PO-004", fecha_salida: "04/01/2024", fecha_estimada: "18/01/2024", cantidad_kg: "2200.00", hub_id: 3, status: "delayed", product_id: 3, material_type: "type3", transport: "air", delay_reason: "aduana", stage: "4" },
-  { po_number: "PO-005", fecha_salida: "05/01/2024", fecha_estimada: "19/01/2024", cantidad_kg: "1700.00", hub_id: 2, status: "on_time", product_id: 2, material_type: "type2", transport: "sea", delay_reason: "despacho", stage: "5" },
-  { po_number: "PO-006", fecha_salida: "06/01/2024", fecha_estimada: "20/01/2024", cantidad_kg: "2100.00", hub_id: 4, status: "delayed", product_id: 4, material_type: "type4", transport: "air", delay_reason: "transporte", stage: "1" },
-  { po_number: "PO-007", fecha_salida: "07/01/2024", fecha_estimada: "21/01/2024", cantidad_kg: "1600.00", hub_id: 1, status: "on_time", product_id: 1, material_type: "type1", transport: "sea", delay_reason: "documental", stage: "2" },
-  { po_number: "PO-008", fecha_salida: "08/01/2024", fecha_estimada: "22/01/2024", cantidad_kg: "2300.00", hub_id: 2, status: "delayed", product_id: 2, material_type: "type2", transport: "air", delay_reason: "clima", stage: "3" },
+// Lista de nombres reales de etapas del kanban_board_id=1
+const kanbanBoard1Stages = [
+  "Recepción",
+  "Consolidación en Hub teorico", 
+  "Validación operativa con el cliente",
+  "Pick Up",
+  "En tránsito terrestre",
+  "Llegada al hub",
+  "Consolidación en Hub real"
 ];
 
 // Estado de filtros activos
@@ -52,67 +21,819 @@ const activeFilters = {
   product_id: [],
   material_type: [],
   delay_reason: [],
+  date_from: null,
+  date_to: null,
+  vendor_id: [],
 };
 
-// Guarda los colores originales de cada gráfico
-const hubOriginalColors = hubData.map(item => item.color);
-const statusOriginalColors = deliveryStatusData.map(item => item.color);
-const transportOriginalColors = transportTypeData.map(item => item.color);
-const delayOriginalColors = delayReasonsData.map(item => item.color);
-const stageOriginalColors = posByStageData.map(item => item.color);
+// Colores predefinidos para gráficos
+const defaultColors = ["#565aff", "#9aabff", "#ff3459", "#f46844", "#c9cfff", "#5ae7f4", "#5dd595"];
 
-// Filtrar datos de la tabla según los filtros activos
-function getFilteredDetailData() {
-  let filtered = [...detailData];
-  if (activeFilters.hub_id.length > 0) {
-    filtered = filtered.filter(row => activeFilters.hub_id.includes(row.hub_id));
+// Referencias a los gráficos
+let hubChartInstance = null;
+let statusChartInstance = null;
+
+// Variables de control para evitar llamadas múltiples
+let updateDashboardTimeout = null;
+let isUpdating = false;
+let chartsCreated = false;
+
+// Función para obtener los datos del backend
+async function fetchDashboardData() {
+  try {
+    // Serializar filtros como query string
+    const params = new URLSearchParams();
+    // Serializar todos los filtros activos
+    if (activeFilters.hub_id && activeFilters.hub_id.length > 0) {
+      activeFilters.hub_id.forEach(id => params.append('hub_id[]', id));
+    }
+    if (activeFilters.status && activeFilters.status.length > 0) {
+      activeFilters.status.forEach(status => params.append('status[]', status));
+    }
+    if (activeFilters.product_id && activeFilters.product_id.length > 0) {
+      activeFilters.product_id.forEach(pid => params.append('product_id[]', pid));
+    }
+    if (activeFilters.material_type && activeFilters.material_type.length > 0) {
+      activeFilters.material_type.forEach(mat => params.append('material_type[]', mat));
+    }
+    if (activeFilters.vendor_id && activeFilters.vendor_id.length > 0) {
+      activeFilters.vendor_id.forEach(vid => params.append('vendor_id[]', vid));
+    }
+    if (activeFilters.transport && activeFilters.transport.length > 0) {
+      activeFilters.transport.forEach(tr => params.append('transport[]', tr));
+    }
+    if (activeFilters.stage && activeFilters.stage.length > 0) {
+      console.log('Serializando filtro stage:', activeFilters.stage);
+      activeFilters.stage.forEach(st => params.append('stage[]', st));
+    }
+    if (activeFilters.date_from) {
+      params.append('date_from', activeFilters.date_from);
+    }
+    if (activeFilters.date_to) {
+      params.append('date_to', activeFilters.date_to);
+    }
+    if (activeFilters.delay_reason && activeFilters.delay_reason.length > 0) {
+      console.log('Serializando filtro delay_reason:', activeFilters.delay_reason);
+      activeFilters.delay_reason.forEach(dr => params.append('delay_reason[]', dr));
+    }
+    // Puedes agregar más filtros aquí si los necesitas
+    const response = await fetch('/dashboard/data?' + params.toString(), {
+      method: 'GET',
+    });
+    if (!response.ok) throw new Error('Error al obtener datos');
+    const result = await response.json();
+    console.log('Respuesta AJAX:', result);
+    if (!result.success) throw new Error(result.message || 'Error en backend');
+    return result;
+  } catch (e) {
+    showError('No se pudo cargar el dashboard: ' + e.message);
+    return null;
   }
-  if (activeFilters.status.length > 0) {
-    filtered = filtered.filter(row => activeFilters.status.includes(row.status));
-  }
-  if (activeFilters.product_id.length > 0) {
-    filtered = filtered.filter(row => activeFilters.product_id.includes(row.product_id));
-  }
-  if (activeFilters.material_type.length > 0) {
-    filtered = filtered.filter(row => activeFilters.material_type.includes(row.material_type));
-  }
-  if (activeFilters.transport.length > 0) {
-    filtered = filtered.filter(row => activeFilters.transport.includes(row.transport));
-  }
-  if (activeFilters.delay_reason.length > 0) {
-    filtered = filtered.filter(row => activeFilters.delay_reason.includes(row.delay_reason));
-  }
-  if (activeFilters.stage.length > 0) {
-    filtered = filtered.filter(row => activeFilters.stage.includes(row.stage));
-  }
-  return filtered;
 }
 
-// Actualizar tabla según filtros
-function updateFilteredTable() {
-  const data = getFilteredDetailData();
-  const tbody = document.getElementById("detailTableBody");
-  tbody.innerHTML = "";
-  data.forEach((row) => {
-    const tr = document.createElement("tr");
+// Renderizar gráfico de Entregas por hub
+function renderHubChart(hubData) {
+  const ctx = document.getElementById('hubChart').getContext('2d');
+  // Destruir cualquier gráfico existente en este canvas
+  const prevChart = Chart.getChart('hubChart');
+  if (prevChart) {
+    console.log('Destruyendo gráfico de hub anterior');
+    prevChart.destroy();
+  }
+  if (hubChartInstance) {
+    console.log('Limpiando instancia de hubChart anterior');
+    hubChartInstance = null;
+  }
+  
+  // IMPORTANTE: Limpiar el canvas completamente para evitar event listeners acumulados
+  const canvas = document.getElementById('hubChart');
+  canvas.replaceWith(canvas.cloneNode(true));
+  // Obtener nuevamente el contexto del canvas limpio
+  const cleanCtx = document.getElementById('hubChart').getContext('2d');
+  
+  const labels = hubData.map(item => item.name);
+  // Para el gráfico, usar un mínimo de 0.1% para elementos con 0 para que aparezcan
+  const data = hubData.map(item => item.percentage > 0 ? item.percentage : 0.1);
+  const originalData = hubData.map(item => item.percentage); // Datos originales para tooltips
+  const ids = hubData.map(item => String(item.id)); // Convertir todos los IDs a string para consistencia
+  const colors = ["#565aff", "#9aabff", "#ff3459", "#f46844", "#c9cfff", "#5ae7f4", "#5dd595"];
+  
+  // Lógica de aclarado: si hay filtros activos, los no seleccionados se aclaran
+  let backgroundColors = colors.slice(0, data.length);
+  if (activeFilters.hub_id && activeFilters.hub_id.length > 0) {
+    const activeHubIds = activeFilters.hub_id.map(id => String(id)); // Convertir filtros a string también
+    backgroundColors = ids.map((id, idx) => activeHubIds.includes(id) ? colors[idx % colors.length] : colors[idx % colors.length] + '33');
+  }
+  
+  hubChartInstance = new Chart(cleanCtx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: backgroundColors,
+        borderWidth: 0,
+        cutout: '70%',
+      }],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const hubId = String(ids[idx]);
+          const activeHubIds = activeFilters.hub_id.map(id => String(id));
+          
+          console.log('=== HUB CLICK DEBUG ===');
+          console.log('Click en índice:', idx);
+          console.log('Hub data completo:', hubData[idx]);
+          console.log('Hub ID extraído:', hubId);
+          console.log('Tipo de Hub ID:', typeof hubId);
+          console.log('IDs array completo:', ids);
+          console.log('Filtros activos antes (RAW):', activeFilters.hub_id);
+          console.log('Filtros activos antes (STRING):', activeHubIds);
+          console.log('¿Hub ya incluido?', activeHubIds.includes(hubId));
+          
+          // 🔍 DEBUGGING ESPECÍFICO PARA EWR vs MIA
+          if (hubId === '2') {
+            console.log('🔴 EWR CLICK DETECTED - Análisis detallado:');
+            console.log('   Hub name:', hubData[idx].name);
+            console.log('   Hub percentage:', hubData[idx].percentage);
+            console.log('   Hub value:', hubData[idx].value);
+            console.log('   Active filters before:', JSON.parse(JSON.stringify(activeFilters)));
+          } else if (hubId === '1') {
+            console.log('🟢 MIA CLICK DETECTED - Análisis detallado:');
+            console.log('   Hub name:', hubData[idx].name);
+            console.log('   Hub percentage:', hubData[idx].percentage);
+            console.log('   Hub value:', hubData[idx].value);
+            console.log('   Active filters before:', JSON.parse(JSON.stringify(activeFilters)));
+          }
+          
+          if (activeHubIds.includes(hubId)) {
+            console.log('→ REMOVIENDO filtro');
+            activeFilters.hub_id = activeFilters.hub_id.filter(id => String(id) !== hubId);
+          } else {
+            console.log('→ AÑADIENDO filtro');
+            activeFilters.hub_id.push(hubData[idx].id);
+          }
+          
+          console.log('Filtros activos después:', JSON.stringify(activeFilters.hub_id));
+          
+          // 🔍 DEBUGGING FINAL
+          if (hubId === '2' || hubId === '1') {
+            console.log(`🔍 ${hubId === '2' ? 'EWR' : 'MIA'} - Estado final:`, {
+              activeFiltersAfter: JSON.parse(JSON.stringify(activeFilters)),
+              aboutToCallUpdate: true,
+              timestamp: new Date().toISOString()
+            });
+          }
+          
+          console.log('=== LLAMANDO updateDashboardUI ===');
+          updateDashboardUI();
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              // Usar datos originales en tooltip
+              return context.label + ': ' + originalData[context.dataIndex] + '%';
+            }
+          }
+        }
+      }
+    },
+  });
+  
+  // Leyenda
+  const legendContainer = document.getElementById('hubLegend');
+  legendContainer.innerHTML = '';
+  hubData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.percentage}%</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Renderizar gráfico de Estado entrega
+function renderStatusChart(statusData) {
+  const ctx = document.getElementById('statusChart').getContext('2d');
+  // Destruir cualquier gráfico existente en este canvas
+  const prevChart = Chart.getChart('statusChart');
+  if (prevChart) {
+    console.log('Destruyendo gráfico de status anterior');
+    prevChart.destroy();
+  }
+  if (statusChartInstance) {
+    console.log('Limpiando instancia de statusChart anterior');
+    statusChartInstance = null;
+  }
+  
+  // IMPORTANTE: Limpiar el canvas completamente para evitar event listeners acumulados
+  const canvas = document.getElementById('statusChart');
+  canvas.replaceWith(canvas.cloneNode(true));
+  // Obtener nuevamente el contexto del canvas limpio
+  const cleanCtx = document.getElementById('statusChart').getContext('2d');
+  
+  const labels = statusData.map(item => item.name);
+  const data = statusData.map(item => item.percentage);
+  const values = statusData.map(item => item.name); // "On Time" o "Atrasado"
+  const colors = ["#565aff", "#c9cfff", "#ff3459", "#f46844"];
+  
+  // Aplicar lógica de aclarado al crear el gráfico
+  let backgroundColors = colors.slice(0, data.length);
+  if (activeFilters.status && activeFilters.status.length > 0) {
+    backgroundColors = statusData.map((item, idx) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
+      return isSelected ? colors[idx % colors.length] : colors[idx % colors.length] + '33';
+    });
+  }
+  
+  statusChartInstance = new Chart(cleanCtx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: backgroundColors,
+        borderWidth: 0,
+        cutout: '70%',
+      }],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const statusValue = values[idx];
+          if (activeFilters.status.includes(statusValue)) {
+            activeFilters.status = activeFilters.status.filter(s => s !== statusValue);
+          } else {
+            activeFilters.status.push(statusValue);
+          }
+          updateDashboardUI();
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed + '%';
+            }
+          }
+        }
+      }
+    },
+  });
+  // Leyenda
+  const legendContainer = document.getElementById('statusLegend');
+  legendContainer.innerHTML = '';
+  statusData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.percentage}%</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Función para mostrar errores
+function showError(msg) {
+  alert(msg); // Puedes mejorar esto con un modal si lo deseas
+}
+
+// Renderizar indicadores superiores
+function renderTopMetrics(metrics) {
+  console.log('renderTopMetrics recibe:', metrics);
+  if (document.getElementById('totalPosValue')) {
+    document.getElementById('totalPosValue').textContent = metrics.total_pos;
+  }
+  if (document.getElementById('onTimePercentageValue')) {
+    document.getElementById('onTimePercentageValue').textContent = metrics.on_time_percentage.toLocaleString('es-ES', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%';
+  }
+  if (document.getElementById('delayedPercentageValue')) {
+    document.getElementById('delayedPercentageValue').textContent = metrics.delayed_percentage.toLocaleString('es-ES', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%';
+  }
+  if (document.getElementById('materialCountValue')) {
+    document.getElementById('materialCountValue').textContent = metrics.material_count;
+  }
+}
+
+// Renderizar gráfico de Tipo de transporte
+function createPieChart(canvasId, data, legendId, onClickHandler) {
+  // --- DESTRUIR GRÁFICO ANTERIOR SI EXISTE ---
+  const prevChart = Chart.getChart(canvasId);
+  if (prevChart) {
+    console.log(`Destruyendo gráfico anterior: ${canvasId}`);
+    prevChart.destroy();
+  }
+
+  // IMPORTANTE: Limpiar el canvas completamente para evitar event listeners acumulados
+  const canvas = document.getElementById(canvasId);
+  if (canvas) {
+    canvas.replaceWith(canvas.cloneNode(true));
+  }
+  
+  // Obtener nuevamente el contexto del canvas limpio
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  
+  // Aplicar lógica de aclarado al crear el gráfico
+  let backgroundColors = data.map((item) => item.color);
+  
+  if (canvasId === 'transportChart' && activeFilters.transport && activeFilters.transport.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.transport.includes(val));
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'statusChart' && activeFilters.status && activeFilters.status.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'delayChart' && activeFilters.delay_reason && activeFilters.delay_reason.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = activeFilters.delay_reason.includes(item.name);
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'stageChart' && activeFilters.stage && activeFilters.stage.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = activeFilters.stage.includes(item.name);
+      return isSelected ? item.color : item.color + '33';
+    });
+  }
+  
+  // Para el gráfico, usar un mínimo de 0.1 para elementos con 0 para que aparezcan
+  const displayData = data.map((item) => item.value > 0 ? item.value : 0.1);
+  const originalValues = data.map((item) => item.value); // Valores originales para tooltips
+  
+  const chart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: data.map((item) => item.name),
+      datasets: [
+        {
+          data: displayData,
+          backgroundColor: backgroundColors,
+          borderWidth: 0,
+          cutout: "70%",
+        },
+      ],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              // Usar valores originales en tooltip
+              const originalValue = originalValues[context.dataIndex];
+              return context.label + ': ' + (typeof data[context.dataIndex].percentage !== 'undefined' ? data[context.dataIndex].percentage + '%' : originalValue);
+            }
+          }
+        }
+      },
+      onClick: onClickHandler || undefined,
+    },
+  });
+  window[canvasId] = chart;
+  // Leyenda
+  const legendContainer = document.getElementById(legendId);
+  legendContainer.innerHTML = "";
+  data.forEach((item) => {
+    const legendItem = document.createElement("div");
+    legendItem.className = "legend-item";
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${item.color}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${typeof item.percentage !== 'undefined' ? item.percentage + '%' : item.value}</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Renderizar gráfico de Motivo de atraso
+function renderDelayChart(delayData) {
+  const ctx = document.getElementById('delayChart').getContext('2d');
+  const prevChart = Chart.getChart('delayChart');
+  if (prevChart) prevChart.destroy();
+  const labels = delayData.map(item => item.name);
+  const data = delayData.map(item => item.percentage);
+  const colors = ["#565aff", "#9aabff", "#5ae7f4", "#f46844", "#5dd595", "#c9cfff"];
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.slice(0, data.length),
+        borderWidth: 0,
+        cutout: '70%',
+      }],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed + '%';
+            }
+          }
+        }
+      }
+    },
+  });
+  // Leyenda
+  const legendContainer = document.getElementById('delayLegend');
+  legendContainer.innerHTML = '';
+  delayData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.percentage}%</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Renderizar gráfico de PO's por etapa
+function renderStageChart(stageData) {
+  const ctx = document.getElementById('stageChart').getContext('2d');
+  const prevChart = Chart.getChart('stageChart');
+  if (prevChart) prevChart.destroy();
+  const labels = stageData.map(item => item.name);
+  const data = stageData.map(item => item.value);
+  const colors = ["#565aff", "#ff3459", "#f46844", "#5dd595", "#9aabff", "#c9cfff"];
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.slice(0, data.length),
+        borderWidth: 0,
+        cutout: '70%',
+      }],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed;
+            }
+          }
+        }
+      }
+    },
+  });
+  // Leyenda
+  const legendContainer = document.getElementById('stageLegend');
+  legendContainer.innerHTML = '';
+  stageData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.value}</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Renderizar tabla de detalle
+function renderDetailTable(detailData) {
+  const tbody = document.getElementById('detailTableBody');
+  tbody.innerHTML = '';
+  detailData.forEach((row) => {
+    const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${row.po_number}</td>
-      <td style="color: #6b7280;">${row.fecha_estimada}</td>
-      <td class="text-right">${row.cantidad_kg}</td>
-      <td class="text-right">${row.hub_id}</td>
+      <td>${row.fecha_salida || '-'}</td>
+      <td style="color: #6b7280;">${row.fecha_estimada || '-'}</td>
+      <td class="text-right">${row.cantidad_kg || '-'}</td>
+      <td class="text-right">${row.po_number || '-'}</td>
     `;
     tbody.appendChild(tr);
   });
   // Fila total
-  const totalRow = document.createElement("tr");
-  totalRow.className = "total-row";
+  const totalRow = document.createElement('tr');
+  totalRow.className = 'total-row';
   totalRow.innerHTML = `
     <td>Total</td>
     <td></td>
-    <td class="text-right">${data.reduce((acc, row) => acc + parseFloat(row.cantidad_kg), 0).toFixed(2)}</td>
-    <td class="text-right">${data.length}</td>
+    <td class="text-right">${detailData.reduce((acc, row) => acc + parseFloat(row.cantidad_kg || 0), 0).toFixed(2)}</td>
+    <td class="text-right">${detailData.length}</td>
   `;
   tbody.appendChild(totalRow);
+}
+
+// Función principal para actualizar el dashboard con debouncing
+async function updateDashboardUI() {
+  // Evitar llamadas múltiples simultáneas
+  if (isUpdating) {
+    console.log('updateDashboardUI ya está ejecutándose, ignorando llamada duplicada');
+    return;
+  }
+  
+  // Cancelar timeout anterior si existe
+  if (updateDashboardTimeout) {
+    clearTimeout(updateDashboardTimeout);
+  }
+  
+  // Usar debouncing para evitar llamadas muy rápidas
+  updateDashboardTimeout = setTimeout(async () => {
+    isUpdating = true;
+    console.log('=== updateDashboardUI LLAMADA ===');
+    console.log('Filtros actuales al momento de la llamada:', JSON.stringify(activeFilters));
+    
+    try {
+      const response = await fetchDashboardData();
+      console.log('fetchDashboardData response:', response);
+      if (!response) return;
+      
+      // Soportar ambas rutas posibles para filterOptions
+      let filterOptions = null;
+      if (response.filterOptions) {
+        filterOptions = response.filterOptions;
+      } else if (response.data && response.data.filterOptions) {
+        filterOptions = response.data.filterOptions;
+      }
+      if (filterOptions) {
+        console.log('Llenando filtros con:', filterOptions);
+        populateFilters(filterOptions);
+      }
+      
+      // Indicadores superiores
+      const metrics = response.data && response.data.metrics ? response.data.metrics : response.metrics;
+      if (metrics) renderTopMetrics(metrics);
+      
+      // Gráficos - Crear SOLO la primera vez, luego solo actualizar datos
+      const charts = response.data && response.data.charts ? response.data.charts : response.charts;
+      if (charts) {
+        if (!chartsCreated) {
+          console.log('Creando gráficos por primera vez');
+          createAllChartsOnce(charts);
+          chartsCreated = true;
+        } else {
+          console.log('Actualizando datos de gráficos existentes SIN recrear');
+          updateAllChartsData(charts);
+        }
+      }
+      
+      // Tabla de detalle
+      const detailTable = response.data && response.data.detail_table ? response.data.detail_table : response.detail_table;
+      if (detailTable) renderDetailTable(detailTable);
+      
+    } catch (error) {
+      console.error('Error en updateDashboardUI:', error);
+    } finally {
+      isUpdating = false;
+    }
+  }, 100); // Debounce de 100ms
+}
+
+// Crear todos los gráficos UNA SOLA VEZ
+function createAllChartsOnce(charts) {
+  // Crear gráfico de hub con handler persistente
+  renderHubChart(charts.hub_distribution);
+  
+  // Crear gráfico de status con handler persistente  
+  renderStatusChart(charts.delivery_status);
+  
+  // Crear otros gráficos
+  createPieChart("transportChart", charts.transport_type, "transportLegend", function(evt, elements) {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const value = charts.transport_type[idx].values && charts.transport_type[idx].values[0];
+      if (activeFilters.transport.includes(value)) {
+        activeFilters.transport = [];
+      } else {
+        activeFilters.transport = [value];
+      }
+      updateDashboardUI();
+    }
+  });
+  
+  createPieChart("delayChart", charts.delay_reasons, "delayLegend", function(evt, elements) {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const motivo = charts.delay_reasons[idx].name;
+      if (activeFilters.delay_reason.includes(motivo)) {
+        activeFilters.delay_reason = [];
+      } else {
+        activeFilters.delay_reason = [motivo];
+      }
+      updateDashboardUI();
+    }
+  });
+  
+  createPieChart("stageChart", charts.pos_by_stage, "stageLegend", function(evt, elements) {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const stageName = charts.pos_by_stage[idx].name;
+      if (activeFilters.stage.includes(stageName)) {
+        activeFilters.stage = [];
+      } else {
+        activeFilters.stage = [stageName];
+      }
+      updateDashboardUI();
+    }
+  });
+  
+  // Forzar pointer-events:auto en los canvas para asegurar que reciban clicks
+  document.getElementById('delayChart').style.pointerEvents = 'auto';
+  document.getElementById('stageChart').style.pointerEvents = 'auto';
+}
+
+// Actualizar solo datos de gráficos existentes SIN recrear
+function updateAllChartsData(charts) {
+  // Actualizar hub chart
+  if (hubChartInstance && charts.hub_distribution) {
+    updateHubChartDataOnly(charts.hub_distribution);
+  }
+  
+  // Actualizar status chart
+  if (statusChartInstance && charts.delivery_status) {
+    updateStatusChartDataOnly(charts.delivery_status);
+  }
+  
+  // Actualizar otros charts
+  if (charts.transport_type) {
+    updateChartDataOnly("transportChart", "transportLegend", charts.transport_type);
+  }
+  if (charts.delay_reasons) {
+    updateChartDataOnly("delayChart", "delayLegend", charts.delay_reasons);
+  }
+  if (charts.pos_by_stage) {
+    updateChartDataOnly("stageChart", "stageLegend", charts.pos_by_stage);
+  }
+}
+
+// Funciones para actualizar SOLO datos sin recrear gráficos
+function updateHubChartDataOnly(hubData) {
+  if (!hubChartInstance) return;
+  
+  console.log('Actualizando SOLO datos del gráfico de hub');
+  const labels = hubData.map(item => item.name);
+  const data = hubData.map(item => item.percentage);
+  const ids = hubData.map(item => String(item.id));
+  const colors = ["#565aff", "#9aabff", "#ff3459", "#f46844", "#c9cfff", "#5ae7f4", "#5dd595"];
+  
+  // Aplicar lógica de aclarado
+  let backgroundColors = colors.slice(0, data.length);
+  if (activeFilters.hub_id && activeFilters.hub_id.length > 0) {
+    const activeHubIds = activeFilters.hub_id.map(id => String(id));
+    backgroundColors = ids.map((id, idx) => activeHubIds.includes(id) ? colors[idx % colors.length] : colors[idx % colors.length] + '33');
+  }
+  
+  // Actualizar datos del gráfico SIN recrear
+  hubChartInstance.data.labels = labels;
+  hubChartInstance.data.datasets[0].data = data;
+  hubChartInstance.data.datasets[0].backgroundColor = backgroundColors;
+  hubChartInstance.update('none'); // Sin animación para ser más rápido
+  
+  // Actualizar leyenda
+  const legendContainer = document.getElementById('hubLegend');
+  legendContainer.innerHTML = '';
+  hubData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.percentage}%</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+function updateStatusChartDataOnly(statusData) {
+  if (!statusChartInstance) return;
+  
+  console.log('Actualizando SOLO datos del gráfico de status');
+  const labels = statusData.map(item => item.name);
+  const data = statusData.map(item => item.percentage);
+  const values = statusData.map(item => item.name); // "On Time" o "Atrasado"
+  const colors = ["#565aff", "#c9cfff", "#ff3459", "#f46844"];
+  
+  // Aplicar lógica de aclarado igual que en hub chart
+  let backgroundColors = colors.slice(0, data.length);
+  if (activeFilters.status && activeFilters.status.length > 0) {
+    backgroundColors = statusData.map((item, idx) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
+      return isSelected ? colors[idx % colors.length] : colors[idx % colors.length] + '33';
+    });
+  }
+  
+  // Actualizar datos del gráfico SIN recrear
+  statusChartInstance.data.labels = labels;
+  statusChartInstance.data.datasets[0].data = data;
+  statusChartInstance.data.datasets[0].backgroundColor = backgroundColors;
+  statusChartInstance.update('none'); // Sin animación
+  
+  // Actualizar leyenda
+  const legendContainer = document.getElementById('statusLegend');
+  legendContainer.innerHTML = '';
+  statusData.forEach((item, i) => {
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${item.percentage}%</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+function updateChartDataOnly(canvasId, legendId, data) {
+  const chart = window[canvasId];
+  if (!chart) return;
+  
+  console.log(`Actualizando SOLO datos del gráfico: ${canvasId}`);
+  
+  // Aplicar lógica de aclarado basada en el tipo de gráfico
+  let backgroundColors = data.map((item) => item.color);
+  
+  if (canvasId === 'transportChart' && activeFilters.transport && activeFilters.transport.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.transport.includes(val));
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'statusChart' && activeFilters.status && activeFilters.status.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'delayChart' && activeFilters.delay_reason && activeFilters.delay_reason.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = activeFilters.delay_reason.includes(item.name);
+      return isSelected ? item.color : item.color + '33';
+    });
+  } else if (canvasId === 'stageChart' && activeFilters.stage && activeFilters.stage.length > 0) {
+    backgroundColors = data.map((item) => {
+      const isSelected = activeFilters.stage.includes(item.name);
+      return isSelected ? item.color : item.color + '33';
+    });
+  }
+  
+  // Actualizar datos del gráfico SIN recrear
+  chart.data.labels = data.map((item) => item.name);
+  chart.data.datasets[0].data = data.map((item) => item.value);
+  chart.data.datasets[0].backgroundColor = backgroundColors;
+  chart.update('none'); // Sin animación
+  
+  // Actualizar leyenda
+  const legendContainer = document.getElementById(legendId);
+  legendContainer.innerHTML = "";
+  data.forEach((item) => {
+    const legendItem = document.createElement("div");
+    legendItem.className = "legend-item";
+    legendItem.innerHTML = `
+      <div class="legend-label">
+        <div class="legend-color" style="background-color: ${item.color}"></div>
+        <span>${item.name}</span>
+      </div>
+      <span>${typeof item.percentage !== 'undefined' ? item.percentage + '%' : item.value}</span>
+    `;
+    legendContainer.appendChild(legendItem);
+  });
 }
 
 // Efecto de aclarado en los gráficos
@@ -137,6 +858,15 @@ function syncMultiSelectsWithFilters() {
     });
     updateMultiSelectDisplay(categoriaGroup);
   }
+  // Vendor (antes Categoría)
+  const vendorGroup = document.querySelectorAll('.filter-group')[1];
+  if (vendorGroup) {
+    const checkboxes = vendorGroup.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = activeFilters.vendor_id.includes(Number(cb.value));
+    });
+    updateMultiSelectDisplay(vendorGroup);
+  }
   // Puedes agregar lógica similar para otros filtros multi-select si los implementas
 }
 
@@ -153,72 +883,7 @@ function updateMultiSelectDisplay(multiSelectGroup) {
   }
 }
 
-// Actualizar el color de los gráficos según los filtros activos
-function syncChartsWithFilters() {
-  // Hub
-  const hubChart = Chart.getChart('hubChart');
-  if (hubChart) {
-    hubChart.data.datasets[0].backgroundColor = hubOriginalColors.map((color, idx) => {
-      if (activeFilters.hub_id.length === 0) return color;
-      return activeFilters.hub_id.includes(hubData[idx].hub_id) ? color : color + '33';
-    });
-    hubChart.update();
-  }
-  // Estado entrega
-  const statusChart = Chart.getChart('statusChart');
-  if (statusChart) {
-    statusChart.data.datasets[0].backgroundColor = statusOriginalColors.map((color, idx) => {
-      if (activeFilters.status.length === 0) return color;
-      return activeFilters.status.includes(deliveryStatusData[idx].status) ? color : color + '33';
-    });
-    statusChart.update();
-  }
-  // Tipo de transporte
-  const transportChart = Chart.getChart('transportChart');
-  if (transportChart) {
-    transportChart.data.datasets[0].backgroundColor = transportOriginalColors.map((color, idx) => {
-      if (activeFilters.transport.length === 0) return color;
-      return activeFilters.transport.includes(transportTypeData[idx].transport) ? color : color + '33';
-    });
-    transportChart.update();
-  }
-  // Motivo de atraso
-  const delayChart = Chart.getChart('delayChart');
-  if (delayChart) {
-    delayChart.data.datasets[0].backgroundColor = delayOriginalColors.map((color, idx) => {
-      if (activeFilters.delay_reason.length === 0) return color;
-      // Mapea el label a valor
-      const delayMap = {
-        "Problemas de transporte": "transporte",
-        "Error documental": "documental",
-        "Clima adverso": "clima",
-        "Retraso en aduana": "aduana",
-        "Demora en despacho": "despacho"
-      };
-      const value = delayMap[delayReasonsData[idx].name];
-      return activeFilters.delay_reason.includes(value) ? color : color + '33';
-    });
-    delayChart.update();
-  }
-  // PO's por etapa
-  const stageChart = Chart.getChart('stageChart');
-  if (stageChart) {
-    stageChart.data.datasets[0].backgroundColor = stageOriginalColors.map((color, idx) => {
-      if (activeFilters.stage.length === 0) return color;
-      const stageValue = (idx + 1).toString();
-      return activeFilters.stage.includes(stageValue) ? color : color + '33';
-    });
-    stageChart.update();
-  }
-}
-
-// Centralizar la actualización de todo el estado visual y de datos
-function updateDashboardUI() {
-  syncMultiSelectsWithFilters();
-  syncChartsWithFilters();
-  updateFilteredTable();
-  updateClearFiltersButton();
-}
+// Función syncChartsWithFilters eliminada - los gráficos se actualizan automáticamente con datos del backend
 
 // MULTISELECT REUTILIZABLE
 (function() {
@@ -337,49 +1002,6 @@ function setupChartClickFilters() {
   });
 }
 
-// Gráficos
-function createPieChart(canvasId, data, legendId, onClickHandler) {
-  const ctx = document.getElementById(canvasId).getContext("2d");
-  const chart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: data.map((item) => item.name),
-      datasets: [
-        {
-          data: data.map((item) => item.value),
-          backgroundColor: data.map((item) => item.color),
-          borderWidth: 0,
-          cutout: "30%",
-        },
-      ],
-    },
-    options: {
-      responsive: false,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-      },
-      onClick: onClickHandler || undefined,
-    },
-  });
-  window[canvasId] = chart;
-  // Leyenda
-  const legendContainer = document.getElementById(legendId);
-  legendContainer.innerHTML = "";
-  data.forEach((item) => {
-    const legendItem = document.createElement("div");
-    legendItem.className = "legend-item";
-    legendItem.innerHTML = `
-      <div class="legend-label">
-        <div class="legend-color" style="background-color: ${item.color}"></div>
-        <span>${item.name}</span>
-      </div>
-      <span>${item.value}%</span>
-    `;
-    legendContainer.appendChild(legendItem);
-  });
-}
-
 // Tabla de detalle
 function populateDetailTable() {
   const tbody = document.getElementById("detailTableBody");
@@ -432,6 +1054,7 @@ function selectMultiSelectOption(filterType, value) {
   if (!activeFilters[key].includes(value)) {
     activeFilters[key].push(value);
   }
+  console.log('activeFilters.transport:', activeFilters.transport);
   updateDashboardUI();
 }
 
@@ -444,74 +1067,14 @@ function clearAllFilters() {
   activeFilters.transport = [];
   activeFilters.delay_reason = [];
   activeFilters.stage = [];
+  activeFilters.date_from = null;
+  activeFilters.date_to = null;
+  activeFilters.vendor_id = [];
   updateDashboardUI();
   updateClearFiltersButton();
 }
 
-// Inicialización
-window.addEventListener("DOMContentLoaded", () => {
-  // Gráficos
-  createPieChart("hubChart", hubData, "hubLegend", function(evt, elements) {
-    if (elements.length > 0) {
-      const idx = elements[0].index;
-      const hubId = hubData[idx].hub_id;
-      selectMultiSelectOption('categoría', hubId);
-    }
-  });
-  createPieChart("statusChart", deliveryStatusData, "statusLegend", function(evt, elements) {
-    if (elements.length > 0) {
-      const idx = elements[0].index;
-      const status = deliveryStatusData[idx].status;
-      selectMultiSelectOption('status', status);
-    }
-  });
-  createPieChart("transportChart", transportTypeData, "transportLegend", function(evt, elements) {
-    if (elements.length > 0) {
-      const idx = elements[0].index;
-      const transport = transportTypeData[idx].transport;
-      selectMultiSelectOption('transport', transport);
-    }
-  });
-  createPieChart("delayChart", delayReasonsData, "delayLegend", function(evt, elements) {
-    if (elements.length > 0) {
-      const idx = elements[0].index;
-      // Mapear el nombre a un valor de delay_reason
-      const delayMap = {
-        "Problemas de transporte": "transporte",
-        "Error documental": "documental",
-        "Clima adverso": "clima",
-        "Retraso en aduana": "aduana",
-        "Demora en despacho": "despacho"
-      };
-      const delayLabel = delayReasonsData[idx].name;
-      const delayValue = delayMap[delayLabel];
-      selectMultiSelectOption('delay_reason', delayValue);
-    }
-  });
-  const stageDataWithNumbers = posByStageData.map((item, index) => ({ ...item, name: `${index + 1}` }));
-  createPieChart("stageChart", stageDataWithNumbers, "stageLegend", function(evt, elements) {
-    if (elements.length > 0) {
-      const idx = elements[0].index;
-      const stage = (idx + 1).toString();
-      selectMultiSelectOption('stage', stage);
-    }
-  });
-  // Tabla y UI
-  updateDashboardUI();
-  // Modales
-  document.getElementById("showSuccessBtn").addEventListener("click", () => showModal("successModal"));
-  document.getElementById("showErrorBtn").addEventListener("click", () => showModal("errorModal"));
-  document.getElementById("closeSuccessBtn").addEventListener("click", () => hideModal("successModal"));
-  document.getElementById("closeErrorBtn").addEventListener("click", () => hideModal("errorModal"));
-  document.getElementById("successModal").addEventListener("click", (e) => { if (e.target.id === "successModal") hideModal("successModal"); });
-  document.getElementById("errorModal").addEventListener("click", (e) => { if (e.target.id === "errorModal") hideModal("errorModal"); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { hideModal("successModal"); hideModal("errorModal"); } });
-  // Asocia el botón de borrar filtros a la función
-  const clearBtn = document.getElementById("clearFiltersBtn");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", clearAllFilters);
-  }
-});
+// Código de inicialización obsoleto eliminado - los gráficos se renderizan con datos reales del backend
 
 function updateClearFiltersButton() {
   const clearBtn = document.getElementById("clearFiltersBtn");
@@ -523,7 +1086,169 @@ function updateClearFiltersButton() {
     activeFilters.material_type.length > 0 ||
     activeFilters.transport.length > 0 ||
     activeFilters.delay_reason.length > 0 ||
-    activeFilters.stage.length > 0
+    activeFilters.stage.length > 0 ||
+    activeFilters.date_from ||
+    activeFilters.date_to ||
+    activeFilters.vendor_id.length > 0
   );
   clearBtn.style.display = anyActive ? "block" : "none";
 }
+
+// --- INICIO: Conexión de multifiltros superiores ---
+function applyTopFilters() {
+  // Fecha
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  activeFilters.date_from = startDate || null;
+  activeFilters.date_to = endDate || null;
+
+  // Vendor (filtro múltiple)
+  const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
+  if (vendorGroup) {
+    const checked = vendorGroup.querySelectorAll('input[type="checkbox"]:checked');
+    activeFilters.vendor_id = Array.from(checked).map(cb => cb.value);
+  }
+
+  // Producto (filtro múltiple)
+  const productoGroup = document.querySelector('.filter-group[data-filter="product"]');
+  if (productoGroup) {
+    const checked = productoGroup.querySelectorAll('input[type="checkbox"]:checked');
+    activeFilters.product_id = Array.from(checked).map(cb => cb.value);
+  }
+
+  // Material (filtro múltiple)
+  const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
+  if (materialGroup) {
+    const checked = materialGroup.querySelectorAll('input[type="checkbox"]:checked');
+    activeFilters.material_type = Array.from(checked).map(cb => cb.value);
+  }
+}
+
+// Inicialización principal del dashboard
+document.addEventListener('DOMContentLoaded', () => {
+  // Configurar botón Aceptar
+  const aceptarBtn = document.querySelector('.action-buttons .btn-primary');
+  if (aceptarBtn) {
+    aceptarBtn.addEventListener('click', () => {
+      applyTopFilters();
+      updateDashboardUI();
+    });
+  }
+  
+  // Configurar modales
+  const closeSuccessBtn = document.getElementById("closeSuccessBtn");
+  const closeErrorBtn = document.getElementById("closeErrorBtn");
+  if (closeSuccessBtn) closeSuccessBtn.addEventListener("click", () => hideModal("successModal"));
+  if (closeErrorBtn) closeErrorBtn.addEventListener("click", () => hideModal("errorModal"));
+  document.addEventListener("keydown", (e) => { 
+    if (e.key === "Escape") { 
+      hideModal("successModal"); 
+      hideModal("errorModal"); 
+    } 
+  });
+  
+  // Configurar botón borrar filtros
+  const clearBtn = document.getElementById("clearFiltersBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", clearAllFilters);
+  }
+  
+  // Configurar inputs de fecha
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput = document.getElementById('endDate');
+  if (startDateInput) {
+    startDateInput.type = 'date';
+    startDateInput.addEventListener('change', () => {
+      activeFilters.date_from = startDateInput.value || null;
+      updateDashboardUI();
+    });
+  }
+  if (endDateInput) {
+    endDateInput.type = 'date';
+    endDateInput.addEventListener('change', () => {
+      activeFilters.date_to = endDateInput.value || null;
+      updateDashboardUI();
+    });
+  }
+  
+  // Cargar datos iniciales del dashboard
+  updateDashboardUI();
+});
+// --- FIN: Conexión de multifiltros superiores ---
+
+// --- INICIO: Poblar filtros dinámicamente y eliminar valores mock ---
+function populateFilters(filterOptions) {
+  console.log('populateFilters called', filterOptions);
+  // Productos
+  const productoGroup = document.querySelector('.filter-group[data-filter="product"]');
+  if (productoGroup) {
+    const optionsBox = productoGroup.querySelector('.multi-select-options');
+    while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+    filterOptions.products.forEach(product => {
+      const label = document.createElement('label');
+      label.className = 'multi-select-option';
+      label.innerHTML = `<input type="checkbox" value="${product.id}"> ${product.name}`;
+      optionsBox.appendChild(label);
+    });
+    // Seleccionar todos
+    const selectAll = document.createElement('div');
+    selectAll.className = 'multi-select-option';
+    selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
+    optionsBox.appendChild(selectAll);
+    selectAll.querySelector('input').addEventListener('change', function() {
+      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
+      all.forEach(cb => cb.checked = this.checked);
+    });
+  }
+  // Materiales
+  const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
+  if (materialGroup) {
+    const optionsBox = materialGroup.querySelector('.multi-select-options');
+    while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+    let materials = filterOptions.materials;
+    if (materials && !Array.isArray(materials)) {
+      materials = Object.values(materials);
+    }
+    if (materials && Array.isArray(materials)) {
+      materials.forEach(material => {
+        const label = document.createElement('label');
+        label.className = 'multi-select-option';
+        label.innerHTML = `<input type="checkbox" value="${material}"> ${material}`;
+        optionsBox.appendChild(label);
+      });
+    }
+    // Seleccionar todos
+    const selectAll = document.createElement('div');
+    selectAll.className = 'multi-select-option';
+    selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
+    optionsBox.appendChild(selectAll);
+    selectAll.querySelector('input').addEventListener('change', function() {
+      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
+      all.forEach(cb => cb.checked = this.checked);
+    });
+  }
+  // Vendor
+  const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
+  if (vendorGroup) {
+    const optionsBox = vendorGroup.querySelector('.multi-select-options');
+    while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+    filterOptions.vendors.forEach(vendor => {
+      const label = document.createElement('label');
+      label.className = 'multi-select-option';
+      label.innerHTML = `<input type="checkbox" value="${vendor.id}"> ${vendor.name}`;
+      optionsBox.appendChild(label);
+    });
+    // Seleccionar todos
+    const selectAll = document.createElement('div');
+    selectAll.className = 'multi-select-option';
+    selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
+    optionsBox.appendChild(selectAll);
+    selectAll.querySelector('input').addEventListener('change', function() {
+      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
+      all.forEach(cb => cb.checked = this.checked);
+    });
+  }
+}
+
+// Esta función duplicada fue eliminada - usar solo la de la línea 486
+// --- FIN: Poblar filtros dinámicamente y eliminar valores mock ---
