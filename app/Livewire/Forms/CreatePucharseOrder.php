@@ -929,6 +929,27 @@ class CreatePucharseOrder extends Component
                     }
                 }
 
+                $notificationService = app(\App\Services\NotificationService::class);
+
+                // Create notification for all users
+                $notifications = $notificationService->notifyAll(
+                    'po_hub_real',
+                    'Hub Real Diferente',
+                    "La orden de compra {$this->order_number} se creó con un hub real ({$actualHub->name}) diferente al hub planificado ({$plannedHub->name})",
+                    [
+                        'order_number' => $this->order_number,
+                        'planned_hub' => $plannedHub->name,
+                        'actual_hub' => $actualHub->name,
+                        'order_id' => $purchaseOrder->id,
+                        'type' => 'hub_change'
+                    ]
+                );
+
+                \Log::info('Notificación enviada correctamente', [
+                    'notifications' => $notifications,
+                    'type' => 'po_hub_real'
+                ]);
+
                 $this->dispatch('open-modal', 'modal-purchase-order-created');
 
             } catch (\Exception $e) {
