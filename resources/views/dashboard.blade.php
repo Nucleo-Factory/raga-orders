@@ -35,13 +35,57 @@
                 border: 2px solid #7288FF;
                 margin-top: 0.25rem;
                 box-shadow: 0 2px 8px rgba(86,90,255,0.08);
+                max-height: 70vh;
+                overflow-y: auto;
+                z-index: 9999;
             }
+            
+            /* Mejorar scrollbar para multi-select */
+            .multi-select-content::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .multi-select-content::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+            
+            .multi-select-content::-webkit-scrollbar-thumb {
+                background: #565AFF;
+                border-radius: 4px;
+            }
+            
+            .multi-select-content::-webkit-scrollbar-thumb:hover {
+                background: #434ad1;
+            }
+            
+            /* Mejor separación visual para las opciones */
+            .multi-select-option {
+                border-bottom: 1px solid #f0f0f0;
+                padding: 4px 8px;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                font-size: 13px;
+                line-height: 1.2;
+            }
+            
+            .multi-select-option:last-child {
+                border-bottom: none;
+            }
+            
+            .multi-select-option:hover {
+                background-color: #f8f9ff;
+            }
+            
+
             .multi-select-search-input {
                 border-radius: 0.5rem;
                 border: 1px solid #7288FF;
-                padding: 0.25rem 0.5rem;
-                margin-bottom: 0.25rem;
+                padding: 0.125rem 0.375rem;
+                margin-bottom: 0.125rem;
                 width: 100%;
+                font-size: 12px;
             }
             .multi-select-value {
                 color: #565AFF;
@@ -74,9 +118,9 @@
             <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar vendors</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08); max-height: 70vh; overflow-y: auto;">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
+              <input type="text" placeholder="Buscar vendors... (ESC para limpiar)" class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
             <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
@@ -90,9 +134,9 @@
             <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar productos</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08); max-height: 70vh; overflow-y: auto;">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
+              <input type="text" placeholder="Buscar productos... (ESC para limpiar)" class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
             <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
@@ -106,9 +150,9 @@
             <span class="multi-select-value" style="color: #AFAFAF;">Seleccionar materiales</span>
             <i class="fas fa-chevron-down multi-select-icon"></i>
           </button>
-          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08);">
+          <div class="multi-select-content" style="border-radius: 10px; border: 2px solid #7288FF; margin-top: 0.25rem; box-shadow: 0 2px 8px rgba(86,90,255,0.08); max-height: 70vh; overflow-y: auto;">
             <div class="multi-select-search">
-              <input type="text" placeholder="Buscar..." class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
+              <input type="text" placeholder="Buscar materiales... (ESC para limpiar)" class="multi-select-search-input" style="color: #222; font-size: 16px; font-family: 'Lato', sans-serif;">
             </div>
             <div class="multi-select-options"></div>
             <div class="multi-select-clear">Limpiar selección</div>
@@ -150,7 +194,7 @@
         <h3 class="chart-title">Entregas por hub</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="hubChart" width="160" height="160"></canvas>
+            <canvas id="hubChart" width="136" height="136"></canvas>
           </div>
           <div class="chart-legend" id="hubLegend"></div>
         </div>
@@ -160,7 +204,7 @@
         <h3 class="chart-title">Estado entrega</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="statusChart" width="160" height="160"></canvas>
+            <canvas id="statusChart" width="136" height="136"></canvas>
           </div>
           <div class="chart-legend" id="statusLegend"></div>
         </div>
@@ -170,7 +214,7 @@
         <h3 class="chart-title">Tipo de transporte</h3>
         <div class="chart-content">
           <div class="chart-container">
-            <canvas id="transportChart" width="160" height="160"></canvas>
+            <canvas id="transportChart" width="136" height="136"></canvas>
           </div>
           <div class="chart-legend" id="transportLegend"></div>
         </div>
@@ -178,11 +222,11 @@
     </div>
 
     <!-- Bottom Section -->
-    <div class="bottom-section">
+    <div class="bottom-section" style="display: flex; gap: 16px; margin-top: 24px; align-items: stretch; min-height: 600px;">
       <!-- Detail Table -->
-      <div class="table-card">
+      <div class="table-card" style="flex: 2; display: flex; flex-direction: column; height: 600px;">
         <h3 class="chart-title">Detalle</h3>
-        <div class="table-container">
+        <div class="table-container" style="flex: 1; overflow-y: auto; height: calc(100% - 40px); border: 1px solid #f3f4f6; border-radius: 8px;">
           <table class="detail-table">
             <thead>
               <tr>
@@ -200,24 +244,24 @@
       </div>
 
       <!-- Right Charts Column - Apilados verticalmente con alturas específicas -->
-      <div class="right-charts-vertical">
+      <div class="right-charts-vertical" style="display: flex; flex-direction: column; gap: 32px; flex: 1; height: 600px;">
         <!-- Motivo de atraso: 1/3 de la altura -->
-        <div class="chart-card delay-chart-small">
+        <div class="chart-card delay-chart-small" style="flex: 1.3; max-height: 280px; min-height: 220px;">
           <h3 class="chart-title">Motivo de atraso</h3>
           <div class="chart-content">
             <div class="chart-container">
-              <canvas id="delayChart" width="160" height="160"></canvas>
+              <canvas id="delayChart" width="136" height="136"></canvas>
             </div>
             <div class="chart-legend" id="delayLegend"></div>
           </div>
         </div>
 
         <!-- PO's por etapa: 2/3 de la altura -->
-        <div class="chart-card stage-chart-large">
+        <div class="chart-card stage-chart-large" style="flex: 2; min-height: 300px;">
           <h3 class="chart-title">PO's por etapa</h3>
           <div class="chart-content">
             <div class="chart-container">
-              <canvas id="stageChart" width="160" height="160"></canvas>
+              <canvas id="stageChart" width="136" height="136"></canvas>
             </div>
             <div class="chart-legend" id="stageLegend"></div>
           </div>
@@ -265,5 +309,6 @@
             window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         </script>
         <script src="{{ asset('js/main.js') }}"></script>
+        <link rel="stylesheet" href="{{ asset('css/table-fix.css') }}">
     @endpush
 </x-app-layout>

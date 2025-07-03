@@ -35,20 +35,31 @@ class DashboardService
             Log::info('Getting on-time and delayed metrics...');
             $onTimeDelayedQuery = $this->getBaseQuery($filters)
                 ->whereNotNull('date_ata')
-                ->whereNotNull('date_required_in_destination')
+                ->whereNotNull('date_required_in_destination');
+                
+            $totalWithDates = (clone $onTimeDelayedQuery)->count();
+            $totalWithoutDates = $totalPOs - $totalWithDates;
+            
+            $result = $onTimeDelayedQuery
                 ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN date_ata <= date_required_in_destination THEN 1 ELSE 0 END) as on_time_count,
                     SUM(CASE WHEN date_ata > date_required_in_destination THEN 1 ELSE 0 END) as delayed_count
-                ');
-            $result = $onTimeDelayedQuery->first();
+                ')
+                ->first();
+                
             $total = $result->total ?? 0;
             $onTimeCount = $result->on_time_count ?? 0;
             $delayedCount = $result->delayed_count ?? 0;
-            $onTimePercentage = $total > 0 ? round(($onTimeCount / $total) * 100, 1) : 0;
-            $delayedPercentage = $total > 0 ? round(($delayedCount / $total) * 100, 1) : 0;
+            
+            // Calculamos los porcentajes sobre el total de órdenes, no solo las que tienen fechas
+            $onTimePercentage = $totalPOs > 0 ? round(($onTimeCount / $totalPOs) * 100, 1) : 0;
+            $delayedPercentage = $totalPOs > 0 ? round(($delayedCount / $totalPOs) * 100, 1) : 0;
+            
             Log::info('On-time/delayed metrics', [
-                'total' => $total,
+                'total_pos' => $totalPOs,
+                'total_with_dates' => $totalWithDates,
+                'total_without_dates' => $totalWithoutDates,
                 'on_time_count' => $onTimeCount,
                 'delayed_count' => $delayedCount,
                 'on_time_percentage' => $onTimePercentage,
@@ -248,31 +259,60 @@ class DashboardService
         $filtersSinStatus = $filters;
         unset($filtersSinStatus['status']);
         \Log::info('getDeliveryStatus - Filtros usados (SIN filtro status)', $filtersSinStatus);
-        $baseQuery = $this->getBaseQuery($filtersSinStatus)
+        
+        // Primero, obtenemos el total de órdenes con los filtros aplicados
+        $baseQueryTotal = $this->getBaseQuery($filtersSinStatus);
+        $totalOrders = (clone $baseQueryTotal)->count();
+        
+        // Luego, filtramos solo las que tienen las fechas necesarias para calcular el estado
+        $baseQuery = (clone $baseQueryTotal)
             ->whereNotNull('date_ata')
             ->whereNotNull('date_required_in_destination');
         
+        $totalWithDates = (clone $baseQuery)->count();
+        $totalWithoutDates = $totalOrders - $totalWithDates;
+        
         // NO aplicar filtro de estado aquí - calcular distribución total
-        $total = (clone $baseQuery)->count();
         $query = (clone $baseQuery)
             ->selectRaw("CASE WHEN date_ata <= date_required_in_destination THEN 'On Time' ELSE 'Atrasado' END AS estado, COUNT(*) AS total_pos")
             ->groupBy(DB::raw("CASE WHEN date_ata <= date_required_in_destination THEN 'On Time' ELSE 'Atrasado' END"));
         $raw = $query->get();
         $resultByName = collect($raw)->keyBy('estado');
+        
+        // Definimos todos los estados posibles
         $allStatus = collect([
             (object)['name' => 'On Time', 'color' => '#565aff'],
             (object)['name' => 'Atrasado', 'color' => '#c9cfff'],
+            (object)['name' => 'Sin datos', 'color' => '#f0f0f0'],
         ]);
-        return $allStatus->map(function($cat) use ($resultByName, $total) {
-            $item = $resultByName->get($cat->name);
-            return [
-                'name' => $cat->name,
-                'value' => $item ? (int)$item->total_pos : 0,
-                'percentage' => $total > 0 ? round(100.0 * ($item ? $item->total_pos : 0) / $total, 1) : 0,
-                'color' => $cat->color,
-                'values' => [$cat->name],
-            ];
-        })->values(); // Mostrar TODOS los estados, incluso con 0
+        
+        $result = $allStatus->map(function($cat) use ($resultByName, $totalOrders, $totalWithoutDates) {
+            if ($cat->name === 'Sin datos') {
+                // Para el estado "Sin datos", usamos el contador de órdenes sin fechas
+                return [
+                    'name' => $cat->name,
+                    'value' => $totalWithoutDates,
+                    'percentage' => $totalOrders > 0 ? round(100.0 * $totalWithoutDates / $totalOrders, 1) : 0,
+                    'color' => $cat->color,
+                    'values' => [$cat->name],
+                ];
+            } else {
+                // Para los otros estados, usamos los resultados de la consulta
+                $item = $resultByName->get($cat->name);
+                return [
+                    'name' => $cat->name,
+                    'value' => $item ? (int)$item->total_pos : 0,
+                    'percentage' => $totalOrders > 0 ? round(100.0 * ($item ? $item->total_pos : 0) / $totalOrders, 1) : 0,
+                    'color' => $cat->color,
+                    'values' => [$cat->name],
+                ];
+            }
+        })->filter(function($item) {
+            // Solo mostrar estados con valores > 0
+            return $item['value'] > 0;
+        })->values();
+        
+        return $result;
     }
 
     private function getTransportType(array $filters): Collection
@@ -298,7 +338,7 @@ class DashboardService
         $allTypes = collect([
             (object)['name' => 'MARITIMO', 'color' => '#565aff', 'values' => ['maritimo']],
             (object)['name' => 'AEREO', 'color' => '#ff3459', 'values' => ['aereo']],
-            (object)['name' => 'SIN ESPECIFICAR', 'color' => '#c9cfff', 'values' => [null, '']],
+            (object)['name' => 'SIN ESPECIFICAR', 'color' => '#c9cfff', 'values' => ['SIN_ESPECIFICAR']],
         ]);
         return $allTypes->map(function($cat) use ($counts, $total) {
             return [
@@ -384,12 +424,14 @@ class DashboardService
             ->orderBy('position')
             ->get(['id', 'name', 'color']);
 
-        // Agrupar por etapa real de los POs filtrados
+        // Agrupar por etapa real de los POs filtrados (incluyendo las que no tienen etapa)
         $query = $baseQuery
-            ->join('kanban_statuses as ks', 'purchase_orders.kanban_status_id', '=', 'ks.id')
-            ->where('ks.kanban_board_id', 1)
-            ->select('ks.name as stage', \DB::raw('COUNT(purchase_orders.id) as total_pos'))
-            ->groupBy('ks.name');
+            ->leftJoin('kanban_statuses as ks', 'purchase_orders.kanban_status_id', '=', 'ks.id')
+            ->select(
+                \DB::raw('COALESCE(ks.name, \'Sin etapa\') as stage'), 
+                \DB::raw('COUNT(purchase_orders.id) as total_pos')
+            )
+            ->groupBy(\DB::raw('COALESCE(ks.name, \'Sin etapa\')'));
         $raw = $query->get()->keyBy('stage');
 
         // Construir resultado con todas las etapas posibles
@@ -402,11 +444,23 @@ class DashboardService
                 'color' => $stage->color ?? '#c9cfff',
             ];
         });
+
+        // Agregar la categoría "Sin etapa" si hay POs sin etapa
+        $sinEtapaItem = $raw->get('Sin etapa');
+        if ($sinEtapaItem && (int)$sinEtapaItem->total_pos > 0) {
+            $result->push([
+                'name' => 'Sin etapa',
+                'value' => (int)$sinEtapaItem->total_pos,
+                'percentage' => $total > 0 ? round(100.0 * $sinEtapaItem->total_pos / $total, 1) : 0,
+                'color' => '#f0f0f0', // Color gris claro para "Sin etapa"
+            ]);
+        }
+
         return $result->sortByDesc('value')->values(); // Mostrar TODAS las etapas, incluso con 0
     }
 
     /**
-     * Get detail table data - Using user's exact corrected query
+     * Get detail table data - Show individual POs with order_number
      *
      * @param array $filters
      * @param int $limit
@@ -423,15 +477,14 @@ class DashboardService
             // --- USAR getBaseQuery PARA FILTROS CONSISTENTES ---
             $baseQuery = $this->getBaseQuery($filters);
             $query = $baseQuery
-                ->join('purchase_order_product as pp', 'purchase_orders.id', '=', 'pp.purchase_order_id')
+                ->leftJoin('purchase_order_product as pp', 'purchase_orders.id', '=', 'pp.purchase_order_id')
                 ->selectRaw('
+                    purchase_orders.order_number,
                     purchase_orders.order_date    AS dispatch_date,
                     purchase_orders.date_eta      AS eta,
-                    SUM(pp.quantity) AS total_kgs,
-                    COUNT(DISTINCT purchase_orders.order_number) AS total_pos
+                    COALESCE(SUM(pp.quantity), 0) AS total_kgs
                 ')
-                ->whereNotNull('purchase_orders.order_date')
-                ->groupBy('purchase_orders.order_date', 'purchase_orders.date_eta')
+                ->groupBy('purchase_orders.id', 'purchase_orders.order_number', 'purchase_orders.order_date', 'purchase_orders.date_eta')
                 ->orderBy('purchase_orders.order_date')
                 ->limit($limit);
 
@@ -449,14 +502,14 @@ class DashboardService
 
             $collection = $result->map(function ($item) {
                 Log::info('Processing detail table row', [
+                    'order_number' => $item->order_number,
                     'dispatch_date' => $item->dispatch_date,
                     'eta' => $item->eta,
-                    'total_kgs' => $item->total_kgs,
-                    'total_pos' => $item->total_pos
+                    'total_kgs' => $item->total_kgs
                 ]);
 
                 return [
-                    'po_number' => $item->total_pos, // Number of POs instead of individual PO number
+                    'po_number' => $item->order_number, // Show actual PO number instead of count
                     'fecha_salida' => $item->dispatch_date ? Carbon::parse($item->dispatch_date)->format('d/m/Y') : '-',
                     'fecha_estimada' => $item->eta ? Carbon::parse($item->eta)->format('d/m/Y') : '-',
                     'fecha_real' => '-', // Not used in this aggregated view
@@ -464,7 +517,7 @@ class DashboardService
                 ];
             });
 
-            Log::info('Detail table data retrieved using exact query', [
+            Log::info('Detail table data retrieved with individual POs', [
                 'count' => $collection->count(),
                 'sample' => $collection->take(3)->toArray()
             ]);
@@ -773,8 +826,18 @@ class DashboardService
                 Log::info('Filtro transport recibido:', ['transport' => $filters['transport']]);
                 $transports = is_array($filters['transport']) ? $filters['transport'] : [$filters['transport']];
                 $transports = array_filter($transports);
+                
                 if (!empty($transports)) {
-                    $query->whereIn('mode', $transports);
+                    $query->where(function($q) use ($transports) {
+                        foreach ($transports as $transport) {
+                            if ($transport === 'SIN_ESPECIFICAR') {
+                                $q->orWhereNull('mode')
+                                  ->orWhere('mode', '');
+                            } else {
+                                $q->orWhere('mode', $transport);
+                            }
+                        }
+                    });
                 }
             }
 

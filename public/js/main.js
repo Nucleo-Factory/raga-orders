@@ -246,15 +246,20 @@ function renderStatusChart(statusData) {
   
   const labels = statusData.map(item => item.name);
   const data = statusData.map(item => item.percentage);
-  const values = statusData.map(item => item.name); // "On Time" o "Atrasado"
-  const colors = ["#565aff", "#c9cfff", "#ff3459", "#f46844"];
+  const values = statusData.map(item => item.name); // "On Time", "Atrasado" o "Sin datos"
+  // Colores específicos para cada estado
+  const colors = {
+    "On Time": "#565aff",
+    "Atrasado": "#c9cfff",
+    "Sin datos": "#f0f0f0"
+  };
+  const backgroundColors = statusData.map(item => colors[item.name] || "#c9cfff");
   
   // Aplicar lógica de aclarado al crear el gráfico
-  let backgroundColors = colors.slice(0, data.length);
   if (activeFilters.status && activeFilters.status.length > 0) {
-    backgroundColors = statusData.map((item, idx) => {
-      const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
-      return isSelected ? colors[idx % colors.length] : colors[idx % colors.length] + '33';
+    backgroundColors.forEach((color, idx) => {
+      const isSelected = statusData[idx].values && statusData[idx].values.some(val => activeFilters.status.includes(val));
+      backgroundColors[idx] = isSelected ? color : color + '33';
     });
   }
   
@@ -276,6 +281,10 @@ function renderStatusChart(statusData) {
         if (elements.length > 0) {
           const idx = elements[0].index;
           const statusValue = values[idx];
+          
+          // No filtrar por "Sin datos" ya que no es un estado real
+          if (statusValue === "Sin datos") return;
+          
           if (activeFilters.status.includes(statusValue)) {
             activeFilters.status = activeFilters.status.filter(s => s !== statusValue);
           } else {
@@ -299,12 +308,12 @@ function renderStatusChart(statusData) {
   // Leyenda
   const legendContainer = document.getElementById('statusLegend');
   legendContainer.innerHTML = '';
-  statusData.forEach((item, i) => {
+  statusData.forEach((item) => {
     const legendItem = document.createElement('div');
     legendItem.className = 'legend-item';
     legendItem.innerHTML = `
       <div class="legend-label">
-        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <div class="legend-color" style="background-color: ${colors[item.name] || "#c9cfff"}"></div>
         <span>${item.name}</span>
       </div>
       <span>${item.percentage}%</span>
@@ -436,39 +445,73 @@ function renderDelayChart(delayData) {
   const ctx = document.getElementById('delayChart').getContext('2d');
   const prevChart = Chart.getChart('delayChart');
   if (prevChart) prevChart.destroy();
+  
+  // Limpiar el canvas para evitar problemas de eventos acumulados
+  const canvas = document.getElementById('delayChart');
+  canvas.replaceWith(canvas.cloneNode(true));
+  const cleanCtx = document.getElementById('delayChart').getContext('2d');
+  
   const labels = delayData.map(item => item.name);
-  const data = delayData.map(item => item.percentage);
+  const data = delayData.map(item => item.percentage > 0 ? item.percentage : 0.1); // Valor mínimo para visualización
+  const originalData = delayData.map(item => item.percentage); // Datos originales para tooltips
   const colors = ["#565aff", "#9aabff", "#5ae7f4", "#f46844", "#5dd595", "#c9cfff"];
-  new Chart(ctx, {
+  
+  // Aplicar lógica de aclarado si hay filtros activos
+  let backgroundColors = colors.slice(0, data.length);
+  if (activeFilters.delay_reason && activeFilters.delay_reason.length > 0) {
+    backgroundColors = labels.map((name, idx) => 
+      activeFilters.delay_reason.includes(name) ? colors[idx % colors.length] : colors[idx % colors.length] + '33');
+  }
+  
+  new Chart(cleanCtx, {
     type: 'doughnut',
     data: {
       labels,
       datasets: [{
         data,
-        backgroundColor: colors.slice(0, data.length),
+        backgroundColor: backgroundColors,
         borderWidth: 0,
         cutout: '70%',
       }],
     },
     options: {
-      responsive: false,
+      responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.label + ': ' + context.parsed + '%';
+              // Usar datos originales en tooltip
+              return context.label + ': ' + originalData[context.dataIndex] + '%';
             }
           }
+        }
+      },
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const motivo = labels[idx];
+          
+          if (activeFilters.delay_reason.includes(motivo)) {
+            activeFilters.delay_reason = [];
+          } else {
+            activeFilters.delay_reason = [motivo];
+          }
+          updateDashboardUI();
         }
       }
     },
   });
-  // Leyenda
+  
+  // Leyenda mejorada con scroll si hay muchos items
   const legendContainer = document.getElementById('delayLegend');
   legendContainer.innerHTML = '';
-  delayData.forEach((item, i) => {
+  
+  // Ordenar por porcentaje descendente para mejor visualización
+  const sortedData = [...delayData].sort((a, b) => b.percentage - a.percentage);
+  
+  sortedData.forEach((item, i) => {
     const legendItem = document.createElement('div');
     legendItem.className = 'legend-item';
     legendItem.innerHTML = `
@@ -478,6 +521,16 @@ function renderDelayChart(delayData) {
       </div>
       <span>${item.percentage}%</span>
     `;
+    // Hacer clic en la leyenda también filtra
+    legendItem.style.cursor = 'pointer';
+    legendItem.addEventListener('click', () => {
+      if (activeFilters.delay_reason.includes(item.name)) {
+        activeFilters.delay_reason = [];
+      } else {
+        activeFilters.delay_reason = [item.name];
+      }
+      updateDashboardUI();
+    });
     legendContainer.appendChild(legendItem);
   });
 }
@@ -487,48 +540,92 @@ function renderStageChart(stageData) {
   const ctx = document.getElementById('stageChart').getContext('2d');
   const prevChart = Chart.getChart('stageChart');
   if (prevChart) prevChart.destroy();
+  
+  // Limpiar el canvas para evitar problemas de eventos acumulados
+  const canvas = document.getElementById('stageChart');
+  canvas.replaceWith(canvas.cloneNode(true));
+  const cleanCtx = document.getElementById('stageChart').getContext('2d');
+  
   const labels = stageData.map(item => item.name);
-  const data = stageData.map(item => item.value);
-  const colors = ["#565aff", "#ff3459", "#f46844", "#5dd595", "#9aabff", "#c9cfff"];
-  new Chart(ctx, {
+  const data = stageData.map(item => item.value > 0 ? item.value : 0.1); // Valor mínimo para visualización
+  const originalData = stageData.map(item => item.value); // Datos originales para tooltips
+  const colors = stageData.map(item => item.color || "#c9cfff"); // Usar colores definidos en el backend
+  
+  // Aplicar lógica de aclarado si hay filtros activos
+  let backgroundColors = colors;
+  if (activeFilters.stage && activeFilters.stage.length > 0) {
+    backgroundColors = labels.map((name, idx) => 
+      activeFilters.stage.includes(name) ? colors[idx] : colors[idx] + '33');
+  }
+  
+  new Chart(cleanCtx, {
     type: 'doughnut',
     data: {
       labels,
       datasets: [{
         data,
-        backgroundColor: colors.slice(0, data.length),
+        backgroundColor: backgroundColors,
         borderWidth: 0,
         cutout: '70%',
       }],
     },
     options: {
-      responsive: false,
+      responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.label + ': ' + context.parsed;
+              // Usar datos originales en tooltip
+              return context.label + ': ' + originalData[context.dataIndex];
             }
           }
+        }
+      },
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const stageName = labels[idx];
+          
+          if (activeFilters.stage.includes(stageName)) {
+            activeFilters.stage = [];
+          } else {
+            activeFilters.stage = [stageName];
+          }
+          updateDashboardUI();
         }
       }
     },
   });
-  // Leyenda
+  
+  // Leyenda mejorada con scroll si hay muchos items
   const legendContainer = document.getElementById('stageLegend');
   legendContainer.innerHTML = '';
-  stageData.forEach((item, i) => {
+  
+  // Ordenar por valor descendente para mejor visualización
+  const sortedData = [...stageData].sort((a, b) => b.value - a.value);
+  
+  sortedData.forEach((item, i) => {
     const legendItem = document.createElement('div');
     legendItem.className = 'legend-item';
     legendItem.innerHTML = `
       <div class="legend-label">
-        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <div class="legend-color" style="background-color: ${item.color || colors[i % colors.length]}"></div>
         <span>${item.name}</span>
       </div>
       <span>${item.value}</span>
     `;
+    // Hacer clic en la leyenda también filtra
+    legendItem.style.cursor = 'pointer';
+    legendItem.addEventListener('click', () => {
+      if (activeFilters.stage.includes(item.name)) {
+        activeFilters.stage = [];
+      } else {
+        activeFilters.stage = [item.name];
+      }
+      updateDashboardUI();
+    });
     legendContainer.appendChild(legendItem);
   });
 }
@@ -636,11 +733,22 @@ function createAllChartsOnce(charts) {
   createPieChart("transportChart", charts.transport_type, "transportLegend", function(evt, elements) {
     if (elements.length > 0) {
       const idx = elements[0].index;
-      const value = charts.transport_type[idx].values && charts.transport_type[idx].values[0];
-      if (activeFilters.transport.includes(value)) {
-        activeFilters.transport = [];
+      const transportName = charts.transport_type[idx].name;
+      
+      // Manejo especial para "SIN ESPECIFICAR"
+      if (transportName === "SIN ESPECIFICAR") {
+        if (activeFilters.transport.includes("SIN_ESPECIFICAR")) {
+          activeFilters.transport = [];
+        } else {
+          activeFilters.transport = ["SIN_ESPECIFICAR"];
+        }
       } else {
-        activeFilters.transport = [value];
+        const value = charts.transport_type[idx].values && charts.transport_type[idx].values[0];
+        if (activeFilters.transport.includes(value)) {
+          activeFilters.transport = [];
+        } else {
+          activeFilters.transport = [value];
+        }
       }
       updateDashboardUI();
     }
@@ -747,15 +855,22 @@ function updateStatusChartDataOnly(statusData) {
   console.log('Actualizando SOLO datos del gráfico de status');
   const labels = statusData.map(item => item.name);
   const data = statusData.map(item => item.percentage);
-  const values = statusData.map(item => item.name); // "On Time" o "Atrasado"
-  const colors = ["#565aff", "#c9cfff", "#ff3459", "#f46844"];
+  const values = statusData.map(item => item.name); // "On Time", "Atrasado" o "Sin datos"
+  
+  // Colores específicos para cada estado
+  const colors = {
+    "On Time": "#565aff",
+    "Atrasado": "#c9cfff",
+    "Sin datos": "#f0f0f0"
+  };
   
   // Aplicar lógica de aclarado igual que en hub chart
-  let backgroundColors = colors.slice(0, data.length);
+  const backgroundColors = statusData.map(item => colors[item.name] || "#c9cfff");
+  
   if (activeFilters.status && activeFilters.status.length > 0) {
-    backgroundColors = statusData.map((item, idx) => {
+    statusData.forEach((item, idx) => {
       const isSelected = item.values && item.values.some(val => activeFilters.status.includes(val));
-      return isSelected ? colors[idx % colors.length] : colors[idx % colors.length] + '33';
+      backgroundColors[idx] = isSelected ? colors[item.name] : colors[item.name] + '33';
     });
   }
   
@@ -768,12 +883,12 @@ function updateStatusChartDataOnly(statusData) {
   // Actualizar leyenda
   const legendContainer = document.getElementById('statusLegend');
   legendContainer.innerHTML = '';
-  statusData.forEach((item, i) => {
+  statusData.forEach((item) => {
     const legendItem = document.createElement('div');
     legendItem.className = 'legend-item';
     legendItem.innerHTML = `
       <div class="legend-label">
-        <div class="legend-color" style="background-color: ${colors[i % colors.length]}"></div>
+        <div class="legend-color" style="background-color: ${colors[item.name] || "#c9cfff"}"></div>
         <span>${item.name}</span>
       </div>
       <span>${item.percentage}%</span>
@@ -815,14 +930,23 @@ function updateChartDataOnly(canvasId, legendId, data) {
   
   // Actualizar datos del gráfico SIN recrear
   chart.data.labels = data.map((item) => item.name);
-  chart.data.datasets[0].data = data.map((item) => item.value);
+  chart.data.datasets[0].data = data.map((item) => item.value > 0 ? item.value : 0.1); // Usar valor mínimo para visualización
   chart.data.datasets[0].backgroundColor = backgroundColors;
   chart.update('none'); // Sin animación
   
   // Actualizar leyenda
   const legendContainer = document.getElementById(legendId);
   legendContainer.innerHTML = "";
-  data.forEach((item) => {
+  
+  // Ordenar por valor o porcentaje descendente para mejor visualización
+  const sortedData = [...data].sort((a, b) => {
+    if (typeof a.percentage !== 'undefined' && typeof b.percentage !== 'undefined') {
+      return b.percentage - a.percentage;
+    }
+    return b.value - a.value;
+  });
+  
+  sortedData.forEach((item) => {
     const legendItem = document.createElement("div");
     legendItem.className = "legend-item";
     legendItem.innerHTML = `
@@ -832,6 +956,28 @@ function updateChartDataOnly(canvasId, legendId, data) {
       </div>
       <span>${typeof item.percentage !== 'undefined' ? item.percentage + '%' : item.value}</span>
     `;
+    
+    // Agregar interactividad a las leyendas
+    if (canvasId === 'delayChart' || canvasId === 'stageChart') {
+      legendItem.style.cursor = 'pointer';
+      legendItem.addEventListener('click', () => {
+        if (canvasId === 'delayChart') {
+          if (activeFilters.delay_reason.includes(item.name)) {
+            activeFilters.delay_reason = [];
+          } else {
+            activeFilters.delay_reason = [item.name];
+          }
+        } else if (canvasId === 'stageChart') {
+          if (activeFilters.stage.includes(item.name)) {
+            activeFilters.stage = [];
+          } else {
+            activeFilters.stage = [item.name];
+          }
+        }
+        updateDashboardUI();
+      });
+    }
+    
     legendContainer.appendChild(legendItem);
   });
 }
@@ -929,7 +1075,7 @@ function updateMultiSelectDisplay(multiSelectGroup) {
       });
     });
 
-    // Búsqueda
+    // Búsqueda simple
     if (searchInput) {
       searchInput.addEventListener('input', e => {
         const term = e.target.value.toLowerCase();
@@ -938,19 +1084,47 @@ function updateMultiSelectDisplay(multiSelectGroup) {
           opt.style.display = label.includes(term) ? 'flex' : 'none';
         });
       });
+      
+      // Limpiar búsqueda con Escape
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          searchInput.value = '';
+          Array.from(optionsBox.children).forEach(opt => opt.style.display = 'flex');
+        }
+      });
     }
 
     // Limpiar selección
     clearBtn.addEventListener('click', e => {
       e.stopPropagation();
+      console.log('Limpiando selección en', ms.getAttribute('data-filter'));
       checkboxes.forEach(cb => cb.checked = false);
+      selectAll.querySelector('input').checked = false;
       if (searchInput) {
         searchInput.value = '';
         Array.from(optionsBox.children).forEach(opt => opt.style.display = 'flex');
       }
       updateDisplay();
-      content.classList.remove('active');
-      trigger.classList.remove('active');
+      
+      // Ya no cerramos el dropdown para mantenerlo abierto
+      // content.classList.remove('active');
+      // trigger.classList.remove('active');
+      
+      // Actualizar los activeFilters según el tipo de filtro
+      const filterType = ms.getAttribute('data-filter');
+      if (filterType === 'product') {
+        activeFilters.product_id = [];
+        console.log('Limpiado activeFilters.product_id:', activeFilters.product_id);
+        updateDashboardUI();
+      } else if (filterType === 'vendor') {
+        activeFilters.vendor_id = [];
+        console.log('Limpiado activeFilters.vendor_id:', activeFilters.vendor_id);
+        updateDashboardUI();
+      } else if (filterType === 'material') {
+        activeFilters.material_type = [];
+        console.log('Limpiado activeFilters.material_type:', activeFilters.material_type);
+        updateDashboardUI();
+      }
     });
 
     // Cerrar al hacer click fuera
@@ -1179,76 +1353,135 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- INICIO: Poblar filtros dinámicamente y eliminar valores mock ---
 function populateFilters(filterOptions) {
   console.log('populateFilters called', filterOptions);
-  // Productos
-  const productoGroup = document.querySelector('.filter-group[data-filter="product"]');
-  if (productoGroup) {
-    const optionsBox = productoGroup.querySelector('.multi-select-options');
+  
+  // Función helper para crear un multi-select con más espacio
+  function createEnhancedMultiSelect(container, items, valueKey, labelKey) {
+    const optionsBox = container.querySelector('.multi-select-options');
+    const clearBtn = container.querySelector('.multi-select-clear');
+    const searchInput = container.querySelector('.multi-select-search-input');
+    const trigger = container.querySelector('.multi-select-trigger');
+    const content = container.querySelector('.multi-select-content');
+    const valueSpan = container.querySelector('.multi-select-value');
+    const placeholder = container.getAttribute('data-placeholder') || 'Seleccionar';
+    
+    // Limpiar opciones existentes
     while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
-    filterOptions.products.forEach(product => {
-      const label = document.createElement('label');
-      label.className = 'multi-select-option';
-      label.innerHTML = `<input type="checkbox" value="${product.id}"> ${product.name}`;
-      optionsBox.appendChild(label);
-    });
-    // Seleccionar todos
+    
+    // Seleccionar todos (al inicio)
     const selectAll = document.createElement('div');
     selectAll.className = 'multi-select-option';
+    selectAll.style.fontWeight = 'bold';
+    selectAll.style.borderBottom = '2px solid #e0e0e0';
     selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
     optionsBox.appendChild(selectAll);
-    selectAll.querySelector('input').addEventListener('change', function() {
-      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
-      all.forEach(cb => cb.checked = this.checked);
+    
+    // Agregar elementos individuales
+    items.forEach(item => {
+      const label = document.createElement('label');
+      label.className = 'multi-select-option';
+      const value = valueKey ? item[valueKey] : item;
+      const text = labelKey ? item[labelKey] : item;
+      label.innerHTML = `<input type="checkbox" value="${value}"> ${text}`;
+      optionsBox.appendChild(label);
     });
+    
+    // Obtener todos los checkboxes después de crearlos
+    const checkboxes = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
+    
+    // Event listener para "Seleccionar todos"
+    selectAll.querySelector('input').addEventListener('change', function() {
+      checkboxes.forEach(cb => cb.checked = this.checked);
+      updateDisplay();
+    });
+    
+    // Event listener para cada checkbox
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        updateDisplay();
+      });
+    });
+    
+    // Event listener para el botón "Limpiar selección"
+    if (clearBtn) {
+      // Eliminar event listeners anteriores para evitar duplicados
+      const newClearBtn = clearBtn.cloneNode(true);
+      clearBtn.parentNode.replaceChild(newClearBtn, clearBtn);
+      
+      // Agregar nuevo event listener
+      newClearBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        console.log('Limpiando selección en', container.getAttribute('data-filter'));
+        checkboxes.forEach(cb => cb.checked = false);
+        selectAll.querySelector('input').checked = false;
+        if (searchInput) {
+          searchInput.value = '';
+          Array.from(optionsBox.children).forEach(opt => opt.style.display = 'flex');
+        }
+        updateDisplay();
+        
+        // Ya no cerramos el dropdown para mantenerlo abierto
+        // content.classList.remove('active');
+        // trigger.classList.remove('active');
+        
+        // Actualizar los activeFilters según el tipo de filtro
+        const filterType = container.getAttribute('data-filter');
+        if (filterType === 'product') {
+          activeFilters.product_id = [];
+          console.log('Limpiado activeFilters.product_id:', activeFilters.product_id);
+          updateDashboardUI();
+        } else if (filterType === 'vendor') {
+          activeFilters.vendor_id = [];
+          console.log('Limpiado activeFilters.vendor_id:', activeFilters.vendor_id);
+          updateDashboardUI();
+        } else if (filterType === 'material') {
+          activeFilters.material_type = [];
+          console.log('Limpiado activeFilters.material_type:', activeFilters.material_type);
+          updateDashboardUI();
+        }
+      });
+    }
+    
+    // Función para actualizar la visualización
+    function updateDisplay() {
+      const selected = Array.from(checkboxes).filter(cb => cb.checked);
+      if (selected.length === 0) {
+        valueSpan.textContent = placeholder;
+      } else if (selected.length === 1) {
+        valueSpan.textContent = selected[0].parentElement.textContent.trim();
+      } else {
+        valueSpan.textContent = `${selected.length} seleccionados`;
+      }
+    }
+    
+    // Inicializar la visualización
+    updateDisplay();
+  }
+  
+  // Productos
+  const productoGroup = document.querySelector('.filter-group[data-filter="product"]');
+  if (productoGroup && filterOptions.products) {
+    createEnhancedMultiSelect(productoGroup, filterOptions.products, 'id', 'name');
   }
   // Materiales
   const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
-  if (materialGroup) {
-    const optionsBox = materialGroup.querySelector('.multi-select-options');
-    while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+  if (materialGroup && filterOptions.materials) {
     let materials = filterOptions.materials;
     if (materials && !Array.isArray(materials)) {
       materials = Object.values(materials);
     }
     if (materials && Array.isArray(materials)) {
-      materials.forEach(material => {
-        const label = document.createElement('label');
-        label.className = 'multi-select-option';
-        label.innerHTML = `<input type="checkbox" value="${material}"> ${material}`;
-        optionsBox.appendChild(label);
-      });
+      createEnhancedMultiSelect(materialGroup, materials, null, null);
     }
-    // Seleccionar todos
-    const selectAll = document.createElement('div');
-    selectAll.className = 'multi-select-option';
-    selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
-    optionsBox.appendChild(selectAll);
-    selectAll.querySelector('input').addEventListener('change', function() {
-      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
-      all.forEach(cb => cb.checked = this.checked);
-    });
   }
+  
   // Vendor
   const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
-  if (vendorGroup) {
-    const optionsBox = vendorGroup.querySelector('.multi-select-options');
-    while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
-    filterOptions.vendors.forEach(vendor => {
-      const label = document.createElement('label');
-      label.className = 'multi-select-option';
-      label.innerHTML = `<input type="checkbox" value="${vendor.id}"> ${vendor.name}`;
-      optionsBox.appendChild(label);
-    });
-    // Seleccionar todos
-    const selectAll = document.createElement('div');
-    selectAll.className = 'multi-select-option';
-    selectAll.innerHTML = `<label><input type="checkbox" class="select-all"> Seleccionar todos</label>`;
-    optionsBox.appendChild(selectAll);
-    selectAll.querySelector('input').addEventListener('change', function() {
-      const all = optionsBox.querySelectorAll('input[type="checkbox"]:not(.select-all)');
-      all.forEach(cb => cb.checked = this.checked);
-    });
+  if (vendorGroup && filterOptions.vendors) {
+    createEnhancedMultiSelect(vendorGroup, filterOptions.vendors, 'id', 'name');
   }
 }
 
 // Esta función duplicada fue eliminada - usar solo la de la línea 486
 // --- FIN: Poblar filtros dinámicamente y eliminar valores mock ---
+
+
