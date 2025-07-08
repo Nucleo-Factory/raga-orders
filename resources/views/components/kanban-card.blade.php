@@ -19,6 +19,7 @@
     $totalWeight = $purchaseOrder->total_weight;
     $dangerLevel = $purchaseOrder->material_type;
     $materialType = $purchaseOrder->material_type;
+    $trackingIdCode = $purchaseOrder->tracking_id ?? 'N/A';
 
     // Calcular expectedLeadTime = date_required_in_destination - date_planned_pickup (en días)
     $expectedLeadTime = 0;
@@ -72,7 +73,7 @@
                         PO: {{ $po }}
                     </a>
                 </p>
-                <p>ID Tracking: {{ $trackingId }}</p>
+                <p>ID Tracking: {{ $trackingIdCode }}</p>
             </div>
         </div>
 
