@@ -12,7 +12,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 transform translate-y-0"
              x-transition:leave-end="opacity-0 transform translate-y-2"
-             class="fixed z-50 max-w-sm p-4 rounded-lg shadow-lg top-4 right-4"
+             class="fixed top-4 right-4 z-50 p-4 max-w-sm rounded-lg shadow-lg"
              :class="notificationType === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'">
             <div class="flex">
                 <div class="flex-shrink-0">
@@ -28,7 +28,7 @@
                 </div>
                 <div class="pl-3 ml-auto">
                     <div class="-mx-1.5 -my-1.5">
-                        <button @click="showNotification = false" type="button" class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2" :class="notificationType === 'error' ? 'text-red-500 hover:bg-red-200 focus:ring-red-600' : 'text-green-500 hover:bg-green-200 focus:ring-green-600'">
+                        <button @click="showNotification = false" type="button" class="inline-flex p-1.5 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2" :class="notificationType === 'error' ? 'text-red-500 hover:bg-red-200 focus:ring-red-600' : 'text-green-500 hover:bg-green-200 focus:ring-green-600'">
                             <span class="sr-only">Dismiss</span>
                             <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div class="flex items-center justify-between">
+    <div class="flex justify-between items-center">
         <x-view-title>
             <x-slot:title>
                 {{ isset($id) ? 'Editar Orden de compra: ' . $order_number : 'Generar nueva orden de compra' }}
@@ -75,7 +75,7 @@
     <x-form>
         <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
-                <div class="w-full space-y-6">
+                <div class="space-y-6 w-full">
                     <h3 class="text-lg font-bold text-[#7288FF]">Datos generales</h3>
                     <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                         <div class="relative">
@@ -119,7 +119,7 @@
                 </x-form-input-file>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos vendor</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -128,7 +128,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos Ship to</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -137,7 +137,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos de facturación</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Seleccionar Bill to" name="bill_to_id" wireModel="bill_to_id"
@@ -145,7 +145,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones en centímetros</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
@@ -197,7 +197,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
@@ -259,7 +259,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Fechas</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -364,7 +364,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
 
@@ -380,7 +380,7 @@
                                         type="checkbox"
                                         value="{{ $value }}"
                                         wire:model="material_type"
-                                        class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                        class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                                     >
                                     <label for="material_type_{{ $value }}" class="block ml-2 text-sm text-gray-700">
                                         {{ $label }}
@@ -533,7 +533,7 @@
             </div>
         </div>
 
-        <div class="w-full p-8 space-y-6 bg-white rounded-2xl">
+        <div class="p-8 space-y-6 w-full bg-white rounded-2xl">
             <h3 class="w-fit border-b-2 border-[#190FDB] pb-2 text-lg font-bold text-[#190FDB]">Carga / Contenido</h3>
 
             <div class="flex flex-col space-y-4">
@@ -550,10 +550,10 @@
                                 </x-slot:input>
                             </x-form-input>
                             @if (count($searchResults) > 0)
-                                <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg">
-                                    <ul class="py-1 overflow-auto text-base rounded-md max-h-60 sm:text-sm">
+                                <div class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg">
+                                    <ul class="overflow-auto py-1 max-h-60 text-base rounded-md sm:text-sm">
                                         @foreach ($searchResults as $product)
-                                            <li class="relative py-2 pl-3 cursor-pointer select-none pr-9 hover:bg-gray-100"
+                                            <li class="relative py-2 pr-9 pl-3 cursor-pointer select-none hover:bg-gray-100"
                                                 wire:click="selectProduct({{ $product->id }})">
                                                 <div class="flex flex-col items-start">
                                                     <span class="font-medium">{{ $product->material_id }}</span>
@@ -585,7 +585,7 @@
 
                 <!-- Producto seleccionado -->
                 @if ($selectedProduct)
-                    <div class="p-3 mt-2 rounded-md bg-gray-50">
+                    <div class="p-3 mt-2 bg-gray-50 rounded-md">
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-medium">{{ $selectedProduct->material_id }}</p>
@@ -642,7 +642,7 @@
                                             wire:model.live="orderProducts.{{ $index }}.quantity"
                                             wire:change="updateQuantity({{ $index }}, $event.target.value)"
                                             min="1"
-                                            class="block w-20 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                            class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         $ {{ number_format($product['subtotal'], 2) }}</td>
@@ -675,7 +675,7 @@
                                     Costo Adicional:</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="additional_cost" step="0.01"
-                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </td>
                                 <td></td>
                             </tr>
@@ -684,7 +684,7 @@
                                     Costo de Seguro:</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="insurance_cost" step="0.01"
-                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
+                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
                                 </td>
                                 <td></td>
                             </tr>

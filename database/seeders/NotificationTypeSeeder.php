@@ -85,6 +85,12 @@ class NotificationTypeSeeder extends Seeder
                 'category' => 'kanban',
                 'description' => 'Notificaciones cuando se mueven tareas en el tablero Kanban'
             ],
+            [
+                'key' => 'po_hub_real',
+                'name' => 'Hub Real Diferente',
+                'category' => 'ordenes',
+                'description' => 'Notificaciones cuando una orden se crea con un hub real diferente al planificado'
+            ]
         ];
 
         foreach ($types as $type) {

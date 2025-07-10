@@ -3,30 +3,30 @@ class ForecastManager {
     constructor() {
         this.charts = {}; // Store chart instances
         this.initialized = false;
+        this.activeFilters = {
+            vendor_id: [],
+            product_id: [],
+            material_type: [],
+            date_from: null,
+            date_to: null,
+        };
         this.init();
     }
 
     init() {
         console.log('ForecastManager initializing...');
         this.setupEventListeners();
+        this.populateFilters();
 
         // Only initialize charts if we have data and haven't initialized yet
         if (!this.initialized && window.forecastData) {
             this.initializeCharts();
+            this.updateClearFiltersButton();
             this.initialized = true;
         }
     }
 
     setupEventListeners() {
-        // Form submission for filters
-        const form = document.getElementById('forecast-filters');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.applyFilters();
-            });
-        }
-
         // Export button
         const exportBtn = document.getElementById('export-btn');
         if (exportBtn) {
@@ -34,20 +34,410 @@ class ForecastManager {
                 this.exportData();
             });
         }
+
+        // Clear filters button
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                this.clearAllFilters();
+            });
+        }
+
+        // Accept button
+        const aceptarBtn = document.querySelector('.btn-primary');
+        if (aceptarBtn) {
+            aceptarBtn.addEventListener('click', () => {
+                this.applyTopFilters();
+                this.updateForecastUI();
+            });
+        }
+
+        // Date inputs
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        if (startDateInput) {
+            startDateInput.addEventListener('change', () => {
+                this.activeFilters.date_from = startDateInput.value || null;
+                this.updateForecastUI();
+            });
+        }
+        if (endDateInput) {
+            endDateInput.addEventListener('change', () => {
+                this.activeFilters.date_to = endDateInput.value || null;
+                this.updateForecastUI();
+            });
+        }
+
+        // Setup multi-select filters (using dashboard principal logic)
+        this.setupMultiSelectFilters();
     }
 
-    async applyFilters() {
+    // Populate filters from backend data (using dashboard principal logic)
+    populateFilters() {
+        // Get filter options from window (passed from backend)
+        if (!window.forecastData || !window.forecastData.filterOptions) {
+            console.warn('Filter options not available');
+            return;
+        }
+
+        const filterOptions = window.forecastData.filterOptions;
+
+        // Vendor
+        const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
+        if (vendorGroup && filterOptions.vendors) {
+            const optionsBox = vendorGroup.querySelector('.multi-select-options');
+            while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+            filterOptions.vendors.forEach(vendor => {
+                const label = document.createElement('label');
+                label.className = 'multi-select-option';
+                label.innerHTML = `<input type="checkbox" value="${vendor.id}"> ${vendor.name}`;
+                optionsBox.appendChild(label);
+            });
+        }
+
+        // Product
+        const productGroup = document.querySelector('.filter-group[data-filter="product"]');
+        if (productGroup && filterOptions.products) {
+            const optionsBox = productGroup.querySelector('.multi-select-options');
+            while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+            filterOptions.products.forEach(product => {
+                const label = document.createElement('label');
+                label.className = 'multi-select-option';
+                label.innerHTML = `<input type="checkbox" value="${product.id}"> ${product.name} (${product.material_id})`;
+                optionsBox.appendChild(label);
+            });
+        }
+
+        // Material
+        const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
+        if (materialGroup && filterOptions.materials) {
+            const optionsBox = materialGroup.querySelector('.multi-select-options');
+            while (optionsBox.firstChild) optionsBox.removeChild(optionsBox.firstChild);
+            let materials = filterOptions.materials;
+            if (materials && !Array.isArray(materials)) {
+                materials = Object.values(materials);
+            }
+            if (materials && Array.isArray(materials)) {
+                materials.forEach(material => {
+                    const label = document.createElement('label');
+                    label.className = 'multi-select-option';
+                    label.innerHTML = `<input type="checkbox" value="${material}"> ${material}`;
+                    optionsBox.appendChild(label);
+                });
+            }
+        }
+    }
+
+    // Multi-select setup (using exact dashboard principal logic)
+    setupMultiSelectFilters() {
+        function closeAllDropdowns(except) {
+            document.querySelectorAll('.multi-select-content').forEach(content => {
+                if (content !== except) content.classList.remove('active');
+            });
+            document.querySelectorAll('.multi-select-trigger').forEach(trigger => {
+                if (!except || trigger.parentElement.querySelector('.multi-select-content') !== except) {
+                    trigger.classList.remove('active');
+                }
+            });
+        }
+
+        document.querySelectorAll('[data-multiselect]').forEach(ms => {
+            const trigger = ms.querySelector('.multi-select-trigger');
+            const content = ms.querySelector('.multi-select-content');
+            const valueSpan = ms.querySelector('.multi-select-value');
+            const searchInput = ms.querySelector('.multi-select-search-input');
+            const optionsBox = ms.querySelector('.multi-select-options');
+            const clearBtn = ms.querySelector('.multi-select-clear');
+            const placeholder = ms.getAttribute('data-placeholder') || 'Seleccionar';
+
+            // Abrir/cerrar dropdown
+            trigger.addEventListener('click', e => {
+                e.stopPropagation();
+                const isActive = content.classList.contains('active');
+                closeAllDropdowns(content);
+                content.classList.toggle('active', !isActive);
+                trigger.classList.toggle('active', !isActive);
+                if (!isActive && searchInput) {
+                    searchInput.value = '';
+                    Array.from(optionsBox.children).forEach(opt => opt.style.display = 'flex');
+                    searchInput.focus();
+                }
+            });
+
+            // Búsqueda
+            if (searchInput) {
+                searchInput.addEventListener('input', e => {
+                    const term = e.target.value.toLowerCase();
+                    Array.from(optionsBox.children).forEach(opt => {
+                        const label = opt.textContent.toLowerCase();
+                        opt.style.display = label.includes(term) ? 'flex' : 'none';
+                    });
+                });
+            }
+
+            // Limpiar selección
+            if (clearBtn) {
+                clearBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const checkboxes = optionsBox.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => cb.checked = false);
+                    if (searchInput) {
+                        searchInput.value = '';
+                        Array.from(optionsBox.children).forEach(opt => opt.style.display = 'flex');
+                    }
+                    updateDisplay();
+                    content.classList.remove('active');
+                    trigger.classList.remove('active');
+                });
+            }
+
+            // Cerrar al hacer click fuera
+            document.addEventListener('click', e => {
+                if (!ms.contains(e.target)) {
+                    content.classList.remove('active');
+                    trigger.classList.remove('active');
+                }
+            });
+
+            function updateDisplay() {
+                const checkboxes = optionsBox.querySelectorAll('input[type="checkbox"]');
+                const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                if (selected.length === 0) {
+                    valueSpan.textContent = placeholder;
+                } else if (selected.length === 1) {
+                    valueSpan.textContent = selected[0].parentElement.textContent.trim();
+                } else {
+                    valueSpan.textContent = `${selected.length} seleccionados`;
+                }
+            }
+
+            // Listen for checkbox changes
+            const observer = new MutationObserver(() => {
+                updateDisplay();
+            });
+            observer.observe(optionsBox, { childList: true, subtree: true });
+
+            updateDisplay();
+        });
+    }
+
+    // Apply top filters (get values from multi-selects and dates)
+    applyTopFilters() {
+        // Get vendor filter values
+        const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
+        if (vendorGroup) {
+            const checkedBoxes = vendorGroup.querySelectorAll('input[type="checkbox"]:checked');
+            this.activeFilters.vendor_id = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+        }
+
+        // Get product filter values
+        const productGroup = document.querySelector('.filter-group[data-filter="product"]');
+        if (productGroup) {
+            const checkedBoxes = productGroup.querySelectorAll('input[type="checkbox"]:checked');
+            this.activeFilters.product_id = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+        }
+
+        // Get material filter values
+        const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
+        if (materialGroup) {
+            const checkedBoxes = materialGroup.querySelectorAll('input[type="checkbox"]:checked');
+            this.activeFilters.material_type = Array.from(checkedBoxes).map(cb => cb.value);
+        }
+
+        this.updateClearFiltersButton();
+    }
+
+    // Clear all filters (using dashboard principal logic)
+    clearAllFilters() {
+        this.activeFilters.vendor_id = [];
+        this.activeFilters.product_id = [];
+        this.activeFilters.material_type = [];
+        this.activeFilters.date_from = null;
+        this.activeFilters.date_to = null;
+
+        // Clear date inputs
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        if (startDateInput) startDateInput.value = '';
+        if (endDateInput) endDateInput.value = '';
+
+        // Clear all checkboxes
+        document.querySelectorAll('[data-multiselect] input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+
+        // Update displays
+        document.querySelectorAll('[data-multiselect] .multi-select-value').forEach(valueSpan => {
+            const trigger = valueSpan.closest('.multi-select-trigger');
+            const placeholder = trigger.closest('[data-multiselect]').getAttribute('data-placeholder') || 'Seleccionar';
+            valueSpan.textContent = placeholder;
+        });
+
+        this.updateForecastUI();
+        this.updateClearFiltersButton();
+    }
+
+    // Update clear filters button visibility
+    updateClearFiltersButton() {
+        const clearBtn = document.getElementById('clearFiltersBtn');
+        if (!clearBtn) return;
+
+        const hasActiveFilters = (
+            this.activeFilters.vendor_id.length > 0 ||
+            this.activeFilters.product_id.length > 0 ||
+            this.activeFilters.material_type.length > 0 ||
+            this.activeFilters.date_from ||
+            this.activeFilters.date_to
+        );
+
+        clearBtn.style.display = hasActiveFilters ? 'block' : 'none';
+    }
+
+    // Handle vendor click from charts (using dashboard principal logic)
+    handleVendorClick(vendorName) {
+        console.log('Vendor clicked:', vendorName);
+        
+        // Find vendor ID from filter options
+        const filterOptions = window.forecastData?.filterOptions;
+        if (!filterOptions?.vendors) return;
+
+        const vendor = filterOptions.vendors.find(v => v.name === vendorName);
+        if (!vendor) {
+            console.warn('Vendor not found in filter options:', vendorName);
+            return;
+        }
+
+        // Toggle vendor in activeFilters
+        const vendorId = vendor.id;
+        if (this.activeFilters.vendor_id.includes(vendorId)) {
+            this.activeFilters.vendor_id = this.activeFilters.vendor_id.filter(id => id !== vendorId);
+        } else {
+            this.activeFilters.vendor_id.push(vendorId);
+        }
+
+        // Update checkbox state
+        const vendorGroup = document.querySelector('.filter-group[data-filter="vendor"]');
+        if (vendorGroup) {
+            const checkbox = vendorGroup.querySelector(`input[value="${vendorId}"]`);
+            if (checkbox) {
+                checkbox.checked = this.activeFilters.vendor_id.includes(vendorId);
+            }
+        }
+
+        this.updateForecastUI();
+        this.updateClearFiltersButton();
+    }
+
+    // Handle month click from bar chart (using dashboard principal logic)
+    handleMonthClick(monthString) {
+        console.log('Month clicked:', monthString);
+        
+        // Convert month string (YYYY-MM) to date range
         try {
-            console.log('Applying forecast filters...');
+            const [year, month] = monthString.split('-');
+            const firstDay = `${year}-${month}-01`;
+            const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+            const lastDayStr = `${year}-${month}-${lastDay.toString().padStart(2, '0')}`;
+            
+            // Update active filters
+            this.activeFilters.date_from = firstDay;
+            this.activeFilters.date_to = lastDayStr;
+            
+            // Update date inputs
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (startDateInput) startDateInput.value = firstDay;
+            if (endDateInput) endDateInput.value = lastDayStr;
+            
+            this.updateForecastUI();
+            this.updateClearFiltersButton();
+        } catch (error) {
+            console.error('Error parsing month string:', error);
+        }
+    }
+
+    // Handle material click from treemap (using dashboard principal logic)
+    handleMaterialClick(materialName) {
+        console.log('Material clicked:', materialName);
+
+        // Toggle material in activeFilters
+        if (this.activeFilters.material_type.includes(materialName)) {
+            this.activeFilters.material_type = this.activeFilters.material_type.filter(m => m !== materialName);
+        } else {
+            this.activeFilters.material_type.push(materialName);
+        }
+
+        // Update checkbox state
+        const materialGroup = document.querySelector('.filter-group[data-filter="material"]');
+        if (materialGroup) {
+            const checkbox = materialGroup.querySelector(`input[value="${materialName}"]`);
+            if (checkbox) {
+                checkbox.checked = this.activeFilters.material_type.includes(materialName);
+            }
+        }
+
+        this.updateForecastUI();
+        this.updateClearFiltersButton();
+    }
+
+    // Clear all filters
+    clearAllFilters() {
+        console.log('Clearing all filters...');
+        
+        // Clear date filters
+        const dateFromInput = document.querySelector('input[name="date_from"]');
+        const dateToInput = document.querySelector('input[name="date_to"]');
+        
+        if (dateFromInput) dateFromInput.value = '';
+        if (dateToInput) dateToInput.value = '';
+
+        // Clear all multi-select filters
+        const allCheckboxes = document.querySelectorAll('.multi-select input[type="checkbox"]');
+        allCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Update all multi-select displays
+        const multiSelects = document.querySelectorAll('.multi-select');
+        multiSelects.forEach(select => {
+            this.updateMultiSelectDisplay(select);
+        });
+        
+        // Close all dropdowns
+        this.closeAllMultiSelects();
+
+        // Apply cleared filters (reload with no filters)
+        this.applyFilters();
+    }
+
+    // Update forecast UI (using dashboard principal logic)
+    async updateForecastUI() {
+        try {
+            console.log('Updating forecast UI...');
             this.showLoading();
 
-            const form = document.getElementById('forecast-filters');
-            const formData = new FormData(form);
-            const searchParams = new URLSearchParams(formData);
+            // Build query parameters from active filters
+            const params = new URLSearchParams();
+            
+            if (this.activeFilters.date_from) params.append('date_from', this.activeFilters.date_from);
+            if (this.activeFilters.date_to) params.append('date_to', this.activeFilters.date_to);
+            
+            if (this.activeFilters.vendor_id.length > 0) {
+                this.activeFilters.vendor_id.forEach(id => params.append('vendor_id[]', id.toString()));
+            }
+            
+            if (this.activeFilters.product_id.length > 0) {
+                this.activeFilters.product_id.forEach(id => params.append('product_id[]', id.toString()));
+            }
+            
+            if (this.activeFilters.material_type.length > 0) {
+                this.activeFilters.material_type.forEach(material => params.append('material_type[]', material));
+            }
 
-            console.log('Sending request to:', `/products/forecast-graph/data?${searchParams.toString()}`);
+            console.log('Sending request with filters:', this.activeFilters);
 
-            const response = await fetch(`/products/forecast-graph/data?${searchParams.toString()}`, {
+            const response = await fetch(`/products/forecast-graph/data?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'X-CSRF-TOKEN': window.csrfToken,
@@ -68,20 +458,14 @@ class ForecastManager {
                 this.updateForecast(result.data);
                 // Update URL without page reload
                 const url = new URL(window.location);
-                for (const [key, value] of searchParams.entries()) {
-                    if (value) {
-                        url.searchParams.set(key, value);
-                    } else {
-                        url.searchParams.delete(key);
-                    }
-                }
+                url.search = params.toString();
                 window.history.pushState({}, '', url);
             } else {
                 throw new Error(result.message || 'Error al obtener los datos del forecast');
             }
         } catch (error) {
-            console.error('Error applying forecast filters:', error);
-            this.showErrorModal('Error al aplicar filtros: ' + error.message);
+            console.error('Error updating forecast UI:', error);
+            this.showErrorModal('Error al actualizar los datos: ' + error.message);
         } finally {
             this.hideLoading();
         }
@@ -215,11 +599,25 @@ class ForecastManager {
                 const element = document.createElement('div');
                 element.className = 'treemap-item';
                 element.style.backgroundColor = colors[index];
+                element.style.cursor = 'pointer';
                 element.textContent = item.name;
+
+                // Apply opacity effect based on material filters (using dashboard principal logic)
+                if (this.activeFilters.material_type.length > 0) {
+                    const isSelected = this.activeFilters.material_type.includes(item.name);
+                    element.style.opacity = isSelected ? '1' : '0.3';
+                } else {
+                    element.style.opacity = '1';
+                }
 
                 // Calculate size based on deviation value
                 const size = this.calculateTreemapSize(item.value, data);
                 element.style.gridArea = size.gridArea;
+
+                // Add click handler for material filtering
+                element.addEventListener('click', () => {
+                    this.handleMaterialClick(item.name);
+                });
 
                 container.appendChild(element);
             });
@@ -265,6 +663,10 @@ class ForecastManager {
 
             const ctx = canvas.getContext('2d');
 
+            // For temporal bar chart, keep normal colors but respond to clicks
+            // Bar chart shows monthly data - doesn't need opacity effects from other filters
+            const backgroundColors = data.map(() => '#565AFF');
+            
             this.charts.barChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -272,7 +674,7 @@ class ForecastManager {
                     datasets: [{
                         label: 'Cantidad kgs',
                         data: data.map(item => item.total_kgs),
-                        backgroundColor: '#565AFF',
+                        backgroundColor: backgroundColors,
                         borderWidth: 0,
                         barThickness: 80,
                     }]
@@ -283,6 +685,13 @@ class ForecastManager {
                     plugins: {
                         legend: {
                             display: false
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const dataIndex = elements[0].index;
+                            const monthData = data[dataIndex];
+                            this.handleMonthClick(monthData.month);
                         }
                     },
                     scales: {
@@ -343,13 +752,26 @@ class ForecastManager {
             const ctx = canvas.getContext('2d');
             const colors = this.generateColors(data.length);
 
+            // Apply opacity effect based on vendor filters (using dashboard principal logic)
+            let backgroundColors = colors.slice();
+            if (this.activeFilters.vendor_id.length > 0) {
+                const filterOptions = window.forecastData?.filterOptions;
+                if (filterOptions?.vendors) {
+                    backgroundColors = data.map((item, index) => {
+                        const vendor = filterOptions.vendors.find(v => v.name === item.name);
+                        const isSelected = vendor && this.activeFilters.vendor_id.includes(vendor.id);
+                        return isSelected ? colors[index] : colors[index] + '33'; // Add opacity to non-selected
+                    });
+                }
+            }
+
             this.charts.pieChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: data.map(item => item.name),
                     datasets: [{
                         data: data.map(item => item.percentage),
-                        backgroundColor: colors,
+                        backgroundColor: backgroundColors,
                         borderWidth: 0,
                         cutout: '40%'
                     }]
@@ -361,11 +783,18 @@ class ForecastManager {
                         legend: {
                             display: false
                         }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const dataIndex = elements[0].index;
+                            const vendorName = data[dataIndex].name;
+                            this.handleVendorClick(vendorName);
+                        }
                     }
                 }
             });
 
-            // Update vendor legend
+            // Update vendor legend with click handlers
             this.updateVendorLegend(data, colors);
 
         } catch (error) {
@@ -386,6 +815,20 @@ class ForecastManager {
             data.forEach((item, index) => {
                 const vendorItem = document.createElement('div');
                 vendorItem.className = 'vendor-item';
+                vendorItem.style.cursor = 'pointer';
+                
+                // Apply opacity effect to legend based on vendor filters (using dashboard principal logic)
+                if (this.activeFilters.vendor_id.length > 0) {
+                    const filterOptions = window.forecastData?.filterOptions;
+                    if (filterOptions?.vendors) {
+                        const vendor = filterOptions.vendors.find(v => v.name === item.name);
+                        const isSelected = vendor && this.activeFilters.vendor_id.includes(vendor.id);
+                        vendorItem.style.opacity = isSelected ? '1' : '0.3';
+                    }
+                } else {
+                    vendorItem.style.opacity = '1';
+                }
+                
                 vendorItem.innerHTML = `
                     <div class="vendor-info">
                         <div class="vendor-color" style="background-color: ${colors[index]}"></div>
@@ -396,6 +839,12 @@ class ForecastManager {
                         <div class="vendor-percentage">${item.percentage}%</div>
                     </div>
                 `;
+                
+                // Add click handler to legend items
+                vendorItem.addEventListener('click', () => {
+                    this.handleVendorClick(item.name);
+                });
+                
                 legendContainer.appendChild(vendorItem);
             });
 
@@ -455,6 +904,8 @@ class ForecastManager {
 
         return colors.slice(0, count);
     }
+
+
 
     initializeCharts() {
         try {
