@@ -78,7 +78,19 @@ class ForecastService
             }
 
             if (!empty($filters['vendor_id'])) {
-                $query->where('po.vendor_id', $filters['vendor_id']);
+                $vendorIds = is_array($filters['vendor_id']) ? $filters['vendor_id'] : [$filters['vendor_id']];
+                $vendorIds = array_filter($vendorIds);
+                if (!empty($vendorIds)) {
+                    $query->whereIn('po.vendor_id', $vendorIds);
+                }
+            }
+
+            if (!empty($filters['product_id'])) {
+                $productIds = is_array($filters['product_id']) ? $filters['product_id'] : [$filters['product_id']];
+                $productIds = array_filter($productIds);
+                if (!empty($productIds)) {
+                    $query->whereIn('pp.product_id', $productIds);
+                }
             }
 
             $result = $query->first();
@@ -276,6 +288,22 @@ class ForecastService
                 $query->where('po.order_date', '<=', $filters['date_to']);
             }
 
+            if (!empty($filters['vendor_id'])) {
+                $vendorIds = is_array($filters['vendor_id']) ? $filters['vendor_id'] : [$filters['vendor_id']];
+                $vendorIds = array_filter($vendorIds);
+                if (!empty($vendorIds)) {
+                    $query->whereIn('po.vendor_id', $vendorIds);
+                }
+            }
+
+            if (!empty($filters['product_id'])) {
+                $productIds = is_array($filters['product_id']) ? $filters['product_id'] : [$filters['product_id']];
+                $productIds = array_filter($productIds);
+                if (!empty($productIds)) {
+                    $query->whereIn('pp.product_id', $productIds);
+                }
+            }
+
             $result = $query->get();
 
             $collection = $result->map(function ($item) {
@@ -342,7 +370,19 @@ class ForecastService
             }
 
             if (!empty($filters['vendor_id'])) {
-                $query->where('po.vendor_id', $filters['vendor_id']);
+                $vendorIds = is_array($filters['vendor_id']) ? $filters['vendor_id'] : [$filters['vendor_id']];
+                $vendorIds = array_filter($vendorIds);
+                if (!empty($vendorIds)) {
+                    $query->whereIn('po.vendor_id', $vendorIds);
+                }
+            }
+
+            if (!empty($filters['product_id'])) {
+                $productIds = is_array($filters['product_id']) ? $filters['product_id'] : [$filters['product_id']];
+                $productIds = array_filter($productIds);
+                if (!empty($productIds)) {
+                    $query->whereIn('pp.product_id', $productIds);
+                }
             }
 
             $result = $query->get();

@@ -3,7 +3,7 @@
     $hubArray = $hubArray->pluck('name', 'id')->toArray();
 @endphp
 
-<div class="w-full mx-auto"
+<div class="mx-auto w-full"
      x-data="{
         currentTaskElement: null,
 
@@ -27,9 +27,9 @@
      x-on:purchaseOrderStatusUpdated.window="$wire.$refresh()">
 
     @if(isset($hasActiveFilters) && $hasActiveFilters)
-    <div class="flex items-center justify-between p-3 mb-4 rounded-md bg-blue-50">
+    <div class="flex justify-between items-center p-3 mb-4 bg-blue-50 rounded-md">
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
             </svg>
             <span class="text-sm font-medium text-blue-700">Mostrando órdenes filtradas. Los resultados que estás viendo están limitados por los filtros activos.</span>
@@ -43,7 +43,7 @@
     </div>
     @endif
 
-    <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
+    <div class="flex overflow-x-auto gap-4 pb-4 w-full kanban-container" wire:poll.10s>
         @if (!$board)
             <div class="p-6 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
@@ -153,7 +153,7 @@
 
         <div class="mb-12 space-y-2">
             <div class="space-y-4">
-                <div class="flex flex-col items-start gap-4">
+                <div class="flex flex-col gap-4 items-start">
                     <input
                         type="file"
                         wire:model="attachment"

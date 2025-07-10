@@ -148,14 +148,50 @@ class ForecastController extends Controller
      */
     private function getFilters(Request $request): array
     {
-        return [
-            'date_from' => $request->get('date_from'),
-            'date_to' => $request->get('date_to'),
-            'product_id' => $request->get('product_id'),
-            'material_type' => $request->get('material_type'),
-            'category_id' => $request->get('category_id'),
-            'vendor_id' => $request->get('vendor_id'),
-        ];
+        // Only include filters that have actual values to avoid empty array issues
+        $filters = [];
+        
+        if ($request->filled('date_from')) {
+            $filters['date_from'] = $request->get('date_from');
+        }
+        
+        if ($request->filled('date_to')) {
+            $filters['date_to'] = $request->get('date_to');
+        }
+        
+        if ($request->filled('product_id')) {
+            $productIds = $request->get('product_id');
+            if (is_array($productIds)) {
+                $productIds = array_filter($productIds);
+                if (!empty($productIds)) {
+                    $filters['product_id'] = $productIds;
+                }
+            } else if ($productIds) {
+                $filters['product_id'] = [$productIds];
+            }
+        }
+        
+        if ($request->filled('vendor_id')) {
+            $vendorIds = $request->get('vendor_id');
+            if (is_array($vendorIds)) {
+                $vendorIds = array_filter($vendorIds);
+                if (!empty($vendorIds)) {
+                    $filters['vendor_id'] = $vendorIds;
+                }
+            } else if ($vendorIds) {
+                $filters['vendor_id'] = [$vendorIds];
+            }
+        }
+        
+        if ($request->filled('material_type')) {
+            $filters['material_type'] = $request->get('material_type');
+        }
+        
+        if ($request->filled('category_id')) {
+            $filters['category_id'] = $request->get('category_id');
+        }
+        
+        return $filters;
     }
 
     /**

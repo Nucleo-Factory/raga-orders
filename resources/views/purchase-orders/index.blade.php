@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    <div class="flex items-center justify-between">
+    <div class="flex justify-between items-center">
         <x-view-title>
             <x-slot:title>
                 Órdenes de Compra
@@ -12,7 +12,7 @@
         </x-view-title>
 
 
-        <div class="flex items-center gap-2">
+        <div class="flex gap-2 items-center">
 
             <a href="{{ route('shipping-documentation.create') }}">
                 <x-secondary-button>
@@ -28,14 +28,14 @@
         </div>
     </div>
 
-    <div class="flex items-center justify-between hidden mb-6">
+    <div class="flex hidden justify-between items-center mb-6">
         <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
     </div>
 
     <div class="" x-data="{activeTab: 'tab1'}">
         <!-- Selector de pestañas -->
-        <div class="flex items-center justify-start gap-6 mb-3 text-lg font-bold">
-            <div class="flex items-center gap-6">
+        <div class="flex gap-6 justify-start items-center mb-3 text-lg font-bold">
+            <div class="flex gap-6 items-center">
                 <button @click="activeTab = 'tab1'"
                     :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">

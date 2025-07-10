@@ -333,7 +333,7 @@ class DashboardManager {
             }
 
             if (!data || data.length === 0) {
-                legend.innerHTML = '<div class="text-gray-500 text-sm">Sin datos</div>';
+                legend.innerHTML = '<div class="text-sm text-gray-500">Sin datos</div>';
                 return;
             }
 
