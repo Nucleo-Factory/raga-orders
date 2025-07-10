@@ -16,6 +16,18 @@ Route::get('/status', function () {
 // Public endpoint for creating purchase orders from external API
 Route::post('/purchase-orders', [PurchaseOrderController::class, 'createFromApi']);
 
+// Public endpoint for retrieving a purchase order by ID or order number
+Route::get('/purchase-orders/{identifier}', [PurchaseOrderController::class, 'getOrder']);
+
+// Public endpoint for listing purchase orders with pagination and filters
+Route::get('/purchase-orders', [PurchaseOrderController::class, 'listOrders']);
+
+// Public endpoint for updating purchase order status
+Route::patch('/purchase-orders/{identifier}/status', [PurchaseOrderController::class, 'updateStatus']);
+
+// Public endpoint for adding comments to a purchase order
+Route::post('/purchase-orders/{identifier}/comments', [PurchaseOrderController::class, 'addComment']);
+
 // Rutas protegidas con autenticación de token API
 Route::middleware('api.token')->group(function () {
 

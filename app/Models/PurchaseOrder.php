@@ -147,6 +147,14 @@ class PurchaseOrder extends Model implements HasMedia
     }
 
     /**
+     * Get the bill-to that owns the purchase order.
+     */
+    public function billTo(): BelongsTo
+    {
+        return $this->belongsTo(BillTo::class);
+    }
+
+    /**
      * Get the products for the purchase order.
      */
     public function products(): BelongsToMany
