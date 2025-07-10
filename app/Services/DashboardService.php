@@ -70,8 +70,9 @@ class DashboardService
             Log::info('Getting material count...');
             $materialCount = $this->getBaseQuery($filters)
                 ->join('purchase_order_product', 'purchase_orders.id', '=', 'purchase_order_product.purchase_order_id')
-                ->distinct('purchase_order_product.product_id')
-                ->count('purchase_order_product.product_id');
+                ->select(DB::raw('COUNT(DISTINCT purchase_order_product.product_id) as count'))
+                ->first()
+                ->count;
             Log::info('Material count result', ['count' => $materialCount]);
 
             $result = [
@@ -162,10 +163,10 @@ class DashboardService
 
             $query = $this->getBaseQuery($filters)
                 ->join('purchase_order_product', 'purchase_orders.id', '=', 'purchase_order_product.purchase_order_id')
-                ->distinct('purchase_order_product.product_id');
+                ->select(DB::raw('COUNT(DISTINCT purchase_order_product.product_id) as count'));
 
             Log::info('Executing material count query...');
-            $count = $query->count('purchase_order_product.product_id');
+            $count = $query->first()->count;
             Log::info('Material count result', ['count' => $count]);
 
             return $count;
@@ -376,10 +377,10 @@ class DashboardService
         // Extraer motivos de atraso de los comentarios de las órdenes filtradas
         $reasons = \DB::table('purchase_order_comments as poc')
             ->selectRaw(
-                "regexp_replace(poc.comment, '(?i)^motivo de atraso\\s*[-–—]\\s*(.*)$', '\\1') as motivo"
+                "REGEXP_REPLACE(poc.comment, '^motivo de atraso\\s*[-–—]\\s*(.*)$', '$1') as motivo"
             )
             ->whereIn('poc.purchase_order_id', $poIds)
-            ->whereRaw("poc.comment ~* '^motivo de atraso\\s*[-–—]'")
+            ->whereRaw("poc.comment REGEXP '^motivo de atraso\\s*[-–—]'")
             ->pluck('motivo');
 
         // Contar cada motivo
@@ -751,7 +752,8 @@ class DashboardService
                 if (!empty($materialTypes)) {
                     $query->where(function($q) use ($materialTypes) {
                         foreach ($materialTypes as $materialType) {
-                            $q->orWhereRaw('material_type::text LIKE ?', ['%' . $materialType . '%']);
+                            // Reemplazar PostgreSQL CAST con JSON_CONTAINS para MySQL
+                            $q->orWhereRaw("JSON_CONTAINS(material_type, '\"" . $materialType . "\"') OR material_type LIKE ?", ['%' . $materialType . '%']);
                         }
                     });
                 }
