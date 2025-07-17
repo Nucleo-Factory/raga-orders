@@ -280,6 +280,12 @@ class CreatePucharseOrder extends Component
                 $this->width_cm = $this->purchaseOrder->width_cm;
                 $this->height_cm = $this->purchaseOrder->height_cm;
 
+                // Cargar el modo de transporte
+                $this->mode = $this->purchaseOrder->mode;
+
+                // Cargar el tipo de seguro
+                $this->ensurence_type = $this->purchaseOrder->ensurence_type ?? 'pending';
+
                 // Cargar productos
                 $this->orderProducts = [];
                 foreach ($this->purchaseOrder->products as $product) {
@@ -316,11 +322,14 @@ class CreatePucharseOrder extends Component
 
     public function generateUniqueOrderNumber()
     {
+        $companyId = auth()->user()->company_id ?? 1;
+
         // Formato: PO-YYYYMMDD-XXXX donde XXXX es un número secuencial
         $prefix = 'PO-' . date('Ymd') . '-';
 
-        // Obtener el último número de orden con este prefijo
-        $lastOrder = \App\Models\PurchaseOrder::where('order_number', 'like', $prefix . '%')
+        // Obtener el último número de orden con este prefijo para esta compañía
+        $lastOrder = \App\Models\PurchaseOrder::where('company_id', $companyId)
+            ->where('order_number', 'like', $prefix . '%')
             ->orderBy('order_number', 'desc')
             ->first();
 
@@ -333,6 +342,21 @@ class CreatePucharseOrder extends Component
             // Si no hay órdenes previas con este prefijo, empezar con 0001
             $this->order_number = $prefix . '0001';
         }
+
+        // Verificar que el número generado sea único (precaución extra)
+        $attempts = 0;
+        while (\App\Models\PurchaseOrder::where('company_id', $companyId)
+                ->where('order_number', $this->order_number)
+                ->exists() && $attempts < 100) {
+
+            $attempts++;
+            $lastNumber = substr($this->order_number, strlen($prefix));
+            $newNumber = intval($lastNumber) + 1;
+            $this->order_number = $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Clear any previous validation errors for order_number
+        $this->resetErrorBag('order_number');
     }
 
     public function onVendorSelected()
@@ -519,205 +543,242 @@ class CreatePucharseOrder extends Component
         }
     }
 
-    public function createPurchaseOrder() {
-        \Log::info('Iniciando createPurchaseOrder');
-
-        // Validación básica
-        $this->validate([
-            'order_number' => 'required',
-            'currency' => 'required',
-            'incoterms' => 'required',
-            'vendor_id' => 'required',
-            'ship_to_id' => 'required',
-            'bill_to_id' => 'required',
-            'date_required_in_destination' => 'required',
-            'planned_hub_id' => 'required',
-            'mode' => 'required',
-            'peso_kg' => 'required',
-            'length_cm' => 'required',
-            'width_cm' => 'required',
-            'height_cm' => 'required',
-            'material_type' => 'required|array|min:1',
-        ], [
-            'order_number.required' => 'El número de orden es requerido',
-            'currency.required' => 'La moneda es requerida',
-            'incoterms.required' => 'El incoterm es requerido',
-            'vendor_id.required' => 'El vendor es requerido',
-            'ship_to_id.required' => 'El ship to es requerido',
-            'bill_to_id.required' => 'El bill to es requerido',
-            'date_required_in_destination.required' => 'La fecha de entrega es requerida',
-            'planned_hub_id.required' => 'El hub es requerido',
-            'mode.required' => 'El modo es requerido',
-            'peso_kg.required' => 'El peso es requerido',
-            'ancho.required' => 'El ancho es requerido',
-            'largo.required' => 'El largo es requerido',
-            'alto.required' => 'El alto es requerido',
-            'volumen.required' => 'El volumen es requerido',
-            'material_type.required' => 'Debe seleccionar al menos un tipo de material',
-            'material_type.min' => 'Debe seleccionar al menos un tipo de material',
+    public function createPurchaseOrder()
+    {
+        \Log::info('=== INICIO createPurchaseOrder ===', [
+            'id' => $this->id,
+            'actual_hub_id' => $this->actual_hub_id,
+            'planned_hub_id' => $this->planned_hub_id,
+            'order_number' => $this->order_number,
+            'user_id' => auth()->id()
         ]);
 
-        // Validar que tenga al menos un producto
-        if (empty($this->orderProducts) || count($this->orderProducts) < 1) {
-            $this->addError('products', 'Debe agregar al menos un producto a la orden de compra');
-            return;
-        }
-
-
-        \Log::info('Preparando datos para guardar');
+        // Get company ID for validation
+        $companyId = auth()->user()->company_id ?? 1;
 
         try {
-            // Preparar los datos para la orden de compra
-            $companyId = auth()->user()->company_id ?? 1;
+            // Validación básica
+            $this->validate([
+                'order_number' => [
+                    'required',
+                    'unique:purchase_orders,order_number,NULL,id,company_id,' . $companyId
+                ],
+                'currency' => 'required',
+                'incoterms' => 'required',
+                'vendor_id' => 'required',
+                'ship_to_id' => 'required',
+                'bill_to_id' => 'required',
+                'date_required_in_destination' => 'required',
+                'planned_hub_id' => 'required',
+                'mode' => 'required',
+                'peso_kg' => 'required|numeric|min:0',
+                'largo' => 'required|numeric|min:0',
+                'ancho' => 'required|numeric|min:0',
+                'alto' => 'required|numeric|min:0',
+                'material_type' => 'required|array|min:1',
+            ], [
+                'order_number.required' => 'El número de orden es requerido',
+                'order_number.unique' => 'Este número de orden ya existe. Por favor, use un número diferente.',
+                'currency.required' => 'La moneda es requerida',
+                'incoterms.required' => 'El incoterm es requerido',
+                'vendor_id.required' => 'El vendor es requerido',
+                'ship_to_id.required' => 'El ship to es requerido',
+                'bill_to_id.required' => 'El bill to es requerido',
+                'date_required_in_destination.required' => 'La fecha de entrega es requerida',
+                'planned_hub_id.required' => 'El hub es requerido',
+                'mode.required' => 'El modo es requerido',
+                'peso_kg.required' => 'El peso es requerido',
+                'peso_kg.numeric' => 'El peso debe ser un número',
+                'peso_kg.min' => 'El peso debe ser mayor a 0',
+                'largo.required' => 'El largo es requerido',
+                'largo.numeric' => 'El largo debe ser un número',
+                'largo.min' => 'El largo debe ser mayor a 0',
+                'ancho.required' => 'El ancho es requerido',
+                'ancho.numeric' => 'El ancho debe ser un número',
+                'ancho.min' => 'El ancho debe ser mayor a 0',
+                'alto.required' => 'El alto es requerido',
+                'alto.numeric' => 'El alto debe ser un número',
+                'alto.min' => 'El alto debe ser mayor a 0',
+                'material_type.required' => 'Debe seleccionar al menos un tipo de material',
+                'material_type.min' => 'Debe seleccionar al menos un tipo de material',
+            ]);
 
-            // Asegurar que las fechas sean null si están vacías
-            $this->prepareDateFields();
+            // Validar que tenga al menos un producto
+            if (empty($this->orderProducts) || count($this->orderProducts) < 1) {
+                $this->addError('products', 'Debe agregar al menos un producto a la orden de compra');
+                return;
+            }
 
-            // Recopilar todos los datos relevantes
-            $poData = [
-                'company_id' => $companyId,
-                'order_number' => $this->order_number,
-                'status' => $this->id ? $this->status : 'draft',
-                'notes' => $this->notes,
-                'vendor_id' => $this->vendor_id,
-                'ship_to_id' => $this->ship_to_id,
-                'bill_to_id' => $this->bill_to_id,
-                'order_date' => $this->order_date,
-                'currency' => $this->currency,
-                'incoterms' => $this->incoterms,
-                'payment_terms' => $this->payment_terms,
-                'net_total' => $this->net_total,
-                'additional_cost' => $this->additional_cost,
-                'total' => $this->total,
-                'insurance_cost' => $this->insurance_cost,
-                'length' => $this->largo,
-                'width' => $this->ancho,
-                'height' => $this->alto,
-                'volume' => $this->volumen,
-                'weight_kg' => $this->peso_kg,
-                'weight_lb' => $this->peso_lb,
-                'planned_hub_id' => $this->planned_hub_id,
-                'actual_hub_id' => $this->actual_hub_id,
-                // Fechas
-                'date_required_in_destination' => $this->date_required_in_destination,
-                'date_planned_pickup' => $this->date_planned_pickup,
-                'date_actual_pickup' => $this->date_actual_pickup,
-                'date_estimated_hub_arrival' => $this->date_estimated_hub_arrival,
-                'date_actual_hub_arrival' => $this->date_actual_hub_arrival,
-                'date_etd' => $this->date_etd,
-                'date_atd' => $this->date_atd,
-                'date_eta' => $this->date_eta,
-                'date_ata' => $this->date_ata,
-                'date_consolidation' => $this->date_consolidation,
-                'release_date' => $this->release_date,
-                // Otros campos
-                'material_type' => json_encode($this->material_type),
-                'ensurence_type' => $this->ensurence_type,
-                'mode' => $this->mode,
-                'tracking_id' => $this->tracking_id,
-                'pallet_quantity' => $this->pallet_quantity,
-                'pallet_quantity_real' => $this->pallet_quantity_real,
-                'bill_of_lading' => $this->bill_of_lading,
-                'ground_transport_cost_1' => $this->ground_transport_cost_1,
-                'ground_transport_cost_2' => $this->ground_transport_cost_2,
-                'cost_nationalization' => $this->cost_nationalization,
-                'cost_ofr_estimated' => $this->cost_ofr_estimated,
-                'cost_ofr_real' => $this->cost_ofr_real,
-                'estimated_pallet_cost' => $this->estimated_pallet_cost,
-                'real_cost_estimated_po' => $this->real_cost_estimated_po,
-                'real_cost_real_po' => $this->real_cost_real_po,
-                'other_costs' => $this->other_costs,
-                'other_expenses' => $this->other_expenses,
-                'variable_calculare_weight' => $this->variable_calculare_weight,
-                'savings_ofr_fcl' => $this->savings_ofr_fcl,
-                'saving_pickup' => $this->saving_pickup,
-                'saving_executed' => $this->saving_executed,
-                'saving_not_executed' => $this->saving_not_executed,
-                'comments' => $this->comments,
-                'length_cm' => $this->length_cm,
-                'width_cm' => $this->width_cm,
-                'height_cm' => $this->height_cm,
-            ];
+            try {
+                // Usar transacción para asegurar integridad
+                \DB::beginTransaction();
 
-            // Filtrar valores nulos o vacíos para evitar errores
-            $poData = array_filter($poData, function($value) {
-                return $value !== null && $value !== '' || $value === 0 || $value === 0.0;
-            });
+                // Preparar los datos para la orden de compra
+                $poData = [
+                    'company_id' => $companyId,
+                    'order_number' => $this->order_number,
+                    'status' => $this->id ? $this->status : 'draft',
+                    'notes' => $this->notes,
+                    'vendor_id' => $this->vendor_id,
+                    'ship_to_id' => $this->ship_to_id,
+                    'bill_to_id' => $this->bill_to_id,
+                    'order_date' => $this->order_date,
+                    'currency' => $this->currency,
+                    'incoterms' => $this->incoterms,
+                    'payment_terms' => $this->payment_terms,
+                    'net_total' => $this->net_total,
+                    'additional_cost' => $this->additional_cost,
+                    'total' => $this->total,
+                    'insurance_cost' => $this->insurance_cost,
+                    'length' => $this->largo,
+                    'width' => $this->ancho,
+                    'height' => $this->alto,
+                    'volume' => $this->volumen,
+                    'weight_kg' => $this->peso_kg,
+                    'weight_lb' => $this->peso_lb,
+                    'planned_hub_id' => $this->planned_hub_id,
+                    'actual_hub_id' => $this->actual_hub_id,
+                    'date_required_in_destination' => $this->date_required_in_destination,
+                    'date_planned_pickup' => $this->date_planned_pickup,
+                    'date_actual_pickup' => $this->date_actual_pickup,
+                    'date_estimated_hub_arrival' => $this->date_estimated_hub_arrival,
+                    'date_actual_hub_arrival' => $this->date_actual_hub_arrival,
+                    'date_etd' => $this->date_etd,
+                    'date_atd' => $this->date_atd,
+                    'date_eta' => $this->date_eta,
+                    'date_ata' => $this->date_ata,
+                    'date_consolidation' => $this->date_consolidation,
+                    'release_date' => $this->release_date,
+                    'material_type' => json_encode($this->material_type),
+                    'ensurence_type' => $this->ensurence_type,
+                    'mode' => $this->mode,
+                    'tracking_id' => $this->tracking_id,
+                    'pallet_quantity' => $this->pallet_quantity,
+                    'pallet_quantity_real' => $this->pallet_quantity_real,
+                    'bill_of_lading' => $this->bill_of_lading,
+                    'ground_transport_cost_1' => $this->ground_transport_cost_1,
+                    'ground_transport_cost_2' => $this->ground_transport_cost_2,
+                    'cost_nationalization' => $this->cost_nationalization,
+                    'cost_ofr_estimated' => $this->cost_ofr_estimated,
+                    'cost_ofr_real' => $this->cost_ofr_real,
+                    'estimated_pallet_cost' => $this->estimated_pallet_cost,
+                    'real_cost_estimated_po' => $this->real_cost_estimated_po,
+                    'real_cost_real_po' => $this->real_cost_real_po,
+                    'other_costs' => $this->other_costs,
+                    'other_expenses' => $this->other_expenses,
+                    'variable_calculare_weight' => $this->variable_calculare_weight,
+                    'savings_ofr_fcl' => $this->savings_ofr_fcl,
+                    'saving_pickup' => $this->saving_pickup,
+                    'saving_executed' => $this->saving_executed,
+                    'saving_not_executed' => $this->saving_not_executed,
+                    'comments' => $this->comments,
+                    'length_cm' => $this->length_cm,
+                    'width_cm' => $this->width_cm,
+                    'height_cm' => $this->height_cm,
+                ];
 
-            \Log::info('Datos preparados para guardar', ['data_keys' => array_keys($poData)]);
-
-            // Usar transacción para asegurar integridad
-            \DB::beginTransaction();
-
-            if ($this->id) {
-                // Actualizar orden existente
-                $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($this->id);
-                $purchaseOrder->update($poData);
-                \Log::info('Orden actualizada', ['id' => $purchaseOrder->id]);
-
-                // Eliminar productos existentes
-                $purchaseOrder->products()->detach();
-            } else {
-                // Si es una nueva orden, establecer kanban status
-                if (!isset($poData['kanban_status_id'])) {
-                    $kanbanBoard = \App\Models\KanbanBoard::where('company_id', $companyId)
-                        ->where('type', 'po_stages')
-                        ->where('is_active', true)
-                        ->first();
-
-                    if ($kanbanBoard) {
-                        $recepcionStatus = $kanbanBoard->statuses()
-                            ->where('name', 'Recepción')
-                            ->first();
-
-                        if (!$recepcionStatus) {
-                            $recepcionStatus = $kanbanBoard->defaultStatus();
-                        }
-
-                        if ($recepcionStatus) {
-                            $poData['kanban_status_id'] = $recepcionStatus->id;
-                        }
-                    }
-                }
+                // Filtrar valores nulos o vacíos para evitar errores
+                $poData = array_filter($poData, function($value) {
+                    return $value !== null && $value !== '' || $value === 0 || $value === 0.0;
+                });
 
                 // Crear nueva orden
                 $purchaseOrder = \App\Models\PurchaseOrder::create($poData);
                 \Log::info('Orden creada con datos básicos', ['id' => $purchaseOrder->id]);
-            }
 
-            // Guardar los productos asociados a la orden
-            foreach ($this->orderProducts as $product) {
-                $purchaseOrder->products()->attach($product['id'], [
-                    'quantity' => $product['quantity'] ?? 0,
-                    'unit_price' => $product['price_per_unit'] ?? 0
+                // Guardar el ID de la orden recién creada
+                $this->id = $purchaseOrder->id;
+
+                // Asegurar que el número de orden esté actualizado
+                $this->order_number = $purchaseOrder->order_number;
+
+                // Guardar los productos asociados a la orden
+                foreach ($this->orderProducts as $product) {
+                    $purchaseOrder->products()->attach($product['id'], [
+                        'quantity' => $product['quantity'] ?? 0,
+                        'unit_price' => $product['price_per_unit'] ?? 0
+                    ]);
+                }
+
+                \DB::commit();
+
+                // Check if actual hub is different from planned hub
+                if ($this->actual_hub_id && $this->planned_hub_id && $this->actual_hub_id !== $this->planned_hub_id) {
+                    \Log::info('Verificando diferencia de hubs', [
+                        'actual_hub_id' => $this->actual_hub_id,
+                        'planned_hub_id' => $this->planned_hub_id,
+                        'order_number' => $this->order_number
+                    ]);
+
+                    $actualHub = \App\Models\Hub::find($this->actual_hub_id);
+                    $plannedHub = \App\Models\Hub::find($this->planned_hub_id);
+
+                    if ($actualHub && $plannedHub) {
+                        \Log::info('Hubs encontrados, enviando notificación', [
+                            'actual_hub' => $actualHub->name,
+                            'planned_hub' => $plannedHub->name
+                        ]);
+
+                        try {
+                            $notificationService = app(\App\Services\NotificationService::class);
+
+                            // Create notification for all users
+                            $notifications = $notificationService->notifyAll(
+                                'po_hub_real',
+                                'Hub Real Diferente',
+                                "La orden de compra {$this->order_number} se creó con un hub real ({$actualHub->name}) diferente al hub planificado ({$plannedHub->name})",
+                                [
+                                    'order_number' => $this->order_number,
+                                    'planned_hub' => $plannedHub->name,
+                                    'actual_hub' => $actualHub->name,
+                                    'order_id' => $purchaseOrder->id,
+                                    'type' => 'hub_change'
+                                ]
+                            );
+
+                            \Log::info('Notificación enviada correctamente', [
+                                'notifications' => $notifications,
+                                'type' => 'po_hub_real'
+                            ]);
+
+                            // Dispatch events to refresh notifications
+                            $this->dispatch('notificationsUpdated');
+                            $this->dispatch('refresh-notifications');
+                            $this->dispatch('notification-received');
+                        } catch (\Exception $e) {
+                            \Log::error('Error al enviar notificación: ' . $e->getMessage(), [
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    }
+                }
+
+                // Dispatch success notification
+                $this->dispatch('show-success', 'Orden de compra creada exitosamente con número: ' . $this->order_number);
+                $this->dispatch('open-modal', 'modal-purchase-order-created');
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                \Log::error('Error en createPurchaseOrder: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
                 ]);
+
+                // Check if it's a duplicate key error
+                if (strpos($e->getMessage(), 'duplicate key value violates unique constraint') !== false) {
+                    $this->addError('order_number', 'Este número de orden ya existe. Por favor, use un número diferente.');
+                } else {
+                    session()->flash('error', 'Error al guardar la orden: ' . $e->getMessage());
+                }
+
+                // Dispatch error event to show notification
+                $this->dispatch('show-error', 'Error al crear la orden de compra. Por favor, revise los campos y vuelva a intentar.');
             }
-
-            // Si el guardado básico funcionó, intentar actualizar con más campos
-            $additionalData = [
-                'vendor_id' => $this->vendor_id,
-                'ship_to_id' => $this->ship_to_id,
-                'bill_to_id' => $this->bill_to_id,
-                // Agrega más campos según sea necesario
-            ];
-
-            // Filtrar valores nulos
-            $additionalData = array_filter($additionalData, function($value) {
-                return $value !== null && $value !== '';
-            });
-
-            \Log::info('Actualizando con datos adicionales', $additionalData);
-            $purchaseOrder->update($additionalData);
-
-            \DB::commit();
-
-            $this->dispatch('open-modal', 'modal-purchase-order-created');
-        } catch (\Exception $e) {
-            \DB::rollBack();
-            \Log::error('Error en createPurchaseOrder: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
-
-            session()->flash('error', 'Error al guardar la orden: ' . $e->getMessage());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Error de validación', [
+                'errors' => $e->errors(),
+                'message' => $e->getMessage()
+            ]);
+            throw $e;
         }
     }
 
@@ -846,6 +907,49 @@ class CreatePucharseOrder extends Component
                 }
 
                 \DB::commit();
+
+                // Check if actual hub is different from planned hub
+                if ($this->actual_hub_id && $this->planned_hub_id && $this->actual_hub_id !== $this->planned_hub_id) {
+                    $actualHub = Hub::find($this->actual_hub_id);
+                    $plannedHub = Hub::find($this->planned_hub_id);
+
+                    if ($actualHub && $plannedHub) {
+                        $notificationService = app(\App\Services\NotificationService::class);
+                        $notificationService->notifyAll(
+                            'hub_changed',
+                            'Cambio de Hub',
+                            "La orden de compra {$this->order_number} tiene un hub real ({$actualHub->name}) diferente al hub planificado ({$plannedHub->name})",
+                            [
+                                'order_number' => $this->order_number,
+                                'planned_hub' => $plannedHub->name,
+                                'actual_hub' => $actualHub->name,
+                                'order_id' => $purchaseOrder->id
+                            ]
+                        );
+                    }
+                }
+
+                $notificationService = app(\App\Services\NotificationService::class);
+
+                // Create notification for all users
+                $notifications = $notificationService->notifyAll(
+                    'po_hub_real',
+                    'Hub Real Diferente',
+                    "La orden de compra {$this->order_number} se creó con un hub real ({$actualHub->name}) diferente al hub planificado ({$plannedHub->name})",
+                    [
+                        'order_number' => $this->order_number,
+                        'planned_hub' => $plannedHub->name,
+                        'actual_hub' => $actualHub->name,
+                        'order_id' => $purchaseOrder->id,
+                        'type' => 'hub_change'
+                    ]
+                );
+
+                \Log::info('Notificación enviada correctamente', [
+                    'notifications' => $notifications,
+                    'type' => 'po_hub_real'
+                ]);
+
                 $this->dispatch('open-modal', 'modal-purchase-order-created');
 
             } catch (\Exception $e) {
@@ -857,7 +961,14 @@ class CreatePucharseOrder extends Component
 
     public function closeModal() {
         $this->dispatch('close-modal', 'modal-purchase-order-created');
-        return redirect()->route('purchase-orders.index');
+
+        // Si tenemos un ID, redirigir a la página de detalle
+        if ($this->id) {
+            return redirect()->route('purchase-orders.detail', $this->id);
+        } else {
+            // Si no hay ID, redirigir al listado de POs
+            return redirect()->route('purchase-orders.index');
+        }
     }
 
     public function render() {

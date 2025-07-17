@@ -10,10 +10,13 @@ use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use App\Notifications\ResetPasswordNotification;
 
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements HasMedia, CanResetPassword
 {
-    use HasFactory, Notifiable, HasRoles, InteractsWithMedia, HasApiTokens;
+    use HasFactory, Notifiable, HasRoles, InteractsWithMedia, HasApiTokens, CanResetPasswordTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -95,5 +98,16 @@ class User extends Authenticatable implements HasMedia
     {
         $this->addMediaCollection('profile-photo')
             ->singleFile(); // Esto asegura que solo haya una imagen de perfil a la vez
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

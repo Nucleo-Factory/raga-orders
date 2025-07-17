@@ -118,4 +118,32 @@
             </div>
         </div>
     </form>
+
+    <x-modal-success name="modal-bill-to-created">
+        <x-slot:title>
+            Dirección de facturación creada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La dirección de facturación ha sido creada correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
+
+    <x-modal-success name="modal-bill-to-updated">
+        <x-slot:title>
+            Dirección de facturación actualizada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La dirección de facturación ha sido actualizada correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 </div>

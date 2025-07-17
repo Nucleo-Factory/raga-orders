@@ -118,6 +118,41 @@ class PucharseOrderConsolidateDetail extends Component {
             // Count items
             $itemsCount = $order->products->count();
 
+            // Calcular expectedLeadTime = date_required_in_destination - date_planned_pickup (en días)
+            $expectedLeadTime = 0;
+            if ($order->date_required_in_destination && $order->date_planned_pickup) {
+                $dateRequired = \Carbon\Carbon::parse($order->date_required_in_destination);
+                $datePlannedPickup = \Carbon\Carbon::parse($order->date_planned_pickup);
+                $expectedLeadTime = $datePlannedPickup->diffInDays($dateRequired);
+            }
+
+            // Calcular realLeadTime (Lead en transito) = ATA - pickup real (en días)
+            $realLeadTime = 0;
+            if ($order->date_ata && $order->date_actual_pickup) {
+                $ataDate = \Carbon\Carbon::parse($order->date_ata);
+                $datePickupReal = \Carbon\Carbon::parse($order->date_actual_pickup);
+                $realLeadTime = $datePickupReal->diffInDays($ataDate, false);
+            }
+
+            // Calcular actualLeadTime (Lead time real) = ATA - fecha pick planificada (en días)
+            $actualLeadTime = 0;
+            if ($order->date_ata && $order->date_planned_pickup) {
+                $ataDate = \Carbon\Carbon::parse($order->date_ata);
+                $plannedPickupDate = \Carbon\Carbon::parse($order->date_planned_pickup);
+                $actualLeadTime = $plannedPickupDate->diffInDays($ataDate);
+            }
+
+            // Calcular Desviación 1 (fecha ata - fecha requerida en destino)
+            $desviacion1 = 0;
+            if ($order->date_ata && $order->date_required_in_destination) {
+                $ataDate = \Carbon\Carbon::parse($order->date_ata);
+                $requiredDate = \Carbon\Carbon::parse($order->date_required_in_destination);
+                $desviacion1 = $ataDate->diffInDays($requiredDate, false); // false para permitir números negativos
+            }
+
+            // Calcular Desviación 2 (lead time real - lead time requerido)
+            $desviacion2 = $actualLeadTime - $expectedLeadTime;
+
             return [
                 'id' => $order->id,
                 'po_number' => $order->order_number,
@@ -125,7 +160,12 @@ class PucharseOrderConsolidateDetail extends Component {
                 'items_count' => $itemsCount,
                 'total_amount' => $order->total_amount,
                 'status' => $order->status,
-                'status_color' => $statusColor
+                'status_color' => $statusColor,
+                'expected_lead_time' => $expectedLeadTime,
+                'real_lead_time' => $realLeadTime,
+                'actual_lead_time' => $actualLeadTime,
+                'desviacion1' => $desviacion1,
+                'desviacion2' => $desviacion2
             ];
         })->toArray();
 
@@ -145,6 +185,16 @@ class PucharseOrderConsolidateDetail extends Component {
             $query->orderBy('total_amount', $this->sortDirection);
         } elseif ($this->sortField === 'status') {
             $query->orderBy('status', $this->sortDirection);
+        } elseif ($this->sortField === 'expected_lead_time') {
+            $query->orderBy('date_required_in_destination', $this->sortDirection);
+        } elseif ($this->sortField === 'real_lead_time') {
+            $query->orderBy('date_eta', $this->sortDirection);
+        } elseif ($this->sortField === 'actual_lead_time') {
+            $query->orderBy('date_ata', $this->sortDirection);
+        } elseif ($this->sortField === 'desviacion1') {
+            $query->orderBy('date_ata', $this->sortDirection);
+        } elseif ($this->sortField === 'desviacion2') {
+            $query->orderBy('date_ata', $this->sortDirection);
         }
         return $query;
     }

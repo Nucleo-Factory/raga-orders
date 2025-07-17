@@ -25,6 +25,9 @@ class BillToForm extends Component
     public $status = 'active';
     public $notes;
 
+    // Propiedades para controlar los modales
+    public $showSuccessModal = false;
+
     protected $rules = [
         'name' => 'required|string|max:255',
     ];
@@ -81,12 +84,20 @@ class BillToForm extends Component
         if ($this->isEdit) {
             $billTo = BillTo::findOrFail($this->billToId);
             $billTo->update($data);
-            session()->flash('message', 'Dirección de facturación actualizada correctamente');
         } else {
             BillTo::create($data);
-            session()->flash('message', 'Dirección de facturación creada correctamente');
         }
 
+        // Mostrar modal de éxito
+        if ($this->isEdit) {
+            $this->dispatch('open-modal', 'modal-bill-to-updated');
+        } else {
+            $this->dispatch('open-modal', 'modal-bill-to-created');
+        }
+    }
+
+    public function closeModal()
+    {
         return redirect()->route('bill-to.index');
     }
 

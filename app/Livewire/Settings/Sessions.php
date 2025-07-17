@@ -45,7 +45,14 @@ class Sessions extends Component {
     {
         $query = DB::table('sessions')
             ->join('users', 'sessions.user_id', '=', 'users.id')
-            ->select('sessions.*', 'users.name as user_name');
+            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->select('sessions.*', 'users.name as user_name', DB::raw('STRING_AGG(roles.name, \', \') as user_roles'))
+            ->where(function($query) {
+                $query->where('model_has_roles.model_type', '=', 'App\\Models\\User')
+                      ->orWhereNull('model_has_roles.model_type');
+            })
+            ->groupBy('sessions.id', 'sessions.user_id', 'sessions.ip_address', 'sessions.user_agent', 'sessions.payload', 'sessions.last_activity', 'users.name');
 
         if (!empty($this->search)) {
             $query->where(function($q) {

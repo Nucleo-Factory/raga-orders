@@ -26,6 +26,9 @@ class ShipToForm extends Component
     public $status = 'active';
     public $notes;
 
+    // Propiedades para controlar los modales
+    public $showSuccessModal = false;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255',
@@ -95,8 +98,16 @@ class ShipToForm extends Component
 
         $shipTo->save();
 
-        session()->flash('message', $this->isEdit ? 'Dirección de envío actualizada correctamente.' : 'Dirección de envío creada correctamente.');
+        // Mostrar modal de éxito
+        if ($this->isEdit) {
+            $this->dispatch('open-modal', 'modal-ship-to-updated');
+        } else {
+            $this->dispatch('open-modal', 'modal-ship-to-created');
+        }
+    }
 
+    public function closeModal()
+    {
         return redirect()->route('ship-to.index');
     }
 

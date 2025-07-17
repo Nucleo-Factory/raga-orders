@@ -3,7 +3,7 @@
 @endphp
 
 <x-app-layout>
-    <div class="flex items-center justify-between">
+    <div class="flex justify-between items-center">
         <x-view-title>
             <x-slot:title>
                 Etapas PO
@@ -118,7 +118,7 @@
     <x-modal-success title="Operación exitosa"
         content="La operación se encuentra pendiente de aprobación por parte de su supervisor" maxWidth="xs" />
 
-    <div class="flex w-full overflow-auto gap-x-10">
+    <div class="flex overflow-auto gap-x-10 w-full">
         <livewire:kanban.kanban-board />
     </div>
 </x-app-layout>

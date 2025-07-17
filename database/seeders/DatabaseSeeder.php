@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
                 KanbanBoardSeeder::class, // Usar KanbanBoardSeeder en lugar de KanbanSeeder
                 HubSeeder::class,
                 NotificationTypeSeeder::class, // Added notification types seeder
+                NotificationTypesSeeder::class,
             ]);
         } finally {
             // Asegurarse de que las restricciones de clave foránea se reactiven

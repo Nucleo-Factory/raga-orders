@@ -1,5 +1,5 @@
 <div>
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex justify-between items-center mb-8">
         <div class="flex items-start gap-[3.75rem]">
             <x-view-title>
                 <x-slot:title>
@@ -27,7 +27,7 @@
         <div class="flex space-x-4">
             <a href="#" class="relative" wire:click.prevent="toggleEdit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none"
-                    class="absolute -translate-y-1/2 left-4 top-1/2">
+                    class="absolute left-4 top-1/2 -translate-y-1/2">
                     <path
                         d="M1.87604 17.1159C1.92198 16.7024 1.94496 16.4957 2.00751 16.3025C2.06301 16.131 2.14143 15.9679 2.24064 15.8174C2.35246 15.6478 2.49955 15.5008 2.79373 15.2066L16 2.0003C17.1046 0.895732 18.8955 0.895734 20 2.0003C21.1046 3.10487 21.1046 4.89573 20 6.0003L6.79373 19.2066C6.49955 19.5008 6.35245 19.6479 6.18289 19.7597C6.03245 19.8589 5.86929 19.9373 5.69785 19.9928C5.5046 20.0553 5.29786 20.0783 4.88437 20.1243L1.5 20.5003L1.87604 17.1159Z"
                         stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -53,7 +53,7 @@
             </div>
 
             @if(count($searchResults) > 0)
-                <div class="mt-2 overflow-hidden border rounded-lg">
+                <div class="overflow-hidden mt-2 rounded-lg border">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-[#E0E5FF]">
                             <tr>
@@ -175,7 +175,7 @@
 
         @if($loadingTracking)
             <div class="flex justify-center">
-                <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-dark-blue"></div>
+                <div class="w-8 h-8 rounded-full border-b-2 animate-spin border-dark-blue"></div>
             </div>
         @else
             <div class="relative">
@@ -191,7 +191,7 @@
                 </div>
 
                 <!-- Timeline events -->
-                <div class="relative flex justify-between">
+                <div class="flex relative justify-between">
                     @foreach($trackingData['timeline'] as $phase)
                         <div class="flex flex-col items-center">
                             <!-- Status dot and line -->
@@ -234,7 +234,7 @@
                             </div>
 
                             <!-- Status details -->
-                            <div class="w-32 mt-4 text-center">
+                            <div class="mt-4 w-32 text-center">
                                 <p class="mb-1 text-sm font-bold {{ $phase['is_completed'] || $phase['is_current'] ? 'text-dark-blue' : 'text-gray-400' }}">
                                     {{ $phase['name'] }}
                                 </p>
@@ -252,10 +252,10 @@
                 </div>
 
                 <!-- Estimated delivery -->
-                <div class="p-6 mt-12 bg-white border border-gray-100 rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
+                <div class="p-6 mt-12 bg-white rounded-lg border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-4">
-                            <div class="p-3 rounded-full bg-blue-50">
+                            <div class="p-3 bg-blue-50 rounded-full">
                                 <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -269,7 +269,7 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <div class="p-3 rounded-full bg-blue-50">
+                            <div class="p-3 bg-blue-50 rounded-full">
                                 <svg class="w-6 h-6 text-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -290,7 +290,7 @@
     <div class="space-y-[1.875rem]" x-data="{
         activeTab: 'tab1'}">
         <!-- Selector de pestañas -->
-        <div class="flex items-center gap-6 text-lg font-bold">
+        <div class="flex gap-6 items-center text-lg font-bold">
             <button @click="activeTab = 'tab1'"
                 :class="activeTab === 'tab1' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                 class="border-b-2 py-[0.625rem]">
@@ -327,14 +327,14 @@
                                     Número de PO
                                     @if ($sortField === 'po_number')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -349,14 +349,14 @@
                                     Proveedor
                                     @if ($sortField === 'supplier')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -371,14 +371,14 @@
                                     Cant. Items
                                     @if ($sortField === 'items_count')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -393,14 +393,14 @@
                                     Total
                                     @if ($sortField === 'total_amount')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -415,14 +415,14 @@
                                     Estado
                                     @if ($sortField === 'status')
                                         @if ($sortDirection === 'asc')
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 15l7-7 7 7"></path>
                                             </svg>
                                         @else
-                                            <svg class="inline-block w-4 h-4 ml-1" fill="none"
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -430,6 +430,60 @@
                                             </svg>
                                         @endif
                                     @endif
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('expected_lead_time')">
+                                    Leadtime requerido
+                                    @if ($sortField === 'expected_lead_time')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('real_lead_time')">
+                                    Leadtime real
+                                    @if ($sortField === 'real_lead_time')
+                                        @if ($sortDirection === 'asc')
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="inline-block ml-1 w-4 h-4" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('actual_lead_time')">
+                                    Desviación fecha de arribo
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer"
+                                    wire:click="sortBy('actual_lead_time')">
+                                    Desviación leadtime
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
@@ -460,7 +514,19 @@
                                             {{ $order['status'] }}
                                         </span>
                                     </td>
-                                    <td class="flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['expected_lead_time'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['real_lead_time'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['desviacion1'] }} días</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $order['desviacion2'] }} días</div>
+                                    </td>
+                                    <td class="flex gap-2 items-center px-6 py-4 text-sm font-medium whitespace-nowrap">
                                         <a href="{{ route('purchase-orders.detail', $order['id']) }}"
                                             class="text-indigo-600 hover:text-indigo-900">
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -611,14 +677,14 @@
             </div>
 
             <div x-show="activeTab === 'tab3'" x-transition x-data="{ fileSelected: false }">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex justify-between items-center mb-6">
                     <x-search-input class="w-64" wire:model.debounce.300ms="search" placeholder="Buscar comentarios o archivos..." />
 
                     <div class="flex gap-4">
                         <!-- Botón upload -->
                         <x-primary-button
                             type="button"
-                            class="flex items-center gap-2 group"
+                            class="flex gap-2 items-center group"
                             x-on:click="window.location.reload()">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18.453 10.8927C18.1752 13.5026 16.6964 15.9483 14.2494 17.3611C10.1839 19.7083 4.98539 18.3153 2.63818 14.2499L2.38818 13.8168M1.54613 9.10664C1.82393 6.49674 3.30272 4.05102 5.74971 2.63825C9.8152 0.29104 15.0137 1.68398 17.3609 5.74947L17.6109 6.18248M1.49316 16.0657L2.22521 13.3336L4.95727 14.0657M15.0424 5.93364L17.7744 6.66569L18.5065 3.93364" stroke="#F7F7F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -653,7 +719,7 @@
                 @endif
 
                 <!-- Tabla para comentarios y archivos adjuntos -->
-                <div class="w-full overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-[#E0E5FF]">
                             <tr>
@@ -704,15 +770,15 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($comment['status'] === 'Aprobado')
                                             <span class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">
-                                                Aprobado <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Aprobado <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                             </span>
                                         @elseif($comment['status'] === 'Pendiente')
                                             <span class="inline-flex px-2 text-xs font-semibold leading-5 text-yellow-800 bg-yellow-100 rounded-full">
-                                                Pendiente <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Pendiente <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             </span>
                                         @else
                                             <span class="inline-flex px-2 text-xs font-semibold leading-5 text-red-800 bg-red-100 rounded-full">
-                                                Rechazado <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                Rechazado <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </span>
                                         @endif
                                     </td>
@@ -723,7 +789,7 @@
                                         @if(count($comment['attachments'] ?? []) > 0)
                                             @foreach($comment['attachments'] as $attachment)
                                                 <a href="{{ $attachment['url'] }}"
-                                                   class="flex items-center gap-1 mb-1 text-blue-600 hover:text-blue-800"
+                                                   class="flex gap-1 items-center mb-1 text-blue-600 hover:text-blue-800"
                                                    target="_blank">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -765,7 +831,7 @@
 
         <div class="mb-12 space-y-2">
             <div class="space-y-4">
-                <div class="flex flex-col items-start gap-4">
+                <div class="flex flex-col gap-4 items-start">
                     <input
                         type="file"
                         wire:model.live="attachment"

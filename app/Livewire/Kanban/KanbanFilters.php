@@ -21,6 +21,9 @@ class KanbanFilters extends Component
     public $selectedActualHub = null;
     public $selectedMaterialType = null;
 
+    // Nuevo filtro de búsqueda por texto
+    public $searchText = '';
+
     public $filtersApplied = false;
     public $filterCount = 0;
 
@@ -64,21 +67,48 @@ class KanbanFilters extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        // Procesar material_type que es un array en la base de datos
-        $materialTypes = [];
+                                        // Hardcoded types based on database analysis - más confiable que parsing dinámico
+        // Basado en los valores reales encontrados: Standard, dangerous, estibable, exclusive, general
+        $this->materialTypes = [
+            'dangerous',
+            'estibable',
+            'exclusive',
+            'general',
+            'Standard'
+        ];
+
+        // También intentar cargar dinámicamente como respaldo
+        $dynamicTypes = [];
         foreach ($purchaseOrders as $po) {
-            if (is_array($po->material_type)) {
-                foreach ($po->material_type as $type) {
-                    if (!empty($type)) {
-                        $materialTypes[] = $type;
+            $materialType = $po->material_type;
+
+            if (!empty($materialType)) {
+                if (is_array($materialType)) {
+                    foreach ($materialType as $type) {
+                        if (!empty($type) && is_string($type)) {
+                            $dynamicTypes[] = trim($type);
+                        }
+                    }
+                } elseif (is_string($materialType)) {
+                    $decoded = json_decode($materialType, true);
+                    if (is_array($decoded)) {
+                        foreach ($decoded as $type) {
+                            if (!empty($type) && is_string($type)) {
+                                $dynamicTypes[] = trim($type);
+                            }
+                        }
+                    } else {
+                        $dynamicTypes[] = trim($materialType);
                     }
                 }
-            } elseif (!empty($po->material_type)) {
-                $materialTypes[] = $po->material_type;
             }
         }
 
-        $this->materialTypes = array_unique($materialTypes);
+        // Combinar tipos hardcoded con dinámicos
+        if (!empty($dynamicTypes)) {
+            $this->materialTypes = array_unique(array_merge($this->materialTypes, $dynamicTypes));
+        }
+
         sort($this->materialTypes);
     }
 
@@ -99,6 +129,7 @@ class KanbanFilters extends Component
         $this->selectedPlannedHub = null;
         $this->selectedActualHub = null;
         $this->selectedMaterialType = null;
+        $this->searchText = '';
 
         $this->filtersApplied = false;
         $this->filterCount = 0;
@@ -116,7 +147,8 @@ class KanbanFilters extends Component
                $this->selectedIncoterm ||
                $this->selectedPlannedHub ||
                $this->selectedActualHub ||
-               $this->selectedMaterialType;
+               $this->selectedMaterialType ||
+               !empty(trim($this->searchText));
     }
 
     protected function updateFilterCount()
@@ -128,6 +160,7 @@ class KanbanFilters extends Component
         if ($this->selectedPlannedHub) $this->filterCount++;
         if ($this->selectedActualHub) $this->filterCount++;
         if ($this->selectedMaterialType) $this->filterCount++;
+        if (!empty(trim($this->searchText))) $this->filterCount++;
     }
 
     protected function getActiveFilters()
@@ -154,6 +187,10 @@ class KanbanFilters extends Component
             $filters['material_type'] = $this->selectedMaterialType;
         }
 
+        if (!empty(trim($this->searchText))) {
+            $filters['search_text'] = trim($this->searchText);
+        }
+
         return $filters;
     }
 
@@ -165,6 +202,7 @@ class KanbanFilters extends Component
             'planned_hub' => $this->selectedPlannedHub,
             'actual_hub' => $this->selectedActualHub,
             'material_type' => $this->selectedMaterialType,
+            'search_text' => $this->searchText,
         ]);
     }
 
@@ -178,6 +216,7 @@ class KanbanFilters extends Component
             $this->selectedPlannedHub = $filters['planned_hub'] ?? null;
             $this->selectedActualHub = $filters['actual_hub'] ?? null;
             $this->selectedMaterialType = $filters['material_type'] ?? null;
+            $this->searchText = $filters['search_text'] ?? '';
 
             if ($this->hasActiveFilters()) {
                 $this->filtersApplied = true;
@@ -192,3 +231,4 @@ class KanbanFilters extends Component
         return view('livewire.kanban.kanban-filters');
     }
 }
+

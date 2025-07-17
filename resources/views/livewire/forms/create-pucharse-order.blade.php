@@ -1,5 +1,46 @@
 <div>
-    <div class="flex items-center justify-between">
+    <!-- Notification area for errors and success messages -->
+    <div x-data="{ showNotification: false, notificationMessage: '', notificationType: 'error' }"
+         @show-error.window="showNotification = true; notificationMessage = $event.detail; notificationType = 'error'; setTimeout(() => showNotification = false, 5000)"
+         @show-success.window="showNotification = true; notificationMessage = $event.detail; notificationType = 'success'; setTimeout(() => showNotification = false, 5000)">
+
+        <!-- Error/Success Notification -->
+        <div x-show="showNotification"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform translate-y-2"
+             class="fixed top-4 right-4 z-50 p-4 max-w-sm rounded-lg shadow-lg"
+             :class="notificationType === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg x-show="notificationType === 'error'" class="w-5 h-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <svg x-show="notificationType === 'success'" class="w-5 h-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" x-text="notificationMessage"></p>
+                </div>
+                <div class="pl-3 ml-auto">
+                    <div class="-mx-1.5 -my-1.5">
+                        <button @click="showNotification = false" type="button" class="inline-flex p-1.5 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2" :class="notificationType === 'error' ? 'text-red-500 hover:bg-red-200 focus:ring-red-600' : 'text-green-500 hover:bg-green-200 focus:ring-green-600'">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center">
         <x-view-title>
             <x-slot:title>
                 {{ isset($id) ? 'Editar Orden de compra: ' . $order_number : 'Generar nueva orden de compra' }}
@@ -34,7 +75,7 @@
     <x-form>
         <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
-                <div class="w-full space-y-6">
+                <div class="space-y-6 w-full">
                     <h3 class="text-lg font-bold text-[#7288FF]">Datos generales</h3>
                     <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                         <div class="relative">
@@ -43,22 +84,12 @@
                                     Número PO
                                 </x-slot:label>
 
-                                <x-slot:input name="order_number" placeholder="Ingrese número PO" wire:model="order_number" class="pr-10 {{ $errors->has('order_number') ? 'border-red-500' : '' }}"></x-slot:input>
-
-                                <x-slot:icon>
-                                    <button wire:click="generateUniqueOrderNumber"
-                                        class="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </x-slot:icon>
+                                <x-slot:input name="order_number" placeholder="Ingrese número PO" wire:model="order_number" class="pr-10 {{ $errors->has('order_number') ? 'border-red-500 bg-red-50' : '' }}"></x-slot:input>
 
                                 <x-slot:error>
-                                    {{ $errors->first('order_number') }}
+                                    <div class="flex items-center text-red-600">
+                                        {{ $errors->first('order_number') }}
+                                    </div>
                                 </x-slot:error>
                             </x-form-input>
                         </div>
@@ -88,7 +119,7 @@
                 </x-form-input-file>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos vendor</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -97,7 +128,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos Ship to</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -106,7 +137,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Datos de facturación</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-select label="Seleccionar Bill to" name="bill_to_id" wireModel="bill_to_id"
@@ -114,7 +145,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones en centímetros</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
@@ -166,7 +197,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Dimensiones</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-x-5 gap-y-6">
                     <x-form-input>
@@ -228,7 +259,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Fechas</h3>
 
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
@@ -333,7 +364,7 @@
                 </div>
             </div>
 
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-[#7288FF]">Información Adicional</h3>
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
 
@@ -349,7 +380,7 @@
                                         type="checkbox"
                                         value="{{ $value }}"
                                         wire:model="material_type"
-                                        class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                        class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                                     >
                                     <label for="material_type_{{ $value }}" class="block ml-2 text-sm text-gray-700">
                                         {{ $label }}
@@ -364,7 +395,7 @@
 
                     <x-form-select label="Seguro" name="ensurence_type" wire:model="ensurence_type" :options="['pending' => 'Pendiente', 'applied' => 'Aplicado']" />
 
-                    <x-form-select label="Modo de transporte" name="mode" wire:model.live="mode" :options="['maritimo' => 'Marítimo', 'aereo' => 'Aéreo']" />
+                    <x-form-select label="Modo de transporte" name="mode" wire:model.live="mode" :options="['maritimo' => 'Marítimo', 'aereo' => 'Aéreo']" :error="$errors->has('mode') ? true : false" />
                     <x-form-input>
                         <x-slot:label>
                             Tracking ID
@@ -502,7 +533,7 @@
             </div>
         </div>
 
-        <div class="w-full p-8 space-y-6 bg-white rounded-2xl">
+        <div class="p-8 space-y-6 w-full bg-white rounded-2xl">
             <h3 class="w-fit border-b-2 border-[#190FDB] pb-2 text-lg font-bold text-[#190FDB]">Carga / Contenido</h3>
 
             <div class="flex flex-col space-y-4">
@@ -519,10 +550,10 @@
                                 </x-slot:input>
                             </x-form-input>
                             @if (count($searchResults) > 0)
-                                <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg">
-                                    <ul class="py-1 overflow-auto text-base rounded-md max-h-60 sm:text-sm">
+                                <div class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg">
+                                    <ul class="overflow-auto py-1 max-h-60 text-base rounded-md sm:text-sm">
                                         @foreach ($searchResults as $product)
-                                            <li class="relative py-2 pl-3 cursor-pointer select-none pr-9 hover:bg-gray-100"
+                                            <li class="relative py-2 pr-9 pl-3 cursor-pointer select-none hover:bg-gray-100"
                                                 wire:click="selectProduct({{ $product->id }})">
                                                 <div class="flex flex-col items-start">
                                                     <span class="font-medium">{{ $product->material_id }}</span>
@@ -554,7 +585,7 @@
 
                 <!-- Producto seleccionado -->
                 @if ($selectedProduct)
-                    <div class="p-3 mt-2 rounded-md bg-gray-50">
+                    <div class="p-3 mt-2 bg-gray-50 rounded-md">
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-medium">{{ $selectedProduct->material_id }}</p>
@@ -611,7 +642,7 @@
                                             wire:model.live="orderProducts.{{ $index }}.quantity"
                                             wire:change="updateQuantity({{ $index }}, $event.target.value)"
                                             min="1"
-                                            class="block w-20 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                            class="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         $ {{ number_format($product['subtotal'], 2) }}</td>
@@ -644,7 +675,7 @@
                                     Costo Adicional:</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="additional_cost" step="0.01"
-                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </td>
                                 <td></td>
                             </tr>
@@ -653,7 +684,7 @@
                                     Costo de Seguro:</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                     <input type="number" wire:model.live="insurance_cost" step="0.01"
-                                        class="block w-32 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
+                                        class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
                                 </td>
                                 <td></td>
                             </tr>
@@ -792,12 +823,18 @@
             }
         }
 
+        // Variables para evitar bucles infinitos en conversiones de peso
+        let isConverting = false;
+
         // Función para convertir kg a lb
         function convertKgToLb() {
+            if (isConverting) return; // Evitar bucle infinito
+
             console.log('Convirtiendo kg a lb');
             const kg = parseFloat(weightKgField?.value) || 0;
 
             if (kg) {
+                isConverting = true;
                 const lb = kg * 2.20462;
                 if (weightLbField) {
                     weightLbField.value = lb.toFixed(2);
@@ -805,15 +842,19 @@
                     weightLbField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 console.log('Peso convertido a lb:', lb.toFixed(2));
+                isConverting = false;
             }
         }
 
         // Función para convertir lb a kg
         function convertLbToKg() {
+            if (isConverting) return; // Evitar bucle infinito
+
             console.log('Convirtiendo lb a kg');
             const lb = parseFloat(weightLbField?.value) || 0;
 
             if (lb) {
+                isConverting = true;
                 const kg = lb * 0.453592;
                 if (weightKgField) {
                     weightKgField.value = kg.toFixed(2);
@@ -821,6 +862,7 @@
                     weightKgField.dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 console.log('Peso convertido a kg:', kg.toFixed(2));
+                isConverting = false;
             }
         }
 

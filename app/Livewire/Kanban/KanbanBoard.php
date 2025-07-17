@@ -125,7 +125,7 @@ class KanbanBoard extends Component {
 
         // Cargar las órdenes de compra de la compañía del usuario
         $companyId = auth()->user()->company_id ?? null;
-        $query = PurchaseOrder::with(['company', 'kanbanStatus'])
+        $query = PurchaseOrder::with(['company', 'kanbanStatus', 'vendor'])
             ->where('company_id', $companyId);
 
         // Aplicar filtros si están activos
@@ -151,7 +151,8 @@ class KanbanBoard extends Component {
             $this->tasks[] = [
                 'id' => $order->id,
                 'po' => $order->order_number,
-                'vendor' => $order->vendor_id,
+                'vendor' => $order->vendor->name ?? 'N/A',
+                'vendor_id' => $order->vendor_id,
                 'status' => $order->kanban_status_id,
                 'status_slug' => $order->kanbanStatus->slug ?? 'unknown',
                 'order_date' => $order->order_date ? $order->order_date->format('Y-m-d') : null,
@@ -175,11 +176,11 @@ class KanbanBoard extends Component {
         }
 
         if (isset($this->activeFilters['currency'])) {
-            $query->where('currency', $this->activeFilters['currency']);
+            $query->whereRaw('LOWER(currency) = LOWER(?)', [$this->activeFilters['currency']]);
         }
 
         if (isset($this->activeFilters['incoterms'])) {
-            $query->where('incoterms', $this->activeFilters['incoterms']);
+            $query->whereRaw('LOWER(incoterms) = LOWER(?)', [$this->activeFilters['incoterms']]);
         }
 
         if (isset($this->activeFilters['planned_hub_id'])) {
@@ -190,12 +191,40 @@ class KanbanBoard extends Component {
             $query->where('actual_hub_id', $this->activeFilters['actual_hub_id']);
         }
 
-        if (isset($this->activeFilters['material_type'])) {
+                        if (isset($this->activeFilters['material_type'])) {
             $materialType = $this->activeFilters['material_type'];
             $query->where(function($q) use ($materialType) {
-                // Para manejar material_type como array (JSON)
-                $q->whereJsonContains('material_type', $materialType)
-                  ->orWhere('material_type', $materialType);
+                // Los datos están como: "[\"general\",\"dangerous\"]"
+                // Buscar sin comillas ya que están escapadas en el JSON
+                $searchPatterns = [
+                    $materialType,                      // exacto
+                    strtolower($materialType),          // minúsculas
+                    strtoupper($materialType),          // mayúsculas
+                    ucfirst(strtolower($materialType))  // primera mayúscula
+                ];
+
+                foreach ($searchPatterns as $pattern) {
+                    $q->orWhereRaw('material_type::text LIKE ?', ['%' . $pattern . '%']);
+                }
+            });
+        }
+
+        // Nuevo filtro de búsqueda de texto case-insensitive
+        if (isset($this->activeFilters['search_text'])) {
+            $searchText = $this->activeFilters['search_text'];
+            $query->where(function($q) use ($searchText) {
+                $q->whereRaw('LOWER(order_number) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereRaw('LOWER(currency) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereRaw('LOWER(incoterms) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereRaw('LOWER(CAST(total AS CHAR)) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereRaw('LOWER(tracking_id) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereRaw('LOWER(material_type::text) LIKE LOWER(?)', ["%{$searchText}%"])
+                  ->orWhereHas('company', function($companyQuery) use ($searchText) {
+                      $companyQuery->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$searchText}%"]);
+                  })
+                  ->orWhereHas('vendor', function($vendorQuery) use ($searchText) {
+                      $vendorQuery->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$searchText}%"]);
+                  });
             });
         }
     }

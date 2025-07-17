@@ -21,15 +21,20 @@ use App\Livewire\Settings\UserCreate;
 use App\Livewire\Settings\Sessions;
 use App\Livewire\Settings\ApiTokens;
 use App\Http\Controllers\AuthorizationController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ForecastController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 Route::view('/', 'welcome')
     ->name('welcome');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified', 'permission:has_view_dashboard'])
-    ->name('dashboard');
+// Dashboard routes
+Route::middleware(['auth', 'verified', 'permission:has_view_dashboard'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/data', [DashboardController::class, 'getData'])->name('dashboard.data');
+    Route::get('dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
+});
 
 Route::view('profile', 'profile')
     ->middleware(['auth', 'permission:has_view_profile'])
@@ -58,9 +63,12 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('permission:has_view_forecast_table')
         ->name('products.forecast');
 
-    Route::view('products/forecast-graph', 'products.forecast-graph')
-        ->middleware('permission:has_view_forecast_graph')
-        ->name('products.forecast-graph');
+    // Forecast dashboard routes
+    Route::middleware('permission:has_view_forecast_graph')->group(function () {
+        Route::get('products/forecast-graph', [ForecastController::class, 'index'])->name('products.forecast-graph');
+        Route::get('products/forecast-graph/data', [ForecastController::class, 'getData'])->name('products.forecast-graph.data');
+        Route::get('products/forecast-graph/export', [ForecastController::class, 'export'])->name('products.forecast-graph.export');
+    });
 
     Route::get('products/forecast-edit/{id}', function ($id) {
         return view('products.forecast-edit', ['forecast' => \App\Models\Forecast::findOrFail($id)]);

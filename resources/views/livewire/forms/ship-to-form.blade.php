@@ -124,4 +124,32 @@
             </div>
         </div>
     </form>
+
+    <x-modal-success name="modal-ship-to-created">
+        <x-slot:title>
+            Dirección de envío creada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La dirección de envío ha sido creada correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
+
+    <x-modal-success name="modal-ship-to-updated">
+        <x-slot:title>
+            Dirección de envío actualizada correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            La dirección de envío ha sido actualizada correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 </div>

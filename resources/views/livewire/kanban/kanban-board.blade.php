@@ -3,15 +3,33 @@
     $hubArray = $hubArray->pluck('name', 'id')->toArray();
 @endphp
 
-<div class="w-full mx-auto"
-     x-data="{}"
+<div class="mx-auto w-full"
+     x-data="{
+        currentTaskElement: null,
+
+        moveTaskToColumn(newColumnId) {
+            if (!window.kanbanCurrentTask || !newColumnId) return;
+
+            const targetColumn = document.getElementById('column-' + newColumnId);
+            if (targetColumn) {
+                // Remover la tarjeta de su posición actual
+                window.kanbanCurrentTask.remove();
+
+                // Agregar la tarjeta a la nueva columna
+                targetColumn.appendChild(window.kanbanCurrentTask);
+
+                // Actualizar el valor del select wire model
+                $wire.set('newColumnId', newColumnId);
+            }
+        }
+     }"
      x-on:refreshKanban.window="$wire.$refresh()"
      x-on:purchaseOrderStatusUpdated.window="$wire.$refresh()">
 
     @if(isset($hasActiveFilters) && $hasActiveFilters)
-    <div class="flex items-center justify-between p-3 mb-4 rounded-md bg-blue-50">
+    <div class="flex justify-between items-center p-3 mb-4 bg-blue-50 rounded-md">
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
             </svg>
             <span class="text-sm font-medium text-blue-700">Mostrando órdenes filtradas. Los resultados que estás viendo están limitados por los filtros activos.</span>
@@ -25,7 +43,7 @@
     </div>
     @endif
 
-    <div class="flex w-full gap-4 pb-4 overflow-x-auto kanban-container" wire:poll.10s>
+    <div class="flex overflow-x-auto gap-4 pb-4 w-full kanban-container" wire:poll.10s>
         @if (!$board)
             <div class="p-6 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold text-gray-700">No hay tableros Kanban disponibles</h3>
@@ -59,6 +77,10 @@
                                     console.log(taskId, newColumn);
                                     if (evt.from.getAttribute('data-column-id') !== newColumn) {
                                         console.log(newColumn);
+
+                                        // Guardar referencia de la tarjeta actual para poder moverla después
+                                        window.kanbanCurrentTask = evt.item;
+
                                         if(newColumn == 1) {
                                             $dispatch('open-modal', 'modal-hub-teorico');
                                         } else if (newColumn == 2) {
@@ -117,7 +139,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -130,18 +153,16 @@
 
         <div class="mb-12 space-y-2">
             <div class="space-y-4">
-                <div class="flex flex-col items-start gap-4">
+                <div class="flex flex-col gap-4 items-start">
                     <input
                         type="file"
                         wire:model="attachment"
                         class="hidden"
                         x-ref="fileInput"
-                        id="file-upload-hub-teorico"
-                        :disabled="empty(trim($comment))"
-                    >
+                        id="file-upload-hub-teorico">
                     <x-secondary-button
                         onclick="document.getElementById('file-upload-hub-teorico').click()"
-                        class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                        class="group flex w-full items-center justify-center gap-[0.625rem]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                             fill="none">
                             <path
@@ -201,7 +222,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -214,12 +236,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-validacion-operativa"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-validacion-operativa">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-validacion-operativa').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -272,7 +292,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -295,12 +316,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-pickup"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-pickup">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-pickup').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -354,7 +373,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -377,12 +397,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-en-transito"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-en-transito">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-en-transito').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -436,7 +454,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -449,12 +468,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-llegada-a-hub"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-llegada-a-hub">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-llegada-a-hub').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -507,7 +524,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -520,12 +538,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-validacion-operativa-cliente"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-validacion-operativa-cliente">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-validacion-operativa-cliente').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -578,7 +594,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
@@ -591,12 +608,10 @@
                 wire:model="attachment"
                 class="hidden"
                 x-ref="fileInput"
-                id="file-upload-consolidacion-hub-real"
-                :disabled="empty(trim($comment))"
-            >
+                id="file-upload-consolidacion-hub-real">
             <x-secondary-button
                 onclick="document.getElementById('file-upload-consolidacion-hub-real').click()"
-                class="group flex w-full items-center justify-center gap-[0.625rem]" :disabled="empty(trim($comment))">
+                class="group flex w-full items-center justify-center gap-[0.625rem]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22"
                     fill="none">
                     <path
@@ -649,7 +664,8 @@
 
         <div class="mb-8">
             <x-form-select label="" name="etapa" :options="collect($columns)->pluck('name', 'id')->toArray()" optionPlaceholder="Seleccionar etapa"
-                :value="$newColumnId" />
+                :value="$newColumnId" wire:model.live="newColumnId"
+                x-on:change="moveTaskToColumn($event.target.value)" />
         </div>
 
         <div class="mb-8">
