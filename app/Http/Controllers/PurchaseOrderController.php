@@ -72,7 +72,9 @@ class PurchaseOrderController extends Controller
                 }
 
                 // Parse date
-                $requiredDate = Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination']);
+                $requiredDate = !empty($general['date_required_in_destination'])
+                    ? Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination'])
+                    : now(); // Default to current date if empty
 
                 // Calcular el peso total a partir de los items
                 $totalWeight = 0;
@@ -116,16 +118,16 @@ class PurchaseOrderController extends Controller
                     'ship_to_id' => $shipTo->id,
                     'bill_to_id' => $billTo->id,
                     'order_date' => now(),
-                    'currency' => $general['currency'],
-                    'incoterms' => $general['incoterms'],
-                    'net_total' => $netTotal, // Usar el valor exacto del JSON
-                    'total' => $netTotal, // El total también es el mismo valor
+                    'currency' => !empty($general['currency']) ? $general['currency'] : 'USD', // Default currency
+                    'incoterms' => !empty($general['incoterms']) ? $general['incoterms'] : 'EXW', // Default incoterms
+                    'net_total' => $netTotal,
+                    'total' => $netTotal,
                     'weight_kg' => $totalWeight,
                     'date_required_in_destination' => $requiredDate,
                     'planned_hub_id' => $hub->id,
-                    'material_type' => json_encode(['Standard']), // Valor por defecto
+                    'material_type' => json_encode(['Standard']),
                     'ensurence_type' => 'pending',
-                    'mode' => $general['mode'],
+                    'mode' => !empty($general['mode']) ? $general['mode'] : 'AIR', // Default mode
                     'kanban_status_id' => $kanbanStatusId,
 
                     // Campos obligatorios con valores predeterminados
@@ -167,7 +169,21 @@ class PurchaseOrderController extends Controller
                 ]);
 
                 // Procesar y asociar los productos
+                $groupedItems = [];
                 foreach ($orderData['items'] as $itemData) {
+                    $materialId = $itemData['material'];
+                    if (!isset($groupedItems[$materialId])) {
+                        $groupedItems[$materialId] = [
+                            'material' => $materialId,
+                            'price_per_unit' => $itemData['price_per_unit'],
+                            'peso_kg' => $itemData['peso_kg']
+                        ];
+                    } else {
+                        $groupedItems[$materialId]['peso_kg'] += $itemData['peso_kg'];
+                    }
+                }
+
+                foreach ($groupedItems as $itemData) {
                     // Buscar el producto por material_id
                     $product = Product::where('material_id', $itemData['material'])->first();
 
