@@ -47,10 +47,10 @@ class PurchaseOrderController extends Controller
             foreach ($orders as $orderData) {
                 $general = $orderData['general'];
 
-                // Find vendor by vendor_code
-                $vendor = Vendor::where('vendo_code', $general['vendor_id'])->first();
+                // Find vendor by name
+                $vendor = Vendor::where('name', $general['vendor_id'])->first();
                 if (!$vendor) {
-                    throw new \Exception("Vendor with code {$general['vendor_id']} not found");
+                    throw new \Exception("Vendor with name '{$general['vendor_id']}' not found");
                 }
 
                 // Find shipTo by name
@@ -71,8 +71,14 @@ class PurchaseOrderController extends Controller
                     throw new \Exception("Hub with code {$general['planned_hub_id']} not found");
                 }
 
-                // Parse date
-                $requiredDate = Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination']);
+                // Parse dates
+                $requiredDate = !empty($general['date_required_in_destination'])
+                    ? Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination'])
+                    : now(); // Default to current date if empty
+
+                $plannedPickupDate = !empty($general['date_planned_pickup'])
+                    ? Carbon::createFromFormat('Y/m/d', $general['date_planned_pickup'])
+                    : null;
 
                 // Calcular el peso total a partir de los items
                 $totalWeight = 0;
@@ -116,16 +122,17 @@ class PurchaseOrderController extends Controller
                     'ship_to_id' => $shipTo->id,
                     'bill_to_id' => $billTo->id,
                     'order_date' => now(),
-                    'currency' => $general['currency'],
-                    'incoterms' => $general['incoterms'],
-                    'net_total' => $netTotal, // Usar el valor exacto del JSON
-                    'total' => $netTotal, // El total también es el mismo valor
+                    'currency' => !empty($general['currency']) ? $general['currency'] : 'USD', // Default currency
+                    'incoterms' => !empty($general['incoterms']) ? $general['incoterms'] : 'EXW', // Default incoterms
+                    'net_total' => $netTotal,
+                    'total' => $netTotal,
                     'weight_kg' => $totalWeight,
                     'date_required_in_destination' => $requiredDate,
+                    'date_planned_pickup' => $plannedPickupDate,
                     'planned_hub_id' => $hub->id,
-                    'material_type' => json_encode(['Standard']), // Valor por defecto
+                    'material_type' => json_encode(['Standard']),
                     'ensurence_type' => 'pending',
-                    'mode' => $general['mode'],
+                    'mode' => !empty($general['mode']) ? $general['mode'] : 'AIR', // Default mode
                     'kanban_status_id' => $kanbanStatusId,
 
                     // Campos obligatorios con valores predeterminados
@@ -154,7 +161,8 @@ class PurchaseOrderController extends Controller
 
                 Log::info('Datos preparados para crear la PO', [
                     'order_number' => $general['order_number'],
-                    'net_total' => $netTotal
+                    'net_total' => $netTotal,
+                    'date_planned_pickup' => $plannedPickupDate ? $plannedPickupDate->format('Y-m-d') : null
                 ]);
 
                 // Crear la orden de compra
@@ -167,7 +175,21 @@ class PurchaseOrderController extends Controller
                 ]);
 
                 // Procesar y asociar los productos
+                $groupedItems = [];
                 foreach ($orderData['items'] as $itemData) {
+                    $materialId = $itemData['material'];
+                    if (!isset($groupedItems[$materialId])) {
+                        $groupedItems[$materialId] = [
+                            'material' => $materialId,
+                            'price_per_unit' => $itemData['price_per_unit'],
+                            'peso_kg' => $itemData['peso_kg']
+                        ];
+                    } else {
+                        $groupedItems[$materialId]['peso_kg'] += $itemData['peso_kg'];
+                    }
+                }
+
+                foreach ($groupedItems as $itemData) {
                     // Buscar el producto por material_id
                     $product = Product::where('material_id', $itemData['material'])->first();
 
