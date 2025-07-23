@@ -47,10 +47,10 @@ class PurchaseOrderController extends Controller
             foreach ($orders as $orderData) {
                 $general = $orderData['general'];
 
-                // Find vendor by vendor_code
-                $vendor = Vendor::where('vendo_code', $general['vendor_id'])->first();
+                // Find vendor by name
+                $vendor = Vendor::where('name', $general['vendor_id'])->first();
                 if (!$vendor) {
-                    throw new \Exception("Vendor with code {$general['vendor_id']} not found");
+                    throw new \Exception("Vendor with name '{$general['vendor_id']}' not found");
                 }
 
                 // Find shipTo by name
@@ -71,10 +71,14 @@ class PurchaseOrderController extends Controller
                     throw new \Exception("Hub with code {$general['planned_hub_id']} not found");
                 }
 
-                // Parse date
+                // Parse dates
                 $requiredDate = !empty($general['date_required_in_destination'])
                     ? Carbon::createFromFormat('Y/m/d', $general['date_required_in_destination'])
                     : now(); // Default to current date if empty
+
+                $plannedPickupDate = !empty($general['date_planned_pickup'])
+                    ? Carbon::createFromFormat('Y/m/d', $general['date_planned_pickup'])
+                    : null;
 
                 // Calcular el peso total a partir de los items
                 $totalWeight = 0;
@@ -124,6 +128,7 @@ class PurchaseOrderController extends Controller
                     'total' => $netTotal,
                     'weight_kg' => $totalWeight,
                     'date_required_in_destination' => $requiredDate,
+                    'date_planned_pickup' => $plannedPickupDate,
                     'planned_hub_id' => $hub->id,
                     'material_type' => json_encode(['Standard']),
                     'ensurence_type' => 'pending',
@@ -156,7 +161,8 @@ class PurchaseOrderController extends Controller
 
                 Log::info('Datos preparados para crear la PO', [
                     'order_number' => $general['order_number'],
-                    'net_total' => $netTotal
+                    'net_total' => $netTotal,
+                    'date_planned_pickup' => $plannedPickupDate ? $plannedPickupDate->format('Y-m-d') : null
                 ]);
 
                 // Crear la orden de compra
