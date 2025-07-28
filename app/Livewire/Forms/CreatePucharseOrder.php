@@ -929,33 +929,29 @@ class CreatePucharseOrder extends Component
                     }
                 }
 
+                // Notificar a todos los usuarios sobre la actualización de la PO
                 $notificationService = app(\App\Services\NotificationService::class);
-
-                // Create notification for all users
-                $notifications = $notificationService->notifyAll(
-                    'po_hub_real',
-                    'Hub Real Diferente',
-                    "La orden de compra {$this->order_number} se creó con un hub real ({$actualHub->name}) diferente al hub planificado ({$plannedHub->name})",
+                $notificationService->notifyAll(
+                    'po_updated',
+                    'Orden de Compra Actualizada',
+                    "La orden de compra {$this->order_number} ha sido actualizada exitosamente",
                     [
                         'order_number' => $this->order_number,
-                        'planned_hub' => $plannedHub->name,
-                        'actual_hub' => $actualHub->name,
                         'order_id' => $purchaseOrder->id,
-                        'type' => 'hub_change'
+                        'type' => 'po_updated'
                     ]
                 );
 
-                \Log::info('Notificación enviada correctamente', [
-                    'notifications' => $notifications,
-                    'type' => 'po_hub_real'
-                ]);
-
+                // Dispatch success notification and open modal
+                $this->dispatch('show-success', 'Orden de compra actualizada exitosamente con número: ' . $this->order_number);
                 $this->dispatch('open-modal', 'modal-purchase-order-created');
 
             } catch (\Exception $e) {
                 \DB::rollBack();
                 \Log::error('Error en updatePurchaseOrder: ' . $e->getMessage());
-                session()->flash('error', 'Error al actualizar la orden: ' . $e->getMessage());
+
+                // Dispatch error notification
+                $this->dispatch('show-error', 'Error al actualizar la orden de compra. Por favor, revise los campos y vuelva a intentar.');
             }
     }
 
