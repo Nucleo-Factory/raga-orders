@@ -273,6 +273,14 @@
                                 Tokens API
                             </x-sidebar-dropdown-item>
                         </li>
+
+                        @if(config('po-confirmation.enabled', false))
+                        <li>
+                            <x-sidebar-dropdown-item href="{{ route('settings.po-confirmation') }}" :active="request()->routeIs('settings.po-confirmation')">
+                                Confirmación PO
+                            </x-sidebar-dropdown-item>
+                        </li>
+                        @endif
                     </ul>
                 </x-sidebar-dropdown>
             </li>

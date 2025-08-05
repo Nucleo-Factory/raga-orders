@@ -233,10 +233,20 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->regenerateToken();
         return redirect('/')->with('message', 'Has cerrado sesión correctamente.');
     })->name('logout-session');
+
+    // PO Confirmation Settings
+    Route::get('/settings/po-confirmation', function () {
+        return view('po-confirmation-settings');
+    })->name('settings.po-confirmation');
 });
 
 Route::view('support', 'support.index')
     ->middleware(['auth'])
     ->name('support.index');
+
+// Ruta de prueba para el módulo PO Confirmation
+Route::get('/po-confirmation-test', function () {
+    return view('po-confirmation-test');
+})->name('po.confirmation.test');
 
 require __DIR__ . '/auth.php';

@@ -12,10 +12,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Traits\HasAuthorizations;
+use RagaOrders\POConfirmation\Traits\HasPOConfirmation;
 
 class PurchaseOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasAuthorizations;
+    use HasFactory, InteractsWithMedia, HasAuthorizations, HasPOConfirmation;
 
     /**
      * The attributes that are mass assignable.
@@ -87,6 +88,12 @@ class PurchaseOrder extends Model implements HasMedia
         'length_cm',
         'width_cm',
         'height_cm',
+        'confirmation_hash',
+        'hash_expires_at',
+        'confirmation_email_sent',
+        'confirmation_email_sent_at',
+        'update_date_po',
+        'confirm_update_date_po',
     ];
 
     /**
@@ -120,6 +127,10 @@ class PurchaseOrder extends Model implements HasMedia
         'date_ata' => 'datetime',
         'date_consolidation' => 'datetime',
         'release_date' => 'datetime',
+        'hash_expires_at' => 'datetime',
+        'confirmation_email_sent_at' => 'datetime',
+        'update_date_po' => 'date',
+        'confirm_update_date_po' => 'boolean',
     ];
 
     /**
