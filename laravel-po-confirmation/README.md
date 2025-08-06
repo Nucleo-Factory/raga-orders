@@ -300,6 +300,92 @@ Este paquete está bajo la licencia MIT. Ver el archivo `LICENSE` para más deta
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
 
+## Gestión de Branches
+
+### Desactivar el módulo antes de cambiar de branch
+
+Cuando necesites cambiar a un branch que no incluye este módulo, es importante desactivarlo primero para evitar errores:
+
+#### 1. Desinstalar el módulo
+```bash
+php artisan po-confirmation:uninstall
+```
+
+#### 2. Remover la dependencia del composer.json
+Editar el archivo `composer.json` y eliminar:
+```json
+"raga-orders/laravel-po-confirmation": "dev-main"
+```
+
+Y también eliminar la sección `repositories`:
+```json
+"repositories": [
+    {
+        "type": "path",
+        "url": "./laravel-po-confirmation"
+    }
+]
+```
+
+#### 3. Actualizar dependencias
+```bash
+composer update
+```
+
+#### 4. Verificar que todo funcione
+```bash
+./vendor/bin/sail ps
+./vendor/bin/sail logs laravel.test
+```
+
+### Activar el módulo al regresar al branch
+
+Cuando regreses al branch que incluye este módulo:
+
+#### 1. Agregar la dependencia al composer.json
+```json
+"require": {
+    "raga-orders/laravel-po-confirmation": "dev-main"
+},
+"repositories": [
+    {
+        "type": "path",
+        "url": "./laravel-po-confirmation"
+    }
+]
+```
+
+#### 2. Instalar dependencias
+```bash
+composer update
+```
+
+#### 3. Instalar el módulo
+```bash
+php artisan po-confirmation:install
+```
+
+#### 4. Verificar instalación
+```bash
+php artisan po-confirmation:status
+```
+
+### Comandos útiles para gestión de branches
+
+```bash
+# Verificar estado del módulo
+php artisan po-confirmation:status
+
+# Desinstalar módulo (antes de cambiar de branch)
+php artisan po-confirmation:uninstall
+
+# Instalar módulo (al regresar al branch)
+php artisan po-confirmation:install
+
+# Verificar logs del servidor
+./vendor/bin/sail logs laravel.test
+```
+
 ## Changelog
 
 ### v1.0.0
@@ -308,3 +394,4 @@ Este paquete está bajo la licencia MIT. Ver el archivo `LICENSE` para más deta
 - Dashboard administrativo
 - Automatización con tareas programadas
 - Templates de email profesionales
+

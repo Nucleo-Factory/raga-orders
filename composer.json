@@ -14,7 +14,7 @@
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.0",
-        "raga-orders/laravel-po-confirmation": "dev-main",
+
         "rappasoft/laravel-livewire-tables": "^3.7",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.16"
@@ -43,12 +43,7 @@
             "Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./laravel-po-confirmation"
-        }
-    ],
+
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
