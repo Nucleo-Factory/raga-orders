@@ -36,7 +36,7 @@ class VendorForm extends Component
         'country' => 'nullable|string|max:100',
         'state' => 'nullable|string|max:100',
         'phone' => 'nullable|string|max:20',
-        'status' => 'required|in:active,inactive',
+        'status' => 'nullable|in:active,inactive',
         'notes' => 'nullable|string',
     ];
 
@@ -56,7 +56,7 @@ class VendorForm extends Component
             $this->country = $vendor->country;
             $this->state = $vendor->state;
             $this->phone = $vendor->phone;
-            $this->status = $vendor->status;
+            $this->status = $vendor->status ?? 'active';
             $this->notes = $vendor->notes;
             $this->title = 'Editar Proveedor';
             $this->subtitle = 'Edite los datos del proveedor';
@@ -81,22 +81,31 @@ class VendorForm extends Component
             'country' => $this->country,
             'state' => $this->state,
             'phone' => $this->phone,
-            'status' => $this->status,
+            'status' => $this->status ?? 'active',
             'notes' => $this->notes,
             'company_id' => Auth::user()->company_id,
         ];
 
-        if ($this->isEdit) {
-            $this->vendor->update($vendorData);
-            session()->flash('message', 'Proveedor actualizado correctamente.');
-        } else {
-            $vendorData['company_id'] = Auth::user()->company_id;
-            Vendor::create($vendorData);
-            session()->flash('message', 'Proveedor creado correctamente.');
-        }
+        try {
+            if ($this->isEdit) {
+                $this->vendor->update($vendorData);
+                $this->dispatch('open-modal', 'modal-vendor-created');
 
+            } else {
+                Vendor::create($vendorData);
+                $this->dispatch('open-modal', 'modal-vendor-created');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al guardar el proveedor: ' . $e->getMessage());
+        }
+    }
+
+    public function closeModal()
+    {
         return redirect()->route('vendors.index');
     }
+
+
 
     public function render()
     {

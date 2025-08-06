@@ -12,6 +12,18 @@
     </div>
 
     <form wire:submit.prevent="saveVendor">
+        @if (session()->has('message'))
+            <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-md">
+                {{ session('message') }}
+            </div>
+        @endif
+
+        @if (session()->has('error'))
+            <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-md">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="w-full max-w-[1254px] space-y-6 bg-white rounded-2xl p-8">
             <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                 <!-- Información básica -->
@@ -106,18 +118,14 @@
                     </x-slot:error>
                 </x-form-input>
 
-                <x-form-select>
-                    <x-slot:label>
-                        Estado
-                    </x-slot:label>
-                    <x-slot:select name="status" wire:model="status">
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
-                    </x-slot:select>
-                    <x-slot:error>
-                        {{ $errors->first('status') }}
-                    </x-slot:error>
-                </x-form-select>
+                <x-form-select
+                    name="status"
+                    :options="['active' => 'Activo', 'inactive' => 'Inactivo']"
+                    optionPlaceholder="Seleccione un estado"
+                    wire:model="status"
+                    :label="'Estado'"
+                    :error="$errors->first('status')"
+                />
             </div>
 
             <div class="mt-6">
@@ -142,4 +150,18 @@
             </div>
         </div>
     </form>
+
+    <x-modal-success name="modal-vendor-created">
+        <x-slot:title>
+            Proveedor creado correctamente
+        </x-slot:title>
+
+        <x-slot:description>
+            El proveedor ha sido creado correctamente con el nombre: {{ $name }}
+        </x-slot:description>
+
+        <x-primary-button wire:click="closeModal" class="w-full">
+            Cerrar
+        </x-primary-button>
+    </x-modal-success>
 </div>
