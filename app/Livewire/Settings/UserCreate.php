@@ -110,6 +110,11 @@ class UserCreate extends Component
         return redirect()->route('settings.users');
     }
 
+    public function backToList()
+    {
+        return redirect()->route('settings.users');
+    }
+
     public function render()
     {
         return view('livewire.settings.user-create')

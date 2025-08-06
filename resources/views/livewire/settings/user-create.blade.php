@@ -1,7 +1,7 @@
 <div>
     <div class="p-8 space-y-10 bg-white rounded-2xl">
         <div class="flex gap-4">
-            <div class="w-full space-y-6">
+            <div class="space-y-6 w-full">
                 <h3 class="text-lg font-bold text-neutral-blue">{{ $title }}</h3>
                 <p class="text-sm text-gray-600">{{ $subtitle }}</p>
 
@@ -68,8 +68,8 @@
                         </x-slot:error>
                     </div>
 
-                    <div class="flex justify-end gap-4 mt-6">
-                        <x-secondary-button type="button" wire:click="$navigate('{{ route('settings.users') }}')">
+                    <div class="flex gap-4 justify-end mt-6">
+                        <x-secondary-button type="button" wire:click="backToList">
                             Cancelar
                         </x-secondary-button>
 
