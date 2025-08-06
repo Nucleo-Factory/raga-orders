@@ -22,7 +22,7 @@
                     @foreach ($filterable as $filter)
                         @if (isset($filterOptions[$filter]))
                             <select wire:model="filters.{{ $filter }}"
-                                class="px-4 py-2 ml-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="px-4 py-2 ml-4 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Todos</option>
                                 @foreach ($filterOptions[$filter] as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -37,7 +37,7 @@
         @if ($showPerPage)
             <div>
                 <select wire:model="perPage"
-                    class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="10">10 por página</option>
                     <option value="25">25 por página</option>
                     <option value="50">50 por página</option>
@@ -58,13 +58,13 @@
                             {{ $header }}
                             @if (in_array($key, $sortable) && $sortField === $key)
                                 @if ($sortDirection === 'asc')
-                                    <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
+                                    <svg class="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 15l7-7 7 7"></path>
                                     </svg>
                                 @else
-                                    <svg class="inline-block w-4 h-4 ml-1" fill="none" stroke="currentColor"
+                                    <svg class="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7"></path>
@@ -164,14 +164,14 @@
                                                 @if (is_array($row->$key))
                                                     @foreach ($row->$key as $item)
                                                         <span
-                                                            class="mr-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                                                            class="inline-flex items-center px-2.5 py-0.5 mr-2 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
                                                             {{ $item }}
                                                         </span>
                                                     @endforeach
                                                 @elseif($row->$key instanceof \Illuminate\Support\Collection)
                                                     @foreach ($row->$key as $item)
                                                         <span
-                                                            class="mr-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                                                            class="inline-flex items-center px-2.5 py-0.5 mr-2 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
                                                             {{ is_object($item) ? (method_exists($item, '__toString') ? $item : $item->id) : $item }}
                                                         </span>
                                                     @endforeach
@@ -214,7 +214,7 @@
                                                 @if (is_array($row[$key]))
                                                     @foreach ($row[$key] as $item)
                                                         <span
-                                                            class="mr-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                                                            class="inline-flex items-center px-2.5 py-0.5 mr-2 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
                                                             {{ $item }}
                                                         </span>
                                                     @endforeach
@@ -244,7 +244,7 @@
     </div>
 
     @if ($showPagination)
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex justify-between items-center mt-4">
             <div class="text-sm text-gray-700">
                 Mostrando {{ $processedRows->firstItem() ?? 0 }} a {{ $processedRows->lastItem() ?? 0 }} de {{ $processedRows->total() }} resultados
             </div>
@@ -255,7 +255,7 @@
                         &larr;
                     </span>
                 @else
-                    <button wire:click="previousPage" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    <button wire:click="previousPage" class="px-3 py-1 text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">
                         <span class="sr-only">Previous</span>
                         &larr;
                     </button>
@@ -265,12 +265,12 @@
                     @if ($page == $processedRows->currentPage())
                         <span class="px-3 py-1 text-white bg-blue-600 rounded-md">{{ $page }}</span>
                     @else
-                        <button wire:click="gotoPage({{ $page }})" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ $page }}</button>
+                        <button wire:click="gotoPage({{ $page }})" class="px-3 py-1 text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">{{ $page }}</button>
                     @endif
                 @endforeach
 
                 @if ($processedRows->hasMorePages())
-                    <button wire:click="nextPage" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    <button wire:click="nextPage" class="px-3 py-1 text-gray-700 bg-white rounded-md border border-gray-300 hover:bg-gray-50">
                         <span class="sr-only">Next</span>
                         &rarr;
                     </button>
@@ -287,11 +287,11 @@
     <!-- Modal de confirmación de eliminación -->
     @if ($confirmingDelete)
         <x-modal-warning :show="$confirmingDelete" title="¿Estás seguro de querer eliminar este registro?" name="modal-warning">
-            <div class="flex items-center gap-2">
+            <div class="flex gap-2 items-center">
                 <button class="w-1/2 py-3 font-medium transition duration-200 rounded-lg border-[3px] text-neutral-blue border-neutral-blue" wire:click="cancelDelete">
                     Cancelar
                 </button>
-                <button class="w-1/2 py-3 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700" wire:click="delete">
+                <button class="py-3 w-1/2 font-medium text-white bg-red-600 rounded-lg transition duration-200 hover:bg-red-700" wire:click="delete">
                     Eliminar
                 </button>
             </div>

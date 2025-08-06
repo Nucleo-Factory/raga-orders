@@ -290,10 +290,10 @@ class ReusableTable extends Component
                     if (strpos($field, '.') !== false) {
                         [$relation, $relationField] = explode('.', $field);
                         $q->orWhereHas($relation, function (Builder $subQ) use ($relationField) {
-                            $subQ->where($relationField, 'like', '%' . $this->search . '%');
+                            $subQ->whereRaw('LOWER(' . $relationField . ') LIKE ?', ['%' . strtolower($this->search) . '%']);
                         });
                     } else {
-                        $q->orWhere($field, 'like', '%' . $this->search . '%');
+                        $q->orWhereRaw('LOWER(' . $field . ') LIKE ?', ['%' . strtolower($this->search) . '%']);
                     }
                 }
             });
