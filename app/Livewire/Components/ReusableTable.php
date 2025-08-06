@@ -189,6 +189,9 @@ class ReusableTable extends Component
         foreach ($this->filterable as $field) {
             $this->filters[$field] = '';
         }
+
+        // Ensure perPage is an integer
+        $this->perPage = (int) $this->perPage;
     }
 
     public function getRouteFor($action, $row)
@@ -256,6 +259,24 @@ class ReusableTable extends Component
 
     public function updatingPerPage()
     {
+        // Convert to integer to ensure proper pagination
+        $this->perPage = (int) $this->perPage;
+        \Log::info('updatingPerPage called', ['perPage' => $this->perPage]);
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        // Ensure perPage is an integer after update
+        $this->perPage = (int) $this->perPage;
+        \Log::info('updatedPerPage called', ['perPage' => $this->perPage]);
+        $this->resetPage();
+    }
+
+    public function setPerPage($value)
+    {
+        $this->perPage = (int) $value;
+        \Log::info('setPerPage called', ['perPage' => $this->perPage]);
         $this->resetPage();
     }
 
@@ -333,6 +354,7 @@ class ReusableTable extends Component
             }
         }
 
+        \Log::info('getProcessedModelData paginate', ['perPage' => $this->perPage, 'type' => gettype($this->perPage)]);
         return $query->paginate($this->perPage);
     }
 

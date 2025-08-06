@@ -36,12 +36,12 @@
 
         @if ($showPerPage)
             <div>
-                <select wire:model="perPage"
+                <select wire:change="setPerPage($event.target.value)" value="{{ $perPage }}"
                     class="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="10">10 por página</option>
-                    <option value="25">25 por página</option>
-                    <option value="50">50 por página</option>
-                    <option value="100">100 por página</option>
+                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 por página</option>
+                    <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 por página</option>
+                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 por página</option>
+                    <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 por página</option>
                 </select>
             </div>
         @endif
