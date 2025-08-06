@@ -11,7 +11,7 @@
 @endphp
 
 <x-app-layout>
-    <div class="flex items-center justify-between">
+    <div class="flex justify-between items-center">
         <x-view-title>
             <x-slot:title>
                 Órdenes consolidadas
@@ -29,8 +29,8 @@
 
     <!-- Tabs for switching between views -->
     <div x-data="{ activeTab: 'table' }" class="mb-6">
-        <div class="flex items-center justify-start gap-6 mb-3 text-lg font-bold">
-            <div class="flex items-center gap-6">
+        <div class="flex gap-6 justify-start items-center mb-3 text-lg font-bold">
+            <div class="flex gap-6 items-center">
                 <button @click="activeTab = 'table'"
                     :class="activeTab === 'table' ? 'border-dark-blue text-dark-blue' : 'border-transparent'"
                     class="border-b-2 py-[0.625rem]">
