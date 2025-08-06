@@ -101,6 +101,7 @@
                     name="status"
                     wireModel="status"
                     :options="['active' => 'Activo', 'inactive' => 'Inactivo']"
+                    :error="$errors->has('status')"
                 />
             </div>
 

@@ -47,8 +47,8 @@ class ShipToForm extends Component
         if ($id) {
             $this->shipToId = $id;
             $this->isEdit = true;
-            $this->title = 'Editar Dirección de Envío';
-            $this->subtitle = 'Modificar información de la dirección de envío';
+            $this->title = 'Editar Dirección de Entrega';
+            $this->subtitle = 'Modificar información de la dirección de entrega';
 
             $shipTo = ShipTo::findOrFail($id);
 
@@ -65,8 +65,8 @@ class ShipToForm extends Component
             $this->notes = $shipTo->notes;
 
         } else {
-            $this->title = 'Nueva Dirección de Envío';
-            $this->subtitle = 'Crear una nueva dirección de envío';
+            $this->title = 'Nueva Dirección de Entrega';
+            $this->subtitle = 'Crear una nueva dirección de entrega';
 
             // Inicializar con la compañía del usuario actual si es aplicable
             // Esto depende de tu lógica de negocio específica
@@ -77,6 +77,13 @@ class ShipToForm extends Component
     public function saveShipTo()
     {
         $this->validate();
+
+        // Debug: Log the status value
+        \Log::info('ShipToForm saveShipTo', [
+            'status' => $this->status,
+            'isEdit' => $this->isEdit,
+            'shipToId' => $this->shipToId ?? 'new'
+        ]);
 
         if ($this->isEdit) {
             $shipTo = ShipTo::findOrFail($this->shipToId);
@@ -104,6 +111,11 @@ class ShipToForm extends Component
         } else {
             $this->dispatch('open-modal', 'modal-ship-to-created');
         }
+    }
+
+    public function updatedStatus()
+    {
+        \Log::info('ShipToForm status updated', ['status' => $this->status]);
     }
 
     public function closeModal()

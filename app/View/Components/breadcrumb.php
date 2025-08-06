@@ -33,7 +33,7 @@ class Breadcrumb extends Component
         'vendors.index' => 'Proveedores',
         'vendors.create' => 'Nuevo proveedor',
         'vendors.edit' => 'Editar proveedor',
-        'ship-to.index' => 'Direcciones de envío',
+        'ship-to.index' => 'Direcciones de entrega',
         'ship-to.create' => 'Nueva dirección',
         'ship-to.edit' => 'Editar dirección',
         'shipping-documentation.index' => 'Documentación de envío',
@@ -110,6 +110,14 @@ class Breadcrumb extends Component
         'tracking' => 'Seguimiento',
         'Kanban' => 'Kanban',
         'kanban' => 'Kanban',
+        'Ship to' => 'Direcciones de entrega',
+        'ship to' => 'Direcciones de entrega',
+        'Ship-to' => 'Direcciones de entrega',
+        'ship-to' => 'Direcciones de entrega',
+        'Ship' => 'Direcciones de entrega',
+        'ship' => 'Direcciones de entrega',
+        'Direcciones de envío' => 'Direcciones de entrega',
+        'direcciones de envío' => 'Direcciones de entrega',
     ];
 
     // Base path groups - maps a segment to its parent group name
@@ -117,7 +125,7 @@ class Breadcrumb extends Component
         'purchase-orders' => 'Órdenes de compra',
         'products' => 'Productos',
         'vendors' => 'Proveedores',
-        'ship-to' => 'Direcciones de envío',
+        'ship-to' => 'Direcciones de entrega',
         'shipping-documentation' => 'Documentación de envío',
         'hub' => 'Hubs',
         'settings' => 'Configuración',
