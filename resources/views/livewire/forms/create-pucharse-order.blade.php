@@ -76,7 +76,7 @@
         <div class="p-8 space-y-10 bg-white rounded-2xl">
             <div class="flex gap-4">
                 <div class="space-y-6 w-full">
-                    <h3 class="text-lg font-bold text-[#7288FF]">Datos generales</h3>
+                    <h3 class="text-lg font-bold text-[#7288FF]">Datos generales PO</h3>
                     <div class="grid grid-cols-[1fr,1fr,1fr] gap-x-5 gap-y-6">
                         <div class="relative">
                             <x-form-input>
