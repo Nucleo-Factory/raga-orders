@@ -144,7 +144,8 @@
         </div>
 
         <div class="mb-8">
-            <x-form-select label="HUB Planificado" name="actual_hub_id" wireModel="actual_hub_id" :options="$hubArray" />
+            {{-- GMM Campo ocultado para GLF --}}
+            {{-- <x-form-select label="HUB Planificado" name="actual_hub_id" wireModel="actual_hub_id" :options="$hubArray" /> --}}
         </div>
 
         <div class="mb-8">

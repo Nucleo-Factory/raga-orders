@@ -120,6 +120,7 @@ class PurchaseOrder extends Model implements HasMedia
         'date_ata' => 'datetime',
         'date_consolidation' => 'datetime',
         'release_date' => 'datetime',
+        'kanban_status' => 'array',
     ];
 
     /**

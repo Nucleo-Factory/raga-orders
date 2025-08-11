@@ -44,7 +44,7 @@
                             <x-slot:label>
                                 Descripción
                             </x-slot:label>
-                            <x-slot:input name="short_text" placeholder="Ingrese short text"
+                            <x-slot:input name="short_text" placeholder="Ingrese una descripción"
                                 wire:model="short_text">
                             </x-slot:input>
                         </x-form-input>

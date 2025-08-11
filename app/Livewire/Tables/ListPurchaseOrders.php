@@ -19,6 +19,7 @@ class ListPurchaseOrders extends Component
         'order_number' => true,
         'vendor' => true,
         'status' => true,
+        'kanban_status' => true,
         'order_date' => true,
         'total' => true,
         'actions' => true,
