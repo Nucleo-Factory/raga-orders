@@ -15,17 +15,17 @@
                     </div>
                 </div>
 
-                <div>
-                    <label for="statusFilter" class="sr-only">Filtrar por estado</label>
-                    <select wire:model.live="statusFilter" id="statusFilter" class="block w-full border-gray-300 rounded-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Todos los estados</option>
-                        <option value="draft">Borrador</option>
-                        <option value="pending">Pendiente</option>
-                        <option value="approved">Aprobada</option>
-                        <option value="shipped">Enviada</option>
-                        <option value="delivered">Entregada</option>
-                    </select>
-                </div>
+{{--                <div>--}}
+{{--                    <label for="statusFilter" class="sr-only">Filtrar por estado</label>--}}
+{{--                    <select wire:model.live="statusFilter" id="statusFilter" class="block w-full border-gray-300 rounded-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">--}}
+{{--                        <option value="">Todos los estados</option>--}}
+{{--                        <option value="draft">Borrador</option>--}}
+{{--                        <option value="pending">Pendiente</option>--}}
+{{--                        <option value="approved">Aprobada</option>--}}
+{{--                        <option value="shipped">Enviada</option>--}}
+{{--                        <option value="delivered">Entregada</option>--}}
+{{--                    </select>--}}
+{{--                </div>--}}
 
                 <!-- Columnas visibles -->
                 <div x-data="{ open: false }" class="relative">
@@ -50,9 +50,15 @@
                                     <span class="text-sm text-gray-700">Vendor</span>
                                 </label>
                             </div>
+{{--                            <div class="px-4 py-2">--}}
+{{--                                <label class="flex items-center space-x-2">--}}
+{{--                                    <input type="checkbox" wire:model.live="visibleColumns.status" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">--}}
+{{--                                    <span class="text-sm text-gray-700">Estado</span>--}}
+{{--                                </label>--}}
+{{--                            </div>--}}
                             <div class="px-4 py-2">
                                 <label class="flex items-center space-x-2">
-                                    <input type="checkbox" wire:model.live="visibleColumns.status" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <input type="checkbox" wire:model.live="visibleColumns.kanban_status" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">Estado</span>
                                 </label>
                             </div>
@@ -135,22 +141,39 @@
                         </th>
                         @endif
 
-                        @if($visibleColumns['status'])
-                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
-                            <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('status')">
-                                <span>Estado</span>
-                                @if ($sortField === 'status')
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+{{--                        @if($visibleColumns['status'])--}}
+{{--                        <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">--}}
+{{--                            <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('status')">--}}
+{{--                                <span>Estado</span>--}}
+{{--                                @if ($sortField === 'status')--}}
+{{--                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">--}}
+{{--                                        @if ($sortDirection === 'asc')--}}
+{{--                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>--}}
+{{--                                        @else--}}
+{{--                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>--}}
+{{--                                        @endif--}}
+{{--                                    </svg>--}}
+{{--                                @endif--}}
+{{--                            </div>--}}
+{{--                        </th>--}}
+{{--                        @endif--}}
+
+                            @if($visibleColumns['kanban_status'])
+                                <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
+                                    <div class="flex items-center space-x-1 cursor-pointer" wire:click="sortBy('kanban_status')">
+                                        <span>Estado</span>
+                                        @if ($sortField === 'kanban_status')
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                @if ($sortDirection === 'asc')
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                @else
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                @endif
+                                            </svg>
                                         @endif
-                                    </svg>
-                                @endif
-                            </div>
-                        </th>
-                        @endif
+                                    </div>
+                                </th>
+                            @endif
 
                         @if($visibleColumns['order_date'])
                         <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase cursor-pointer">
@@ -225,8 +248,22 @@
                             </td>
                             @endif
 
-                            @if($visibleColumns['status'])
-                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+{{--                            @if($visibleColumns['status'])--}}
+{{--                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">--}}
+{{--                                <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5--}}
+{{--                                    {{ $order->status === 'draft' ? 'bg-gray-100 text-gray-800' : '' }}--}}
+{{--                                    {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}--}}
+{{--                                    {{ $order->status === 'approved' ? 'bg-green-100 text-green-800' : '' }}--}}
+{{--                                    {{ $order->status === 'shipped' ? 'bg-blue-100 text-blue-800' : '' }}--}}
+{{--                                    {{ $order->status === 'delivered' ? 'bg-purple-100 text-purple-800' : '' }}--}}
+{{--                                ">--}}
+{{--                                    {{ ucfirst($order->status) }}--}}
+{{--                                </span>--}}
+{{--                            </td>--}}
+{{--                            @endif--}}
+
+                                @if($visibleColumns['kanban_status'])
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
                                     {{ $order->status === 'draft' ? 'bg-gray-100 text-gray-800' : '' }}
                                     {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
@@ -234,10 +271,10 @@
                                     {{ $order->status === 'shipped' ? 'bg-blue-100 text-blue-800' : '' }}
                                     {{ $order->status === 'delivered' ? 'bg-purple-100 text-purple-800' : '' }}
                                 ">
-                                    {{ ucfirst($order->status) }}
+                                    {{ ucfirst($order->kanbanStatus->name) }}
                                 </span>
-                            </td>
-                            @endif
+                                    </td>
+                                @endif
 
                             @if($visibleColumns['order_date'])
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
