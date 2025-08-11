@@ -258,13 +258,13 @@
 
     <x-modal name="modal-hub-teorico" maxWidth="lg">
         <h3 class="mb-2 text-lg font-bold text-center text-light-blue">
-            Agrega fecha de release
+            Fecha de confirmación de Booking
         </h3>
 
         <div class="mb-4">
             <x-form-input>
                 <x-slot:label>
-                    Fecha de release
+                    Fecha de confirmación de Booking
                 </x-slot:label>
 
                 <x-slot:input name="release_date" type="date" placeholder="Ingrese fecha de release" wire:model="release_date" class="pr-10"></x-slot:input>
