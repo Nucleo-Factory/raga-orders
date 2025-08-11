@@ -101,8 +101,8 @@
         </div>
     @endif
 
-    <div class="mb-8 flex max-w-[600px] justify-between gap-5 rounded-[0.625rem] bg-white p-4 text-xs">
-        <div class="flex flex-col justify-between space-y-[0.875rem]">
+    <div class="mb-8 flex max-w-[400px] items-start gap-5 rounded-[0.625rem] bg-white p-4 text-xs">
+        <div class="flex flex-col justify-between space-y-[0.675rem]">
             <x-label class="bg-warning">
                 <span>Documento de embarque</span>
 
@@ -116,7 +116,7 @@
                 </x-slot:icon>
             </x-label>
 
-            <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
+            {{-- <x-label class="bg-[#E0E5FF] py-[0.625rem] text-neutral-blue">
                 <p class="text-base">HUB: <span>{{ $hubLocation ?? 'No especificado' }}</span></p>
 
                 <x-slot:icon>
@@ -127,10 +127,10 @@
                             stroke="#7288FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </x-slot:icon>
-            </x-label>
+            </x-label> --}}
         </div>
 
-        <div class="flex gap-2 mb-2">
+        {{-- <div class="flex gap-y-0 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none">
                 <path
                     d="M5.625 10.25C5.32663 10.25 5.04048 10.3685 4.8295 10.5795C4.61853 10.7905 4.5 11.0766 4.5 11.375C4.5 11.6734 4.61853 11.9595 4.8295 12.1705C5.04048 12.3815 5.32663 12.5 5.625 12.5C5.92337 12.5 6.20952 12.3815 6.4205 12.1705C6.63147 11.9595 6.75 11.6734 6.75 11.375C6.75 11.0766 6.63147 10.7905 6.4205 10.5795C6.20952 10.3685 5.92337 10.25 5.625 10.25ZM7.875 11.375C7.875 11.0766 7.99353 10.7905 8.2045 10.5795C8.41548 10.3685 8.70163 10.25 9 10.25H12.375C12.6734 10.25 12.9595 10.3685 13.1705 10.5795C13.3815 10.7905 13.5 11.0766 13.5 11.375C13.5 11.6734 13.3815 11.9595 13.1705 12.1705C12.9595 12.3815 12.6734 12.5 12.375 12.5H9C8.70163 12.5 8.41548 12.3815 8.2045 12.1705C7.99353 11.9595 7.875 11.6734 7.875 11.375ZM5.625 13.25C5.32663 13.25 5.04048 13.3685 4.8295 13.5795C4.61853 13.7905 4.5 14.0766 4.5 14.375C4.5 14.6734 4.61853 14.9595 4.8295 15.1705C5.04048 15.3815 5.32663 15.5 5.625 15.5H9C9.29837 15.5 9.58452 15.3815 9.79549 15.1705C10.0065 14.9595 10.125 14.6734 10.125 14.375C10.125 14.0766 10.0065 13.7905 9.79549 13.5795C9.58452 13.3685 9.29837 13.25 9 13.25H5.625Z"
@@ -142,16 +142,16 @@
 
             <div class="space-y-1">
                 <p>Creación:
-                    {{-- <span>{{ $shippingDocument->creation_date ? $shippingDocument->creation_date->format('d/m/Y') : 'N/A' }}</span> --}}
+                    <span>{{ $shippingDocument->creation_date ? $shippingDocument->creation_date->format('d/m/Y') : 'N/A' }}</span>
                 </p>
                 <p>Salida estimada:
-                    {{-- <span>{{ $shippingDocument->estimated_departure_date ? $shippingDocument->estimated_departure_date->format('d/m/Y') : 'N/A' }}</span> --}}
+                    <span>{{ $shippingDocument->estimated_departure_date ? $shippingDocument->estimated_departure_date->format('d/m/Y') : 'N/A' }}</span>
                 </p>
                 <p>Llegada estimada:
-                    {{-- <span>{{ $shippingDocument->estimated_arrival_date ? $shippingDocument->estimated_arrival_date->format('d/m/Y') : 'N/A' }}</span> --}}
+                    <span>{{ $shippingDocument->estimated_arrival_date ? $shippingDocument->estimated_arrival_date->format('d/m/Y') : 'N/A' }}</span>
                 </p>
             </div>
-        </div>
+        </div> --}}
 
         <div class="flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" viewBox="0 0 16 18" fill="none">
