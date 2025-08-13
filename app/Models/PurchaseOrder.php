@@ -12,7 +12,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Traits\HasAuthorizations;
-use RagaOrders\POConfirmation\Traits\HasPOConfirmationWrapper;
+use App\Traits\HasPOConfirmationWrapper;
 
 class PurchaseOrder extends Model implements HasMedia
 {
