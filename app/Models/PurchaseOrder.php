@@ -12,11 +12,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Traits\HasAuthorizations;
-use RagaOrders\POConfirmation\Traits\HasPOConfirmation;
+use RagaOrders\POConfirmation\Traits\HasPOConfirmationWrapper;
 
 class PurchaseOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasAuthorizations, HasPOConfirmation;
+    use HasFactory, InteractsWithMedia, HasAuthorizations, HasPOConfirmationWrapper;
 
     /**
      * The attributes that are mass assignable.
