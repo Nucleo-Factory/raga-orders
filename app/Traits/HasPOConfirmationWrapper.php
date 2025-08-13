@@ -122,7 +122,7 @@ trait HasPOConfirmationWrapper
         // Implementación directa si el módulo está activo
         if (config('po-confirmation.enabled', false)) {
             $hash = \Illuminate\Support\Str::random(64);
-            $expiryHours = config('po-confirmation.hash_expiry_hours', 72);
+            $expiryHours = (int) config('po-confirmation.hash_expiry_hours', 72);
 
             $this->update([
                 'confirmation_hash' => $hash,
