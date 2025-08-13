@@ -46,16 +46,25 @@ class ModuleServiceProvider extends ServiceProvider
         foreach ($this->getModulesConfig() as $moduleName => $moduleConfig) {
             $modulePath = base_path($moduleConfig['path']);
 
+            // Debug: Log del path que se está verificando
+            $this->logModuleInfo($moduleName, "Verificando directorio: {$modulePath}");
+            $this->logModuleInfo($moduleName, "¿Existe el directorio? " . (File::exists($modulePath) ? 'SÍ' : 'NO'));
+
             // Solo registrar autoloader si el directorio del módulo existe
             if (File::exists($modulePath)) {
+                $this->logModuleInfo($moduleName, "Directorio encontrado, registrando autoloader...");
                 $this->registerModuleAutoloader($moduleName, $modulePath);
 
                 // Solo registrar funcionalidad si está habilitado
                 if ($moduleConfig['enabled']) {
+                    $this->logModuleInfo($moduleName, "Módulo habilitado, registrando funcionalidad...");
                     $this->registerModule($moduleName, $moduleConfig);
+                } else {
+                    $this->logModuleInfo($moduleName, "Módulo deshabilitado, solo autoloader registrado");
                 }
             } else {
                 $this->logModuleError($moduleName, "El directorio del módulo no existe: {$modulePath}");
+                $this->logModuleInfo($moduleName, "NO se registrará autoloader ni funcionalidad");
             }
         }
     }
