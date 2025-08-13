@@ -36,10 +36,17 @@ trait HasPOConfirmationWrapper
 
     public function scopePendingConfirmation(Builder $query): Builder
     {
-        if ($this->isPOConfirmationAvailable()) {
-            return $this->getPOConfirmationTrait()->scopePendingConfirmation($query);
+        // Verificar si el módulo está activo
+        if (!config('po-confirmation.enabled', false)) {
+            return $query->whereRaw('1 = 0'); // Retorna resultados vacíos
         }
-        return $query->whereRaw('1 = 0'); // Retorna resultados vacíos
+
+        // Implementar el scope directamente
+        return $query->where(function($q) {
+            $q->whereNull('confirmation_hash')
+              ->orWhere('confirmation_email_sent', false)
+              ->orWhere('confirm_update_date_po', false);
+        });
     }
 
     public function scopeConfirmed(Builder $query): Builder
@@ -111,6 +118,20 @@ trait HasPOConfirmationWrapper
         if ($this->isPOConfirmationAvailable()) {
             return $this->getPOConfirmationTrait()->generateConfirmationHash();
         }
+
+        // Implementación directa si el módulo está activo
+        if (config('po-confirmation.enabled', false)) {
+            $hash = \Illuminate\Support\Str::random(64);
+            $expiryHours = config('po-confirmation.hash_expiry_hours', 72);
+
+            $this->update([
+                'confirmation_hash' => $hash,
+                'hash_expires_at' => now()->addHours($expiryHours),
+            ]);
+
+            return $hash;
+        }
+
         return null;
     }
 
@@ -119,6 +140,14 @@ trait HasPOConfirmationWrapper
         if ($this->isPOConfirmationAvailable()) {
             return $this->getPOConfirmationTrait()->isConfirmationHashValid($hash);
         }
+
+        // Implementación directa si el módulo está activo
+        if (config('po-confirmation.enabled', false)) {
+            return $this->confirmation_hash === $hash &&
+                   $this->hash_expires_at &&
+                   $this->hash_expires_at->isFuture();
+        }
+
         return false;
     }
 
@@ -136,5 +165,68 @@ trait HasPOConfirmationWrapper
             return $this->getPOConfirmationTrait()->updateDeliveryDate($newDate);
         }
         return false;
+    }
+
+        /**
+     * Marcar email como enviado
+     */
+    public function markEmailAsSent(): bool
+    {
+        if ($this->isPOConfirmationAvailable()) {
+            return $this->getPOConfirmationTrait()->markEmailAsSent();
+        }
+
+        // Implementación directa si el módulo está activo
+        if (config('po-confirmation.enabled', false)) {
+            $this->update([
+                'confirmation_email_sent' => true,
+                'confirmation_email_sent_at' => now(),
+            ]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Obtener URL de confirmación
+     */
+    public function getConfirmationUrl(): ?string
+    {
+        if ($this->isPOConfirmationAvailable()) {
+            return $this->getPOConfirmationTrait()->getConfirmationUrl();
+        }
+
+        // Implementación directa si el módulo está activo
+        if (config('po-confirmation.enabled', false)) {
+            if (!$this->confirmation_hash || !$this->isConfirmationHashValid($this->confirmation_hash)) {
+                return null;
+            }
+
+            return route('po.confirm', ['hash' => $this->confirmation_hash]);
+        }
+
+        return null;
+    }
+
+    // Métodos estáticos que necesita el servicio
+    public static function withValidHash()
+    {
+        if (config('po-confirmation.enabled', false) &&
+            class_exists('RagaOrders\POConfirmation\Traits\HasPOConfirmation')) {
+            return static::whereNotNull('confirmation_hash')
+                        ->where('hash_expires_at', '>', now());
+        }
+        return static::whereRaw('1 = 0'); // Retorna resultados vacíos
+    }
+
+    public static function withExpiredHash()
+    {
+        if (config('po-confirmation.enabled', false) &&
+            class_exists('RagaOrders\POConfirmation\Traits\HasPOConfirmation')) {
+            return static::whereNotNull('confirmation_hash')
+                        ->where('hash_expires_at', '<=', now());
+        }
+        return static::whereRaw('1 = 0'); // Retorna resultados vacíos
     }
 }
