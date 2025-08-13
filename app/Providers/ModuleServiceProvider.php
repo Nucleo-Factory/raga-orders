@@ -41,15 +41,21 @@ class ModuleServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register(): void
+        public function register(): void
     {
         foreach ($this->getModulesConfig() as $moduleName => $moduleConfig) {
-            // Siempre registrar el autoloader del módulo para que esté disponible
-            $this->registerModuleAutoloader($moduleName, base_path($moduleConfig['path']));
+            $modulePath = base_path($moduleConfig['path']);
 
-            // Solo registrar funcionalidad si está habilitado
-            if ($moduleConfig['enabled']) {
-                $this->registerModule($moduleName, $moduleConfig);
+            // Solo registrar autoloader si el directorio del módulo existe
+            if (File::exists($modulePath)) {
+                $this->registerModuleAutoloader($moduleName, $modulePath);
+
+                // Solo registrar funcionalidad si está habilitado
+                if ($moduleConfig['enabled']) {
+                    $this->registerModule($moduleName, $moduleConfig);
+                }
+            } else {
+                $this->logModuleError($moduleName, "El directorio del módulo no existe: {$modulePath}");
             }
         }
     }
