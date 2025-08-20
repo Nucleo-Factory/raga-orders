@@ -74,11 +74,15 @@
                 <tr>
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <div class="flex items-center">
-                            <input
-                                type="checkbox"
-                                wire:model.live="selectAll"
-                                class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                            >
+                                                    <input
+                            type="checkbox"
+                            wire:model.live="selectAll"
+                            x-data
+                            x-init="$watch('$wire.selectAll', () => {
+                                $el.checked = $wire.selectAll;
+                            })"
+                            class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        >
                         </div>
                     </th>
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
@@ -145,6 +149,9 @@
                     <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
                         <span>Consolidable?</span>
                     </th>
+                    <th scope="col" class="px-6 py-5 text-xs font-bold tracking-wider text-left text-black uppercase">
+                        <span>Consolidado</span>
+                    </th>
                     <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
                         Acciones
                     </th>
@@ -152,12 +159,29 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($purchaseOrders as $order)
-                    <tr>
+                    @php
+                        $backgroundColor = null;
+                        if ($order->shippingDocuments->isNotEmpty()) {
+                            $shippingDocId = $order->shippingDocuments->first()->id;
+                            $backgroundColor = $consolidationColorMap[$shippingDocId] ?? null;
+                        }
+                    @endphp
+                    <tr 
+                        @if($backgroundColor) 
+                            style="background-color: {{ $backgroundColor }} !important;" 
+                        @endif
+                        class="border-b border-gray-200 hover:bg-gray-50 transition-all duration-150"
+                    >
                         <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                             <input
                                 type="checkbox"
                                 wire:model.live="selected"
-                                value="{{ $order->id }}"
+                                value="{{ (string) $order->id }}"
+                                wire:key="checkbox-{{ $order->id }}"
+                                x-data
+                                x-init="$watch('$wire.selected', () => {
+                                    $el.checked = $wire.selected.includes('{{ (string) $order->id }}');
+                                })"
                                 class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                             >
                         </td>
@@ -190,6 +214,18 @@
                                 {{ $order->isConsolidable() ? 'Sí' : 'No' }}
                             </span>
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            @if($order->shippingDocuments->isNotEmpty())
+                                @php
+                                    $shippingDoc = $order->shippingDocuments->first();
+                                @endphp
+                                <span class="text-xs text-gray-600 truncate max-w-[120px]" title="{{ $shippingDoc->document_number }}">
+                                    {{ $shippingDoc->document_number }}
+                                </span>
+                            @else
+                                <span class="text-xs text-gray-400">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                             <a href="/purchase-orders/{{ $order->id }}/detail" class="text-indigo-600 hover:text-indigo-900">Ver</a>
                             <a href="/purchase-orders/{{ $order->id }}/edit" class="ml-4 text-indigo-600 hover:text-indigo-900">Editar</a>
@@ -197,7 +233,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-sm text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-4 text-sm text-center text-gray-500">
                             No se encontraron órdenes de compra
                         </td>
                     </tr>

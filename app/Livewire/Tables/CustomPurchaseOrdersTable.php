@@ -22,6 +22,7 @@ class CustomPurchaseOrdersTable extends Component
     public $consolidableFilter = '';
     public $selected = [];
     public $selectAll = false;
+    public $currentPageOrders = null;
     public $release_date = '';
     public $comment_release = '';
     public $file = null;
@@ -62,14 +63,44 @@ class CustomPurchaseOrdersTable extends Component
 
     public function updatedSelectAll($value)
     {
+        $currentPageIds = $this->getCurrentPageOrders()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        
         if ($value) {
-            $this->selected = $this->getPurchaseOrdersQuery()
-                ->pluck('id')
-                ->map(fn($id) => (string) $id)
-                ->toArray();
+            // Add current page IDs to selected (if not already selected)
+            $this->selected = array_unique(array_merge($this->selected, $currentPageIds));
         } else {
-            $this->selected = [];
+            // Remove current page IDs from selected
+            $this->selected = array_diff($this->selected, $currentPageIds);
         }
+    }
+
+    public function updatedPage()
+    {
+        $this->currentPageOrders = null; // Reset cache
+        $this->updateSelectAllState();
+    }
+
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'selected') {
+            $this->updateSelectAllState();
+        }
+    }
+
+    public function updateSelectAllState()
+    {
+        $currentPageIds = $this->getCurrentPageOrders()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $selectedCurrentPageIds = array_intersect($this->selected, $currentPageIds);
+        
+        $this->selectAll = count($selectedCurrentPageIds) === count($currentPageIds) && count($currentPageIds) > 0;
+    }
+
+    public function getCurrentPageOrders()
+    {
+        if ($this->currentPageOrders === null) {
+            $this->currentPageOrders = $this->getPurchaseOrdersQuery()->paginate($this->perPage)->getCollection();
+        }
+        return $this->currentPageOrders;
     }
 
     public function getHasSelectedOrdersProperty()
@@ -91,6 +122,30 @@ class CustomPurchaseOrdersTable extends Component
 
         // Get the selected purchase orders
         $selectedOrders = PurchaseOrder::whereIn('id', $this->selected)->get();
+
+        \Log::info('Iniciando creación de documento de embarque', [
+            'selected_count' => count($this->selected),
+            'selected_ids' => $this->selected,
+            'orders_found' => $selectedOrders->count()
+        ]);
+
+        // Check if any of the selected orders are already in a shipping document
+        $alreadyConsolidated = [];
+        foreach ($selectedOrders as $order) {
+            $existingConsolidations = \DB::table('purchase_order_shipping_document')
+                ->where('purchase_order_id', $order->id)
+                ->count();
+            
+            if ($existingConsolidations > 0) {
+                $alreadyConsolidated[] = $order->order_number;
+            }
+        }
+
+        if (!empty($alreadyConsolidated)) {
+            \Log::warning('Órdenes ya consolidadas detectadas', ['orders' => $alreadyConsolidated]);
+            session()->flash('error', 'Las siguientes órdenes ya están consolidadas: ' . implode(', ', $alreadyConsolidated));
+            return;
+        }
 
         // Check if all selected orders can be consolidated together
         if (!PurchaseOrder::canBeConsolidatedTogether($selectedOrders)) {
@@ -168,7 +223,32 @@ class CustomPurchaseOrdersTable extends Component
             }
 
             // Associate purchase orders with the shipping document
+            \Log::info('Iniciando asociación de órdenes', [
+                'shipping_document_id' => $shippingDocument->id,
+                'orders_to_associate' => $selectedOrders->pluck('id')->toArray()
+            ]);
+
             foreach ($selectedOrders as $order) {
+                \Log::info('Procesando orden para attach', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'shipping_document_id' => $shippingDocument->id
+                ]);
+
+                // Check if this relationship already exists (protection against duplicates)
+                $existingRelation = \DB::table('purchase_order_shipping_document')
+                    ->where('purchase_order_id', $order->id)
+                    ->where('shipping_document_id', $shippingDocument->id)
+                    ->exists();
+
+                if ($existingRelation) {
+                    \Log::warning('Relación ya existe, saltando attach', [
+                        'order_id' => $order->id,
+                        'shipping_document_id' => $shippingDocument->id
+                    ]);
+                    continue;
+                }
+
                 // Update the order status to 'shipped'
                 $order->status = 'shipped';
                 $order->save();
@@ -176,6 +256,11 @@ class CustomPurchaseOrdersTable extends Component
                 // Associate the order with the shipping document
                 $shippingDocument->purchaseOrders()->attach($order->id, [
                     'notes' => 'Agregado automáticamente al crear el documento de embarque'
+                ]);
+
+                \Log::info('Attach exitoso', [
+                    'order_id' => $order->id,
+                    'shipping_document_id' => $shippingDocument->id
                 ]);
             }
 
@@ -197,6 +282,13 @@ class CustomPurchaseOrdersTable extends Component
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
             \DB::rollBack();
+
+            \Log::error('Error al crear documento de embarque', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'selected_orders' => $this->selected,
+                'release_date' => $this->release_date
+            ]);
 
             // Show error message
             session()->flash('error', 'Error al crear el documento de embarque: ' . $e->getMessage());
@@ -262,6 +354,7 @@ class CustomPurchaseOrdersTable extends Component
     protected function getPurchaseOrdersQuery()
     {
         return PurchaseOrder::query()
+            ->with('shippingDocuments') // Eager load shipping documents for consolidation info
             ->when($this->search, function ($query) {
                 $searchTerm = strtolower($this->search);
                 $query->where(function ($query) use ($searchTerm) {
@@ -286,12 +379,53 @@ class CustomPurchaseOrdersTable extends Component
             ->orderBy($this->sortField, $this->sortDirection);
     }
 
+    public function getRagaColorPalette()
+    {
+        return [
+            '#FFE6E6', // Light pink
+            '#E6F3FF', // Light blue  
+            '#E6FFE6', // Light green
+            '#FFF0E6', // Light orange
+            '#F0E6FF', // Light purple
+            '#FFFFE6', // Light yellow
+            '#E6FFFF', // Light cyan
+            '#FFE6F0', // Light rose
+        ];
+    }
+
+    public function getConsolidationColorMap($purchaseOrders)
+    {
+        $colorMap = [];
+        $colors = $this->getRagaColorPalette();
+        $colorIndex = 0;
+        
+        foreach ($purchaseOrders as $order) {
+            if ($order->shippingDocuments->isNotEmpty()) {
+                $shippingDocId = $order->shippingDocuments->first()->id;
+                
+                if (!isset($colorMap[$shippingDocId])) {
+                    $colorMap[$shippingDocId] = $colors[$colorIndex % count($colors)];
+                    $colorIndex++;
+                }
+            }
+        }
+        
+        return $colorMap;
+    }
+
     public function render()
     {
         $purchaseOrders = $this->getPurchaseOrdersQuery()->paginate($this->perPage);
+        
+        // Update the select all state on each render
+        $this->updateSelectAllState();
+        
+        // Get consolidation color mapping
+        $consolidationColorMap = $this->getConsolidationColorMap($purchaseOrders->getCollection());
 
         return view('livewire.tables.custom-purchase-orders-table', [
-            'purchaseOrders' => $purchaseOrders
+            'purchaseOrders' => $purchaseOrders,
+            'consolidationColorMap' => $consolidationColorMap
         ]);
     }
 }

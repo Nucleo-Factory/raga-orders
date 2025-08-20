@@ -39,6 +39,7 @@ class ShippingDocument extends Model implements HasMedia
         'actual_departure_date' => 'date',
         'actual_arrival_date' => 'date',
         'release_date' => 'date',
+        'total_weight_kg' => 'decimal:2',
     ];
 
     /**
