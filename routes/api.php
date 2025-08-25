@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\Ship24WebhookController;
+use App\Http\Controllers\Ship24TestController;
 
 // Rutas públicas (sin autenticación)
 Route::get('/status', function () {
@@ -15,6 +17,20 @@ Route::get('/status', function () {
 
 // Public endpoint for creating purchase orders from external API
 Route::post('/purchase-orders', [PurchaseOrderController::class, 'createFromApi']);
+
+// Ship24 webhook endpoints (públicos - no requieren autenticación)
+Route::post('/webhooks/ship24', [Ship24WebhookController::class, 'handle']);
+Route::post('/webhooks/ship24/test', [Ship24WebhookController::class, 'test']); // Solo para desarrollo
+
+// Ship24 testing endpoints (solo desarrollo/staging)
+Route::prefix('ship24/test')->group(function () {
+    Route::post('/create-tracker', [Ship24TestController::class, 'createTracker']);
+    Route::post('/get-status', [Ship24TestController::class, 'getTrackerStatus']);
+    Route::post('/tracking-service', [Ship24TestController::class, 'testTrackingService']);
+    Route::get('/list-trackers', [Ship24TestController::class, 'listTrackers']);
+    Route::post('/simulate-webhook', [Ship24TestController::class, 'simulateWebhook']);
+    Route::get('/integration-test', [Ship24TestController::class, 'integrationTest']);
+});
 
 // Rutas protegidas con autenticación de token API
 Route::middleware('api.token')->group(function () {

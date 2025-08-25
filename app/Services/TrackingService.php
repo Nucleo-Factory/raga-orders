@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use App\Models\Ship24Tracker;
 
 class TrackingService
 {
@@ -18,6 +19,69 @@ class TrackingService
     public function getShip24Tracking($trackingNumber)
     {
         try {
+            \Log::info('Getting Ship24 tracking data', ['tracking_number' => $trackingNumber]);
+
+            // Primero intentar obtener datos del tracker local (per-shipment)
+            $tracker = Ship24Tracker::byTrackingNumber($trackingNumber)->first();
+            
+            if ($tracker && $tracker->isActiveInShip24()) {
+                \Log::info('Using Ship24 tracker data from database', ['tracker_id' => $tracker->id]);
+                
+                // Si el tracker existe y tiene datos recientes, usarlos
+                if ($tracker->tracking_data && $tracker->last_ship24_update && 
+                    $tracker->last_ship24_update->diffInMinutes(now()) < 30) {
+                    return $tracker->getFormattedTrackingData();
+                }
+                
+                // Si el tracker existe pero los datos son antiguos, intentar actualizar
+                $trackerService = app(Ship24TrackerService::class);
+                $freshData = $trackerService->getTrackerStatus($trackingNumber);
+                
+                if ($freshData) {
+                    \Log::info('Updated tracker data from Ship24 API');
+                    return $freshData;
+                }
+            }
+
+            // Si no hay tracker o no tiene datos, crear uno nuevo
+            if (!$tracker) {
+                \Log::info('No tracker found, creating new Ship24 tracker');
+                $trackerService = app(Ship24TrackerService::class);
+                $tracker = $trackerService->createTracker($trackingNumber);
+                
+                if ($tracker) {
+                    // Intentar obtener datos inmediatamente
+                    $trackingData = $trackerService->getTrackerStatus($trackingNumber);
+                    if ($trackingData) {
+                        return $trackingData;
+                    }
+                }
+            }
+
+            // Fallback: usar el método per-call original si per-shipment falla
+            \Log::warning('Falling back to per-call Ship24 method', ['tracking_number' => $trackingNumber]);
+            return $this->getShip24TrackingPerCall($trackingNumber);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in getShip24Tracking:', [
+                'error' => $e->getMessage(),
+                'tracking_number' => $trackingNumber,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // En caso de error, intentar fallback
+            return $this->getShip24TrackingPerCall($trackingNumber);
+        }
+    }
+
+    /**
+     * Método fallback per-call original
+     */
+    private function getShip24TrackingPerCall($trackingNumber)
+    {
+        try {
+            \Log::info('Using Ship24 per-call fallback method');
+            
             // Using the correct API endpoint for Ship24
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->ship24ApiKey,
@@ -51,7 +115,7 @@ class TrackingService
             ];
 
         } catch (\Exception $e) {
-            \Log::error('Error in getShip24Tracking:', [
+            \Log::error('Error in getShip24TrackingPerCall:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
