@@ -183,6 +183,14 @@ class PurchaseOrder extends Model implements HasMedia
     }
 
     /**
+     * Get the Ship24 tracker for the purchase order.
+     */
+    public function ship24Tracker(): HasMany
+    {
+        return $this->hasMany(Ship24Tracker::class);
+    }
+
+    /**
      * Get the kanban status for the purchase order.
      */
     public function kanbanStatus(): BelongsTo

@@ -7,6 +7,7 @@ use App\Models\Vendor;
 use App\Models\ShipTo;
 use App\Models\Hub;
 use App\Models\BillTo;
+use App\Jobs\CreateShip24Tracker;
 use Livewire\Component;
 
 class CreatePucharseOrder extends Component
@@ -688,6 +689,16 @@ class CreatePucharseOrder extends Component
 
                 // Guardar el ID de la orden recién creada
                 $this->id = $purchaseOrder->id;
+                
+                // Si la nueva PO tiene tracking_id, crear tracker Ship24
+                if ($purchaseOrder->tracking_id) {
+                    \Log::info('New PO created with tracking_id, dispatching Ship24 tracker creation', [
+                        'purchase_order_id' => $purchaseOrder->id,
+                        'tracking_id' => $purchaseOrder->tracking_id
+                    ]);
+                    
+                    CreateShip24Tracker::dispatch($purchaseOrder);
+                }
 
                 // Asegurar que el número de orden esté actualizado
                 $this->order_number = $purchaseOrder->order_number;
@@ -893,7 +904,23 @@ class CreatePucharseOrder extends Component
                 \DB::beginTransaction();
 
                 $purchaseOrder = \App\Models\PurchaseOrder::findOrFail($id);
+                
+                // Guardar el tracking_id anterior para comparar
+                $oldTrackingId = $purchaseOrder->tracking_id;
+                
                 $purchaseOrder->update($poData);
+                
+                // Si se agregó o cambió el tracking_id, crear/actualizar Ship24 tracker
+                $newTrackingId = $purchaseOrder->tracking_id;
+                if ($newTrackingId && $newTrackingId !== $oldTrackingId) {
+                    \Log::info('Tracking ID changed, dispatching Ship24 tracker creation', [
+                        'purchase_order_id' => $purchaseOrder->id,
+                        'old_tracking_id' => $oldTrackingId,
+                        'new_tracking_id' => $newTrackingId
+                    ]);
+                    
+                    CreateShip24Tracker::dispatch($purchaseOrder);
+                }
 
                 // Eliminar productos existentes
                 $purchaseOrder->products()->detach();
